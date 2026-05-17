@@ -8,7 +8,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 export default defineConfig({
   // For GitHub Pages: use repo name path. For Netlify: use root /
-  base: process.env.VITE_BASE_PATH || (isDev ? '/' : '/Custom-Core-Labs-v1.0/'),
+  base: process.env.VITE_BASE_PATH || (isDev ? '/' : '/'),
   plugins: [
     tailwindcss(), 
     TanStackRouterVite({
