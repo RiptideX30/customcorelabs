@@ -211,8 +211,21 @@ export default function App() {
 
   const { items, total } = useMemo(() => computeLineItems(active, partsValue), [active, partsValue]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    const formElement = e.currentTarget;
+    const formData = new FormData(formElement);
+
+    try {
+      await fetch("/", {
+        method: "POST",
+        body: formData,
+      });
+    } catch (error) {
+      console.error("Netlify form submission failed:", error);
+    }
+
     setSubmitted(true);
     setForm({ name: "", phone: "", email: "", pcpp: "" });
     setActive(new Set());
@@ -614,11 +627,21 @@ function IntakeAndEstimator({
                 </button>
               </div>
             ) : (
-              <form onSubmit={onSubmit} className="space-y-5">
+              <form
+                name="pc-intake-form"
+                method="POST"
+                data-netlify="true"
+                onSubmit={onSubmit}
+                className="space-y-5"
+              >
+                <input type="hidden" name="form-name" value="pc-intake-form" />
+                <input type="hidden" name="selected-services" value={Array.from(active).map((id) => SERVICE_MAP[id].title).join(", ")} />
+                <input type="hidden" name="labor-total" value={total.toFixed(2)} />
                 {step === 1 && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <Field
                       label="Customer name"
+                      name="customer-name"
                       value={form.name}
                       onChange={(v) => setForm({ ...form, name: v })}
                       placeholder="Jane Doe"
@@ -627,6 +650,7 @@ function IntakeAndEstimator({
                     />
                     <Field
                       label="Phone number"
+                      name="phone-number"
                       value={form.phone}
                       onChange={(v) => setForm({ ...form, phone: v })}
                       placeholder="(585) 555-0142"
@@ -636,6 +660,7 @@ function IntakeAndEstimator({
                     />
                     <Field
                       label="Email"
+                      name="email"
                       value={form.email}
                       onChange={(v) => setForm({ ...form, email: v })}
                       placeholder="jane@email.com"
@@ -645,6 +670,7 @@ function IntakeAndEstimator({
                     />
                     <Field
                       label="PCPartPicker URL"
+                      name="pcpartpicker-url"
                       value={form.pcpp}
                       onChange={(v) => setForm({ ...form, pcpp: v })}
                       placeholder="https://pcpartpicker.com/list/…"
@@ -671,6 +697,7 @@ function IntakeAndEstimator({
                       <div className="flex items-center gap-2 rounded-md border hairline-strong bg-background px-3.5 py-2.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
                         <span className="mono text-[13px] text-slate-mute">$</span>
                         <input
+                          name="parts-value"
                           inputMode="decimal"
                           value={partsValueStr}
                           onChange={(e) => setPartsValueStr(e.target.value.replace(/[^0-9.]/g, "").slice(0, 9))}
@@ -694,6 +721,7 @@ function IntakeAndEstimator({
 
                     <label className="flex items-start gap-3 rounded-md border hairline bg-background px-4 py-3">
                       <input
+                        name="terms-consent"
                         type="checkbox"
                         checked={consent}
                         onChange={(e) => setConsent(e.target.checked)}
@@ -803,6 +831,7 @@ function FieldShell({ label, children }: { label: string; children: React.ReactN
 
 function Field({
   label,
+  name,
   value,
   onChange,
   placeholder,
@@ -811,6 +840,7 @@ function Field({
   required,
 }: {
   label: string;
+  name: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -821,6 +851,7 @@ function Field({
   return (
     <FieldShell label={label}>
       <input
+        name={name}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
