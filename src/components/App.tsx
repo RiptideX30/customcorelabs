@@ -211,26 +211,29 @@ export default function App() {
 
   const { items, total } = useMemo(() => computeLineItems(active, partsValue), [active, partsValue]);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formElement = e.currentTarget;
-    const formData = new FormData(formElement);
+    // Encodes your form state fields into a format Netlify expects
+    const formData = new FormData(e.currentTarget);
 
-    try {
-      await fetch("/", {
-        method: "POST",
-        body: formData,
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams(formData as any).toString(),
+    })
+      .then(() => {
+        alert("PC Intake Form Submitted Successfully!");
+        setSubmitted(true);
+        setForm({ name: "", phone: "", email: "", pcpp: "" });
+        setActive(new Set());
+        setPartsValueStr("");
+      })
+      .catch((error) => {
+        console.error("Netlify form submission failed:", error);
+        alert("Submission failed. Please try again.");
       });
-    } catch (error) {
-      console.error("Netlify form submission failed:", error);
-    }
-
-    setSubmitted(true);
-    setForm({ name: "", phone: "", email: "", pcpp: "" });
-    setActive(new Set());
-    setPartsValueStr("");
-  }
+  };
 
   return (
     <main id="top" className="min-h-screen bg-background text-foreground antialiased">
