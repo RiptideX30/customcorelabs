@@ -667,7 +667,6 @@ function IntakeAndEstimator({
                       <button
                         type="button"
                         onClick={() => setStep(2)}
-                        disabled={!form.name || !form.phone || !form.email}
                         className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Continue

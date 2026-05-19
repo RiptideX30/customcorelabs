@@ -5,12 +5,10 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 export default defineConfig({
-  base: "/Custom-Core-Labs-v1.0/",
+  base: "/",
   plugins: [
     tailwindcss(), 
-    TanStackRouterVite({
-      target: 'react' // Fixed: changed 'spa' to 'react'
-    }), 
+    TanStackRouterVite(), 
     react()
   ],
   resolve: {
