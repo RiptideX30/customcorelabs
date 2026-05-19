@@ -105,35 +105,34 @@ export default function IntakeForm() {
   const back = () => setStep((s) => Math.max(s - 1, 0)); 
 
   // Netlify Forms Submission Integration Block
-  const submit = async () => { 
-    const r = finalSchema.safeParse({ consent }); 
-    if (!r.success) { 
-      setErrors({ consent: r.error.issues[0]?.message ?? "Required" }); 
-      return; 
-    } 
-    setErrors({}); 
+const submit = async () => { 
+  // Fixed: Direct primitive check prevents Zod evaluation silent failures
+  if (!consent) { 
+    setErrors({ consent: "You must accept the terms to continue" }); 
+    return; 
+  } 
+  setErrors({}); 
 
-    // Compiles selected service list into text for Netlify
-    const activeServicesText = [...services].join(", ");
+  // Compiles selected service list into text 
+  const activeServicesText = [...services].join(", "); 
 
-    try {
-      await fetch("https://formspree.io/f/xlgvdlok", {
-        method: "POST",
-         headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        "Project Type": track || "",
-        "Selected Services": activeServicesText,
-        "PCPartPicker URL": pcpp,
-        "Symptom Details": symptoms,
-      }),
-    });
+  try { 
+    await fetch("https://formspree.io/f/xlgvdlok", { 
+      method: "POST", 
+      headers: { "Content-Type": "application/json" }, 
+      body: JSON.stringify({ 
+        "Project Type": track || "", 
+        "Selected Services": activeServicesText, 
+        "PCPartPicker URL": pcpp, 
+        "Symptom Details": symptoms, 
+      }), 
+    }); 
     setSubmitted(true); 
-  } catch (error) {
-      console.error("Netlify upload failed:", error);
-      alert("Error sending details to server. Please try again.");
-    }
-  }; 
-
+  } catch (error) { 
+    console.error("Formspree upload failed:", error); 
+    alert("Error sending details to server. Please try again."); 
+  } 
+};
   return ( 
     <section id="intake" className="border-b hairline bg-secondary/30"> 
       <div className="mx-auto max-w-[1280px] px-8 py-28"> 
