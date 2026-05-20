@@ -209,29 +209,26 @@ export default function App() {
 
   const { items, total } = useMemo(() => computeLineItems(active, partsValue), [active, partsValue]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Encodes your form state fields into a format Netlify expects
+    // Encodes your form state fields into a format Formspree expects
     const formData = new FormData(e.currentTarget);
 
-    fetch("/", {
+    fetch("https://formspree.io/f/xlgvdlok", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams(formData as any).toString(),
+      headers: {
+        "Accept": "application/json"
+      },
+      body: formData
     })
-      .then(() => {
-        alert("PC Intake Form Submitted Successfully!");
-        setSubmitted(true);
-        setActive(new Set());
-        setPartsValueStr("");
-      })
-      .catch((error) => {
-        console.error("Netlify form submission failed:", error);
-        alert("Submission failed. Please try again.");
-      });
+    .then(() => {
+      alert("PC Intake Form Submitted Successfully!");
+      setSubmitted(true);
+      setActive(new Set());
+      setPartsValueStr("");
+    });
   };
-
   return (
     <main id="top" className="min-h-screen bg-background text-foreground antialiased">
       <Header />
