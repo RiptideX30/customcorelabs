@@ -119,16 +119,15 @@ export default function IntakeForm() {
 
     try {
       // 1. Package all values into a flat object Formspree natively accepts
-            const payload = {
-        "Customer Name": name,
-        "Phone Number": phone,
-        "Email Address": email,
-        "Project Type": track || "",
-        "Selected Services": activeServicesText,
-        "PCPartPicker URL": pcpp,
-        "Symptom Details": symptoms,
-      };
-
+                const payload = {
+      "customer-name": name,
+      "customer-phone": phone,
+      "customer-email": email,
+      "pcpartpicker-url": pcpp,
+      "symptoms-details": symptoms,
+      "selected-services": activeServicesText,
+      "labor-total": subtotal
+    };
 
       // 2. Submit using Formspree's accepted AJAX layout
       const response = await fetch("https://formspree.io/f/xlgvdlok", {
