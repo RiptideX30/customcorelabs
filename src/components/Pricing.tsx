@@ -122,7 +122,7 @@ export default function Pricing() {
 
             <p className="mono mt-4 flex items-start gap-2 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
               <span className="text-primary">↳</span>
-              For builds over $1,500, labor is 10% + $49 setup fee.
+              For builds over $1,500, labor is 8% + $49 setup fee.
             </p>
           </div>
 

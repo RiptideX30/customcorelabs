@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Check, Info, Lock, Youtube, X, MapPin, ShieldCheck } from "lucide-react";
 import cclLogo from "@/assets/ccl-logo.jpg";
+import IntakeForm from "./IntakeForm";
 
 /* ---------------- Service catalog ---------------- */
 
@@ -233,24 +234,15 @@ export default function App() {
     <main id="top" className="min-h-screen bg-background text-foreground antialiased">
       <Header />
       <Hero />
-      <ServicesGrid
-        active={active}
-        toggle={toggle}
-        isDisabled={isDisabled}
-        openModal={(id) => setModal(id)}
-      />
-      <IntakeAndEstimator
-        active={active}
-        items={items}
-        total={total}
-        partsValueStr={partsValueStr}
-        setPartsValueStr={setPartsValueStr}
-        submitted={submitted}
-        onSubmit={handleSubmit}
-        resetSubmitted={() => setSubmitted(false)}
-      />
-      <Disclosure />
-      <Footer onOpenTerms={() => setTermsOpen(true)} />
+      237    <ServicesGrid
+    active={active}
+    toggle={toggle}
+    isDisabled={isDisabled}
+    openModal={(id) => setModal(id)}
+    />
+  <IntakeForm />
+  <Disclosure />
+  <Footer onOpenTerms={() => setTermsOpen(true)} />
 
       {modal && <DetailsModal service={SERVICE_MAP[modal]} onClose={() => setModal(null)} />}
       {termsOpen && <TermsModal onClose={() => setTermsOpen(false)} />}
