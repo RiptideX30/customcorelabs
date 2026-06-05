@@ -1,6 +1,7 @@
 import { useMemo, useState, ReactNode } from "react";
 import { z } from "zod";
 import { Cpu, FileText, Link2, HelpCircle, X, Check, Minus, Plus, Info, Clock } from "lucide-react";
+import { submitUrl } from "@/lib/submit-api";
 
 // Service definitions matching App.tsx
 const NEW_BUILDS = [
@@ -531,7 +532,7 @@ function formatPhone(value: string): string {
     };
 
     try {
-      const response = await fetch("https://submit-form.cdwojick.workers.dev", {
+      const response = await fetch(submitUrl("/api/submit"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

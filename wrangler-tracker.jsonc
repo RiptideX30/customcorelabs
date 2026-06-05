@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "build-tracker",
+  "account_id": "fe648a5065d0ee203483157b46f6e9fe",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/build-tracker-worker.ts",
@@ -10,8 +11,5 @@
       "id": "4575fa826d2c4687b4c6e7ae6e3ce074",
       "preview_id": "4575fa826d2c4687b4c6e7ae6e3ce074"
     }
-  ],
-  "vars": {
-    "ADMIN_KEY": "YOUR_ADMIN_KEY"
-  }
+  ]
 }

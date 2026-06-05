@@ -9,6 +9,7 @@ import {
   type ApiResponse,
   STATUS_LABELS,
 } from "@/lib/build-tracker";
+import { trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/track/$code")({
   component: TrackBuildPage,
@@ -26,9 +27,7 @@ function TrackBuildPage() {
   useEffect(() => {
     async function fetchBuild() {
       try {
-        const res = await fetch(
-          `https://build-tracker.cdwojick.workers.dev/api/track/${code}`
-        );
+        const res = await fetch(trackerUrl(`/api/track/${code}`));
         const data: ApiResponse<Partial<BuildRecord>> = await res.json();
 
         if (data.ok && data.data) {

@@ -17,60 +17,68 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type, Accept, x-admin-key",
 };
 
-interface Env {
-  BUILD_TRACKER: KVNamespace;
+export interface BuildTrackerEnv {
+  "CCL-BUILD-TRACKER": {
+    get(key: string): Promise<string | null>;
+    put(key: string, value: string, options?: { metadata?: Record<string, unknown> }): Promise<void>;
+    list(options: { prefix?: string }): Promise<{ keys: Array<{ name: string }> }>;
+  };
   ADMIN_KEY?: string;
 }
 
+export async function handleTrackerRequest(request: Request, env: BuildTrackerEnv): Promise<Response> {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  try {
+    // POST /api/track — create a new build record (called from submit form worker)
+    if (request.method === "POST" && path === "/api/track") {
+      return handleCreate(request, env);
+    }
+
+    // GET /api/track/:code — lookup a build by tracking code
+    if (request.method === "GET" && path.startsWith("/api/track/")) {
+      const code = path.replace("/api/track/", "").toUpperCase();
+      return handleLookup(code, env);
+    }
+
+    // PATCH /api/track/:code — update build status (admin only)
+    if (request.method === "PATCH" && path.startsWith("/api/track/")) {
+      const adminKey = request.headers.get("x-admin-key");
+      if (!adminKey || adminKey !== env.ADMIN_KEY) {
+        return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
+      }
+      const code = path.replace("/api/track/", "").toUpperCase();
+      return handleUpdate(request, code, env);
+    }
+
+    // GET /api/admin/builds — list all active builds (admin only)
+    if (request.method === "GET" && path === "/api/admin/builds") {
+      const adminKey = request.headers.get("x-admin-key");
+      if (!adminKey || adminKey !== env.ADMIN_KEY) {
+        return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
+      }
+      return handleListBuilds(env);
+    }
+
+    return jsonResponse({ ok: false, error: "Not found" }, 404);
+  } catch (error) {
+    console.error("Tracker worker error:", error);
+    return jsonResponse({ ok: false, error: "Internal error" }, 500);
+  }
+}
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: CORS_HEADERS });
-    }
-
-    const url = new URL(request.url);
-    const path = url.pathname;
-
-    try {
-      // POST /api/track — create a new build record (called from submit form worker)
-      if (request.method === "POST" && path === "/api/track") {
-        return handleCreate(request, env);
-      }
-
-      // GET /api/track/:code — lookup a build by tracking code
-      if (request.method === "GET" && path.startsWith("/api/track/")) {
-        const code = path.replace("/api/track/", "").toUpperCase();
-        return handleLookup(code, env);
-      }
-
-      // PATCH /api/track/:code — update build status (admin only)
-      if (request.method === "PATCH" && path.startsWith("/api/track/")) {
-        const adminKey = request.headers.get("x-admin-key");
-        if (!adminKey || adminKey !== env.ADMIN_KEY) {
-          return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
-        }
-        const code = path.replace("/api/track/", "").toUpperCase();
-        return handleUpdate(request, code, env);
-      }
-
-      // GET /api/admin/builds — list all active builds (admin only)
-      if (request.method === "GET" && path === "/api/admin/builds") {
-        const adminKey = request.headers.get("x-admin-key");
-        if (!adminKey || adminKey !== env.ADMIN_KEY) {
-          return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
-        }
-        return handleListBuilds(env);
-      }
-
-      return jsonResponse({ ok: false, error: "Not found" }, 404);
-    } catch (error) {
-      console.error("Tracker worker error:", error);
-      return jsonResponse({ ok: false, error: "Internal error" }, 500);
-    }
+  async fetch(request: Request, env: BuildTrackerEnv): Promise<Response> {
+    return handleTrackerRequest(request, env);
   },
 };
 
-async function handleCreate(request: Request, env: Env): Promise<Response> {
+async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Response> {
   const data = (await request.json()) as Partial<BuildRecord>;
 
   const trackingCode = generateTrackingCode();
@@ -98,7 +106,7 @@ async function handleCreate(request: Request, env: Env): Promise<Response> {
     createdAt: now,
   };
 
-  await env.BUILD_TRACKER.put(kvKey(trackingCode), JSON.stringify(record), {
+  await env["CCL-BUILD-TRACKER"].put(kvKey(trackingCode), JSON.stringify(record), {
     metadata: { createdAt: now, customerName: record.customerName },
   });
 
@@ -111,8 +119,8 @@ async function handleCreate(request: Request, env: Env): Promise<Response> {
   }, 201);
 }
 
-async function handleLookup(code: string, env: Env): Promise<Response> {
-  const raw = await env.BUILD_TRACKER.get(kvKey(code));
+async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Response> {
+  const raw = await env["CCL-BUILD-TRACKER"].get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
@@ -134,8 +142,8 @@ async function handleLookup(code: string, env: Env): Promise<Response> {
   });
 }
 
-async function handleUpdate(request: Request, code: string, env: Env): Promise<Response> {
-  const raw = await env.BUILD_TRACKER.get(kvKey(code));
+async function handleUpdate(request: Request, code: string, env: BuildTrackerEnv): Promise<Response> {
+  const raw = await env["CCL-BUILD-TRACKER"].get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
@@ -159,7 +167,7 @@ async function handleUpdate(request: Request, code: string, env: Env): Promise<R
     note: data.note || `Status changed to ${STATUS_LABELS[newStatus]}`,
   });
 
-  await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record));
+  await env["CCL-BUILD-TRACKER"].put(kvKey(code), JSON.stringify(record));
 
   return jsonResponse({
     ok: true,
@@ -171,12 +179,12 @@ async function handleUpdate(request: Request, code: string, env: Env): Promise<R
   });
 }
 
-async function handleListBuilds(env: Env): Promise<Response> {
-  const list = await env.BUILD_TRACKER.list({ prefix: KV_KEY_PREFIX });
+async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
+  const list = await env["CCL-BUILD-TRACKER"].list({ prefix: KV_KEY_PREFIX });
   const builds: Partial<BuildRecord>[] = [];
 
   for (const key of list.keys) {
-    const raw = await env.BUILD_TRACKER.get(key.name);
+    const raw = await env["CCL-BUILD-TRACKER"].get(key.name);
     if (raw) {
       const record: BuildRecord = JSON.parse(raw);
       builds.push({

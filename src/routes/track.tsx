@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search, ArrowUpRight, ShieldCheck, PackageSearch } from "lucide-react";
 import cclLogo from "@/assets/ccl-logo.jpg";
+import { trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/track")({
   component: TrackPage,
@@ -31,9 +32,7 @@ function TrackPage() {
     setError("");
 
     try {
-      const res = await fetch(
-        `https://build-tracker.cdwojick.workers.dev/api/track/${trimmed}`
-      );
+      const res = await fetch(trackerUrl(`/api/track/${trimmed}`));
       const data = await res.json();
 
       if (data.ok && data.data) {

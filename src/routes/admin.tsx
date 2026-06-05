@@ -4,6 +4,7 @@ import { ArrowUpRight, RefreshCw, Clock, PackageSearch } from "lucide-react";
 import cclLogo from "@/assets/ccl-logo.jpg";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
 import { type BuildStatus, BUILD_STATUSES, STATUS_LABELS } from "@/lib/build-tracker";
+import { trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -38,7 +39,7 @@ function AdminPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("https://build-tracker.cdwojick.workers.dev/api/admin/builds", {
+      const res = await fetch(trackerUrl("/api/admin/builds"), {
         headers: { "x-admin-key": adminKey },
       });
       const data = await res.json();
@@ -60,7 +61,7 @@ function AdminPage() {
   const updateStatus = async (code: string, newStatus: BuildStatus) => {
     setUpdatingCode(code);
     try {
-      const res = await fetch(`https://build-tracker.cdwojick.workers.dev/api/track/${code}`, {
+      const res = await fetch(trackerUrl(`/api/track/${code}`), {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

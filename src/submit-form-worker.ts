@@ -17,17 +17,24 @@ const CORS_HEADERS = {
 };
 
 const TURNSTILE_SECRET = "0x4AAAAAADbwqsdyK5cnRCevTba-027DPM0";
-const TRACKER_API = "https://build-tracker.cdwojick.workers.dev";
 
-export default {
-  async fetch(request: Request, env: { RESEND_API_KEY?: string; ADMIN_KEY?: string }): Promise<Response> {
-    // Handle CORS preflight
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: CORS_HEADERS,
-      });
-    }
+export interface SubmitFormEnv {
+  RESEND_API_KEY?: string;
+  ADMIN_KEY?: string;
+  TRACKER_API?: string;
+}
+
+export async function handleSubmitRequest(request: Request, env: SubmitFormEnv): Promise<Response> {
+  const TRACKER_API = env.TRACKER_API || "";
+  const trackerOrigin = TRACKER_API ? TRACKER_API.replace(/\/+$/, "") : new URL(request.url).origin;
+
+  // Handle CORS preflight
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: CORS_HEADERS,
+    });
+  }
 
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
@@ -122,7 +129,7 @@ export default {
         partsValue: data["parts-value"] || "",
       };
 
-      const trackerRes = await fetch(`${TRACKER_API}/api/track`, {
+      const trackerRes = await fetch(`${trackerOrigin}/api/track`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +144,7 @@ export default {
       return new Response(JSON.stringify({
         ok: true,
         trackingCode: trackingCode || null,
-        trackingUrl: trackingCode ? `${TRACKER_API}/track/${trackingCode}` : null,
+        trackingUrl: trackingCode ? `${trackerOrigin}/track/${trackingCode}` : null,
       }), {
         status: 200,
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
@@ -149,5 +156,10 @@ export default {
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
+}
+
+export default {
+  async fetch(request: Request, env: SubmitFormEnv): Promise<Response> {
+    return handleSubmitRequest(request, env);
   },
 };
