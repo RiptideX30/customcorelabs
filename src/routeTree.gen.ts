@@ -9,12 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as ShowcasesRouteImport } from './routes/showcases'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackCodeRouteImport } from './routes/track.$code'
 
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShowcasesRoute = ShowcasesRouteImport.update({
   id: '/showcases',
   path: '/showcases',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +35,70 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackCodeRoute = TrackCodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
+  getParentRoute: () => TrackRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/showcases': typeof ShowcasesRoute
+  '/track': typeof TrackRouteWithChildren
+  '/track/$code': typeof TrackCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/showcases': typeof ShowcasesRoute
+  '/track': typeof TrackRouteWithChildren
+  '/track/$code': typeof TrackCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/showcases': typeof ShowcasesRoute
+  '/track': typeof TrackRouteWithChildren
+  '/track/$code': typeof TrackCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/showcases'
+  fullPaths: '/' | '/admin' | '/showcases' | '/track' | '/track/$code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/showcases'
-  id: '__root__' | '/' | '/showcases'
+  to: '/' | '/admin' | '/showcases' | '/track' | '/track/$code'
+  id: '__root__' | '/' | '/admin' | '/showcases' | '/track' | '/track/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   ShowcasesRoute: typeof ShowcasesRoute
+  TrackRoute: typeof TrackRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/showcases': {
       id: '/showcases'
       path: '/showcases'
       fullPath: '/showcases'
       preLoaderRoute: typeof ShowcasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -65,12 +108,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track/$code': {
+      id: '/track/$code'
+      path: '/$code'
+      fullPath: '/track/$code'
+      preLoaderRoute: typeof TrackCodeRouteImport
+      parentRoute: typeof TrackRoute
+    }
   }
 }
 
+interface TrackRouteChildren {
+  TrackCodeRoute: typeof TrackCodeRoute
+}
+
+const TrackRouteChildren: TrackRouteChildren = {
+  TrackCodeRoute: TrackCodeRoute,
+}
+
+const TrackRouteWithChildren = TrackRoute._addFileChildren(TrackRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ShowcasesRoute: ShowcasesRoute,
+  TrackRoute: TrackRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

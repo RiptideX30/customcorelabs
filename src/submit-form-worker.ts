@@ -17,9 +17,10 @@ const CORS_HEADERS = {
 };
 
 const TURNSTILE_SECRET = "0x4AAAAAADbwqsdyK5cnRCevTba-027DPM0";
+const TRACKER_API = "https://build-tracker.cdwojick.workers.dev";
 
 export default {
-  async fetch(request: Request, env: { RESEND_API_KEY?: string }): Promise<Response> {
+  async fetch(request: Request, env: { RESEND_API_KEY?: string; ADMIN_KEY?: string }): Promise<Response> {
     // Handle CORS preflight
     if (request.method === "OPTIONS") {
       return new Response(null, {
@@ -85,7 +86,7 @@ export default {
         </table>
       `;
 
-      const res = await fetch("https://api.resend.com/emails", {
+      const emailRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${RESEND_API_KEY}`,
@@ -99,8 +100,8 @@ export default {
         }),
       });
 
-      if (!res.ok) {
-        const err = await res.text();
+      if (!emailRes.ok) {
+        const err = await emailRes.text();
         console.error("Resend error:", err);
         return new Response(JSON.stringify({ error: "Failed to send email" }), {
           status: 500,
@@ -108,7 +109,36 @@ export default {
         });
       }
 
-      return new Response(JSON.stringify({ ok: true }), {
+      // After successful email, create a build tracking record
+      const servicesList = (data["selected-services"] || "None selected")
+        .split(", ")
+        .filter(Boolean);
+
+      const trackerPayload = {
+        customerName: data["customer-name"],
+        customerEmail: data["customer-email"],
+        customerPhone: data["customer-phone"],
+        services: servicesList,
+        partsValue: data["parts-value"] || "",
+      };
+
+      const trackerRes = await fetch(`${TRACKER_API}/api/track`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": env.ADMIN_KEY || "",
+        },
+        body: JSON.stringify(trackerPayload),
+      });
+
+      const trackerData = await trackerRes.json();
+      const trackingCode = trackerData?.data?.trackingCode;
+
+      return new Response(JSON.stringify({
+        ok: true,
+        trackingCode: trackingCode || null,
+        trackingUrl: trackingCode ? `${TRACKER_API}/track/${trackingCode}` : null,
+      }), {
         status: 200,
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });

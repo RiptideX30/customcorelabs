@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "build-tracker",
+  "compatibility_date": "2025-09-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "src/build-tracker-worker.ts",
+  "kv_namespaces": [
+    {
+      "binding": "CCL-BUILD-TRACKER",
+      "id": "4575fa826d2c4687b4c6e7ae6e3ce074",
+      "preview_id": "4575fa826d2c4687b4c6e7ae6e3ce074"
+    }
+  ],
+  "vars": {
+    "ADMIN_KEY": "YOUR_ADMIN_KEY"
+  }
+}

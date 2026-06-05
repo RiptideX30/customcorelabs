@@ -44,6 +44,8 @@ type Service = {
   short: string;
   details: string;
   category: "build" | "service" | "addon";
+  /** Recommended for high-end builds (parts value > $2,500) */
+  highTierRecommended?: boolean;
 };
 
 const SERVICES: Service[] = [
@@ -136,6 +138,7 @@ const SERVICES: Service[] = [
     category: "service",
     details:
       "Latest BIOS update installation, custom fan curve profiling for optimal acoustics and thermals, voltage optimization for stability and efficiency.",
+    highTierRecommended: true,
   },
   {
     id: "validation",
@@ -145,6 +148,7 @@ const SERVICES: Service[] = [
     category: "service",
     details:
       "Full 24-hour burn-in testing with industry-standard tools. CPU and GPU thermal validation, memory stability testing with MemTest86, storage health verification, and comprehensive system stability reports.",
+    highTierRecommended: true,
   },
   {
     id: "overclock",
@@ -154,6 +158,7 @@ const SERVICES: Service[] = [
     category: "service",
     details:
       "Manual memory timing optimization, CPU frequency and voltage tuning, stability validation across multiple workloads, custom performance profiles saved to BIOS.",
+    highTierRecommended: true,
   },
 ];
 
@@ -257,7 +262,7 @@ export default function App() {
       <TestimonialSection />
       <GeographySection />
       <FAQSection />
-      <ServicesGrid active={active} toggle={toggle} isDisabled={isDisabled} openModal={(id) => setModal(id)} />
+      <ServicesGrid active={active} toggle={toggle} isDisabled={isDisabled} openModal={(id) => setModal(id)} partsValue={partsValue} />
       <QuickContact />
       <IntakeForm />
       <ServiceAgreement />
@@ -283,6 +288,7 @@ function Header() {
         <nav className="flex items-center gap-3 md:gap-6 text-[13px] text-white/70">
           <a className="hidden sm:inline hover:text-white transition-colors" href="#services">Services</a>
           <a className="hidden sm:inline hover:text-white transition-colors" href="#book">Book Appointment</a>
+          <Link className="hidden sm:inline hover:text-white transition-colors" to="/track">Track Build</Link>
           <Link className="hidden sm:inline hover:text-white transition-colors" to="/showcases">Showcases</Link>
           <a href="#book" className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:opacity-90">
             Book
@@ -639,11 +645,13 @@ function ServicesGrid({
   toggle,
   isDisabled,
   openModal,
+  partsValue,
 }: {
   active: Set<ServiceId>;
   toggle: (id: ServiceId) => void;
   isDisabled: (id: ServiceId) => boolean;
   openModal: (id: ServiceId) => void;
+  partsValue: number;
 }) {
   const groups: { title: string; tag: string; ids: ServiceId[] }[] = [
     { title: "Custom Gaming PC Builds & Assembly", tag: "A · choose one", ids: ["basic", "ultimate"] },
@@ -675,7 +683,7 @@ function ServicesGrid({
             </div>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {g.ids.map((id) => (
-                <ServiceCard key={id} service={SERVICE_MAP[id]} active={active.has(id)} disabled={isDisabled(id)} onDetails={() => openModal(id)} />
+                <ServiceCard key={id} service={SERVICE_MAP[id]} active={active.has(id)} disabled={isDisabled(id)} onDetails={() => openModal(id)} isHighTier={partsValue >= 2500} />
               ))}
             </div>
           </div>
@@ -685,9 +693,16 @@ function ServicesGrid({
   );
 }
 
-function ServiceCard({ service, active, disabled, onDetails }: { service: Service; active: boolean; disabled: boolean; onDetails: () => void }) {
+function ServiceCard({ service, active, disabled, onDetails, isHighTier }: { service: Service; active: boolean; disabled: boolean; onDetails: () => void; isHighTier?: boolean }) {
+  const showRecommended = isHighTier && service.highTierRecommended && !active && !disabled;
+
   return (
     <div className={`relative w-full rounded-xl border bg-background p-6 transition-all ${disabled ? "hairline pointer-events-none opacity-40 bg-zinc-100" : active ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60 hover:shadow-[var(--shadow-elegant)]"}`}>
+      {showRecommended && (
+        <div className="absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-700 shadow-sm">
+          ⭐ Recommended
+        </div>
+      )}
       <div className="mono flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-slate-mute">
         <span>{service.id.toUpperCase()}</span>
         {disabled ? <span className="inline-flex items-center gap-1 text-slate-mute"><Lock className="h-3 w-3" /> Unavailable</span> : active ? <span className="text-primary">SELECTED ✓</span> : null}

@@ -379,7 +379,24 @@ function LiveEstimator({
         )}
       </div>
 
-      <div className="mt-6 rounded-md border hairline bg-secondary/40 px-4 py-3 text-[12.5px] leading-relaxed text-slate-ink">
+      {/* High-tier upselling callout */}
+      {partsValue >= 2500 && (
+        <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
+          <div className="flex items-start gap-2">
+            <span className="text-amber-600 text-[16px] shrink-0 mt-0.5">⭐</span>
+            <div>
+              <p className="text-[12.5px] font-semibold text-amber-800">
+                $2,500+ Enthusiast Build
+              </p>
+              <p className="mt-0.5 text-[12px] leading-relaxed text-amber-700">
+                Consider our Performance & Tuning add-ons — BIOS tuning, 24-hour bench validation, and overclock profiling maximize your high-end hardware investment.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 rounded-md border hairline bg-secondary/40 px-4 py-3 text-[12.5px] leading-relaxed text-slate-ink">
         <span className="font-medium text-primary">Note:</span> Final pricing is determined by your parts budget tier and selected services.
       </div>
     </div>
