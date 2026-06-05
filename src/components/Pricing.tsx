@@ -41,7 +41,7 @@ export default function Pricing() {
   };
 
   const total =
-    (ultimate ? 159 : 0) +
+    (ultimate ? 139 : 0) +
     [...selected].reduce((sum, id) => sum + (MAINTENANCE.find((m) => m.id === id)?.price ?? 0), 0) +
     (thermal && anyMaintenance ? 10 : 0);
 
@@ -95,12 +95,12 @@ export default function Pricing() {
                   on your supplied components.
                 </p>
 
-                <div className="mt-8 flex items-baseline gap-2">
-                  <span className="mono text-[14px] text-slate-mute">$</span>
-                  <span className="text-[64px] font-semibold leading-none tracking-[-0.04em]">159</span>
-                  <span className="mono ml-2 text-[11px] uppercase tracking-[0.16em] text-slate-mute">
-                    flat / labor
-                  </span>
+                <div className="mt-8 flex items-end gap-3">
+                  <span className="text-[14px] text-slate-mute">Starting at</span>
+                  <div className="flex items-start gap-1">
+                    <span className="mono text-[18px] text-slate-mute">$</span>
+                    <span className="text-[64px] font-semibold leading-none tracking-[-0.04em]">139</span>
+                  </div>
                 </div>
 
                 <div className="mt-8 flex items-center justify-between border-t hairline pt-5">
@@ -122,7 +122,7 @@ export default function Pricing() {
 
             <p className="mono mt-4 flex items-start gap-2 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
               <span className="text-primary">↳</span>
-              For builds over $1,500, labor is 8% + $49 setup fee.
+              For builds over $2,000, labor is 8% + $49 setup fee.
             </p>
           </div>
 

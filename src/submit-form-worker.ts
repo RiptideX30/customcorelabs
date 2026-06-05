@@ -7,10 +7,27 @@ interface FormData {
   "symptoms-details": string;
   "selected-services": string;
   "payment-terms": string;
+  "cf-turnstile-response": string;
 }
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Accept",
+};
+
+const TURNSTILE_SECRET = "0x4AAAAAADbwqsdyK5cnRCevTba-027DPM0";
 
 export default {
   async fetch(request: Request, env: { RESEND_API_KEY?: string }): Promise<Response> {
+    // Handle CORS preflight
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: CORS_HEADERS,
+      });
+    }
+
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
@@ -19,13 +36,41 @@ export default {
     if (!RESEND_API_KEY) {
       return new Response(JSON.stringify({ error: "Server misconfigured" }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
 
     try {
       const data: FormData = await request.json();
 
+      // Verify Turnstile token
+      const turnstileToken = data["cf-turnstile-response"];
+      if (!turnstileToken) {
+        return new Response(JSON.stringify({ error: "Missing security token. Please refresh and try again." }), {
+          status: 403,
+          headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        });
+      }
+
+      const verifyResp = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: TURNSTILE_SECRET,
+          response: turnstileToken,
+        }),
+      });
+
+      const verifyResult = await verifyResp.json() as { success: boolean };
+
+      if (!verifyResult.success) {
+        return new Response(JSON.stringify({ error: "Spam detected or token expired. Request blocked." }), {
+          status: 403,
+          headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        });
+      }
+
+      // Turnstile passed — proceed to send email
       const htmlBody = `
         <h2 style="color:#2563eb;">New Lab Request</h2>
         <table style="border-collapse:collapse;width:100%;font-family:sans-serif;">
@@ -59,19 +104,19 @@ export default {
         console.error("Resend error:", err);
         return new Response(JSON.stringify({ error: "Failed to send email" }), {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
         });
       }
 
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     } catch (error) {
       console.error("Worker error:", error);
       return new Response(JSON.stringify({ error: "Internal error" }), {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
   },
