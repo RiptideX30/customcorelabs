@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowUpRight, Calendar, Clock, DollarSign } from "lucide-react";
-import cclLogo from "@/assets/ccl-logo.jpg";
+import { ArrowLeft, Calendar, Clock, DollarSign } from "lucide-react";
 import BuildTimeline from "@/components/BuildTimeline";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
 import {
@@ -47,18 +46,18 @@ function TrackBuildPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-background text-foreground antialiased flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="inline-block h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
           <p className="mt-4 text-[14px] text-slate-mute">Loading build data...</p>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (error || !build) {
     return (
-      <main className="min-h-screen bg-background text-foreground antialiased flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-md px-5">
           <div className="text-[48px] mb-4">🔍</div>
           <h1 className="text-[24px] font-semibold tracking-tight mb-2">
@@ -81,7 +80,7 @@ function TrackBuildPage() {
             </Link>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -95,34 +94,7 @@ function TrackBuildPage() {
     : "Unknown";
 
   return (
-    <main className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
-      {/* Header */}
-      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-foreground/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-5 md:px-8">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={cclLogo} alt="Custom Core Labs logo" className="h-8 w-8 rounded-md object-cover" />
-            <span className="text-[13px] font-semibold tracking-tight text-white">
-              Custom <span className="text-primary">Core</span> Labs
-            </span>
-          </Link>
-          <nav className="flex items-center gap-3 md:gap-6 text-[13px] text-white/70">
-            <Link className="inline hover:text-white transition-colors" to="/">
-              Home
-            </Link>
-            <Link className="inline hover:text-white transition-colors" to="/#book">
-              Book Appointment
-            </Link>
-            <a
-              href="/#book"
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:opacity-90"
-            >
-              Book
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
-          </nav>
-        </div>
-      </header>
-
+    <>
       {/* Build Dashboard */}
       <section className="pt-28 pb-16 md:pt-36 md:pb-20">
         <div className="mx-auto max-w-[1000px] px-5 md:px-8">
@@ -272,21 +244,6 @@ function TrackBuildPage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t hairline">
-        <div className="mx-auto max-w-[1280px] px-5 md:px-8 py-8 text-center">
-          <div className="flex items-center justify-center gap-2.5 mb-4">
-            <img src={cclLogo} alt="Custom Core Labs logo" className="h-6 w-6 rounded-md object-cover" />
-            <span className="text-[12px] font-semibold tracking-tight">
-              Custom <span className="text-primary">Core</span> Labs
-            </span>
-          </div>
-          <p className="text-[12px] text-slate-mute">
-            Zero upfront · Pay when it boots
-          </p>
-        </div>
-      </footer>
-    </main>
+    </>
   );
 }

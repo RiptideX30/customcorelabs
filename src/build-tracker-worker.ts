@@ -18,7 +18,7 @@ const CORS_HEADERS = {
 };
 
 export interface BuildTrackerEnv {
-  "CCL-BUILD-TRACKER": {
+  BUILD_TRACKER: {
     get(key: string): Promise<string | null>;
     put(key: string, value: string, options?: { metadata?: Record<string, unknown> }): Promise<void>;
     list(options: { prefix?: string }): Promise<{ keys: Array<{ name: string }> }>;
@@ -106,7 +106,7 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
     createdAt: now,
   };
 
-  await env["CCL-BUILD-TRACKER"].put(kvKey(trackingCode), JSON.stringify(record), {
+  await env.BUILD_TRACKER.put(kvKey(trackingCode), JSON.stringify(record), {
     metadata: { createdAt: now, customerName: record.customerName },
   });
 
@@ -120,7 +120,7 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
 }
 
 async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Response> {
-  const raw = await env["CCL-BUILD-TRACKER"].get(kvKey(code));
+  const raw = await env.BUILD_TRACKER.get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
@@ -143,7 +143,7 @@ async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Respons
 }
 
 async function handleUpdate(request: Request, code: string, env: BuildTrackerEnv): Promise<Response> {
-  const raw = await env["CCL-BUILD-TRACKER"].get(kvKey(code));
+  const raw = await env.BUILD_TRACKER.get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
@@ -167,7 +167,7 @@ async function handleUpdate(request: Request, code: string, env: BuildTrackerEnv
     note: data.note || `Status changed to ${STATUS_LABELS[newStatus]}`,
   });
 
-  await env["CCL-BUILD-TRACKER"].put(kvKey(code), JSON.stringify(record));
+  await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record));
 
   return jsonResponse({
     ok: true,
@@ -180,11 +180,11 @@ async function handleUpdate(request: Request, code: string, env: BuildTrackerEnv
 }
 
 async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
-  const list = await env["CCL-BUILD-TRACKER"].list({ prefix: KV_KEY_PREFIX });
+  const list = await env.BUILD_TRACKER.list({ prefix: KV_KEY_PREFIX });
   const builds: Partial<BuildRecord>[] = [];
 
   for (const key of list.keys) {
-    const raw = await env["CCL-BUILD-TRACKER"].get(key.name);
+    const raw = await env.BUILD_TRACKER.get(key.name);
     if (raw) {
       const record: BuildRecord = JSON.parse(raw);
       builds.push({

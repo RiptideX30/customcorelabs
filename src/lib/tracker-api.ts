@@ -1,4 +1,5 @@
-export const TRACKER_API_BASE = import.meta.env.VITE_TRACKER_API || "";
+// Cloudflare Worker URL for the build tracker API
+export const TRACKER_API_BASE = "https://build-tracker.cdwojick.workers.dev";
 
 export function trackerUrl(path: string) {
   if (path.startsWith("http://") || path.startsWith("https://")) {

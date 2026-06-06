@@ -13,6 +13,7 @@ import { Route as TrackRouteImport } from './routes/track'
 import { Route as ShowcasesRouteImport } from './routes/showcases'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackIndexRouteImport } from './routes/track.index'
 import { Route as TrackCodeRouteImport } from './routes/track.$code'
 
 const TrackRoute = TrackRouteImport.update({
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackIndexRoute = TrackIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TrackRoute,
+} as any)
 const TrackCodeRoute = TrackCodeRouteImport.update({
   id: '/$code',
   path: '/$code',
@@ -47,13 +53,14 @@ export interface FileRoutesByFullPath {
   '/showcases': typeof ShowcasesRoute
   '/track': typeof TrackRouteWithChildren
   '/track/$code': typeof TrackCodeRoute
+  '/track/': typeof TrackIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/showcases': typeof ShowcasesRoute
-  '/track': typeof TrackRouteWithChildren
   '/track/$code': typeof TrackCodeRoute
+  '/track': typeof TrackIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +69,27 @@ export interface FileRoutesById {
   '/showcases': typeof ShowcasesRoute
   '/track': typeof TrackRouteWithChildren
   '/track/$code': typeof TrackCodeRoute
+  '/track/': typeof TrackIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/showcases' | '/track' | '/track/$code'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/showcases'
+    | '/track'
+    | '/track/$code'
+    | '/track/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/showcases' | '/track' | '/track/$code'
-  id: '__root__' | '/' | '/admin' | '/showcases' | '/track' | '/track/$code'
+  to: '/' | '/admin' | '/showcases' | '/track/$code' | '/track'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/showcases'
+    | '/track'
+    | '/track/$code'
+    | '/track/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -108,6 +129,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track/': {
+      id: '/track/'
+      path: '/'
+      fullPath: '/track/'
+      preLoaderRoute: typeof TrackIndexRouteImport
+      parentRoute: typeof TrackRoute
+    }
     '/track/$code': {
       id: '/track/$code'
       path: '/$code'
@@ -120,10 +148,12 @@ declare module '@tanstack/react-router' {
 
 interface TrackRouteChildren {
   TrackCodeRoute: typeof TrackCodeRoute
+  TrackIndexRoute: typeof TrackIndexRoute
 }
 
 const TrackRouteChildren: TrackRouteChildren = {
   TrackCodeRoute: TrackCodeRoute,
+  TrackIndexRoute: TrackIndexRoute,
 }
 
 const TrackRouteWithChildren = TrackRoute._addFileChildren(TrackRouteChildren)
