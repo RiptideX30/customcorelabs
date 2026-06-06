@@ -18,6 +18,13 @@ type BuildSummary = {
   createdAt: string;
 };
 
+type BuildSummaryWithEstimates = BuildSummary & {
+  partsValue?: string;
+  estimateSubtotal?: string;
+  taxAmount?: string;
+  totalWithTax?: string;
+};
+
 const ADMIN_KEY_STORAGE = "ccl_admin_key";
 
 function AdminPage() {
@@ -93,7 +100,9 @@ function AdminPage() {
           <div className="text-center mb-8">
             <img src={cclLogo} alt="CCL Logo" className="h-12 w-12 rounded-md mx-auto mb-4" />
             <h1 className="text-[24px] font-semibold tracking-tight">Admin Access</h1>
-            <p className="text-[13px] text-slate-mute mt-1">Enter your admin key to manage builds.</p>
+            <p className="text-[13px] text-slate-mute mt-1">
+              Enter your admin key to manage builds.
+            </p>
           </div>
           <div className="rounded-xl border hairline-strong bg-background p-6 shadow-[var(--shadow-elegant)]">
             <input
@@ -114,7 +123,9 @@ function AdminPage() {
             </button>
           </div>
           <div className="mt-6 text-center">
-            <Link to="/" className="text-[13px] text-primary hover:underline">Back to homepage</Link>
+            <Link to="/" className="text-[13px] text-primary hover:underline">
+              Back to homepage
+            </Link>
           </div>
         </div>
       </main>
@@ -156,34 +167,74 @@ function AdminPage() {
             <div className="text-center py-20">
               <PackageSearch className="h-12 w-12 text-slate-mute mx-auto mb-4" />
               <h2 className="text-[20px] font-semibold">No active builds</h2>
-              <p className="text-[14px] text-slate-mute mt-1">Builds will appear here once customers submit the intake form.</p>
+              <p className="text-[14px] text-slate-mute mt-1">
+                Builds will appear here once customers submit the intake form.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h1 className="text-[24px] font-semibold tracking-tight">Active Builds</h1>
-                <span className="mono text-[11px] uppercase tracking-[0.12em] text-slate-mute">{builds.length} build{builds.length !== 1 ? "s" : ""}</span>
+                <span className="mono text-[11px] uppercase tracking-[0.12em] text-slate-mute">
+                  {builds.length} build{builds.length !== 1 ? "s" : ""}
+                </span>
               </div>
 
-              {builds.map((build) => {
+              {builds.map((build0) => {
+                const build = build0 as BuildSummaryWithEstimates;
                 const next = getNextStatus(build.status);
                 return (
-                  <div key={build.trackingCode} className="rounded-xl border hairline-strong bg-background p-5 shadow-[var(--shadow-elegant)] hover:border-primary/30 transition-all">
+                  <div
+                    key={build.trackingCode}
+                    className="rounded-xl border hairline-strong bg-background p-5 shadow-[var(--shadow-elegant)] hover:border-primary/30 transition-all"
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <Link to={`/track/${build.trackingCode}`} className="mono text-[13px] font-semibold text-primary hover:underline">
+                          <Link
+                            to={`/track/${build.trackingCode}`}
+                            className="mono text-[13px] font-semibold text-primary hover:underline"
+                          >
                             {build.trackingCode}
                           </Link>
                           <BuildStatusBadge status={build.status} />
                         </div>
-                        <p className="text-[15px] font-medium text-foreground">{build.customerName}</p>
+                        <p className="text-[15px] font-medium text-foreground">
+                          {build.customerName}
+                        </p>
                         {build.services && build.services.length > 0 && (
                           <p className="mt-0.5 text-[12.5px] text-slate-mute truncate max-w-md">
                             {build.services.join(", ")}
                           </p>
                         )}
-                        <p className="mt-1 text-[11px] text-slate-mute flex items-center gap-1">
+                        {(build.estimateSubtotal || build.taxAmount || build.totalWithTax) && (
+                          <div className="mt-3 rounded-xl border hairline bg-secondary/10 p-3 text-[13px]">
+                            <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute mb-2">
+                              Estimate Details
+                            </div>
+                            <div className="space-y-1">
+                              {build.estimateSubtotal && (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-slate-500">Subtotal</span>
+                                  <span className="font-semibold">{build.estimateSubtotal}</span>
+                                </div>
+                              )}
+                              {build.taxAmount && (
+                                <div className="flex items-center justify-between">
+                                  <span className="text-slate-500">Tax</span>
+                                  <span className="font-semibold">{build.taxAmount}</span>
+                                </div>
+                              )}
+                              {build.totalWithTax && (
+                                <div className="flex items-center justify-between pt-1 border-t hairline">
+                                  <span className="font-medium">Total</span>
+                                  <span className="font-semibold">{build.totalWithTax}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        <p className="mt-4 text-[11px] text-slate-mute flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {new Date(build.createdAt).toLocaleDateString()}
                         </p>

@@ -9,10 +9,10 @@
     {
       "binding": "BUILD_TRACKER",
       "id": "4575fa826d2c4687b4c6e7ae6e3ce074",
-      "preview_id": "4575fa826d2c4687b4c6e7ae6e3ce074"
-    }
+      "preview_id": "4575fa826d2c4687b4c6e7ae6e3ce074",
+    },
   ],
   "vars": {
-    "ADMIN_KEY": "desktop-galaxy-wrench-porch"
-  }
+    "ADMIN_KEY": "desktop-galaxy-wrench-porch",
+  },
 }

@@ -1,10 +1,6 @@
 import { BUILD_STATUSES, STATUS_LABELS, STATUS_ICONS, type BuildStatus } from "@/lib/build-tracker";
 
-export default function BuildTimeline({
-  currentStatus,
-}: {
-  currentStatus: BuildStatus;
-}) {
+export default function BuildTimeline({ currentStatus }: { currentStatus: BuildStatus }) {
   const currentIdx = BUILD_STATUSES.indexOf(currentStatus);
 
   return (
@@ -55,9 +51,7 @@ export default function BuildTimeline({
                     </span>
                   )}
                 </div>
-                {!reached && (
-                  <p className="mt-0.5 text-[13px] text-zinc-300">Pending</p>
-                )}
+                {!reached && <p className="mt-0.5 text-[13px] text-zinc-300">Pending</p>}
               </div>
             </div>
           );

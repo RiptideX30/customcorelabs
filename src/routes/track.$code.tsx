@@ -3,11 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Calendar, Clock, DollarSign } from "lucide-react";
 import BuildTimeline from "@/components/BuildTimeline";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
-import {
-  type BuildRecord,
-  type ApiResponse,
-  STATUS_LABELS,
-} from "@/lib/build-tracker";
+import { type BuildRecord, type ApiResponse, STATUS_LABELS } from "@/lib/build-tracker";
 import { trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/track/$code")({
@@ -60,9 +56,7 @@ function TrackBuildPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-md px-5">
           <div className="text-[48px] mb-4">🔍</div>
-          <h1 className="text-[24px] font-semibold tracking-tight mb-2">
-            Build Not Found
-          </h1>
+          <h1 className="text-[24px] font-semibold tracking-tight mb-2">Build Not Found</h1>
           <p className="text-[14px] text-slate-mute mb-8">{error || "No build data available."}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -118,7 +112,10 @@ function TrackBuildPage() {
               </h1>
             </div>
             {build.status && (
-              <BuildStatusBadge status={build.status} className="self-start sm:self-center text-[12px] px-4 py-1.5" />
+              <BuildStatusBadge
+                status={build.status}
+                className="self-start sm:self-center text-[12px] px-4 py-1.5"
+              />
             )}
           </div>
 
@@ -142,6 +139,25 @@ function TrackBuildPage() {
                   </span>
                 </div>
                 <p className="text-[15px] font-semibold">{build.partsValue}</p>
+              </div>
+            )}
+            {(build.estimateSubtotal || build.taxAmount || build.totalWithTax) && (
+              <div className="rounded-xl border hairline-strong bg-background p-5">
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  <span className="mono text-[9.5px] uppercase tracking-[0.18em] text-slate-mute">
+                    Estimate Summary
+                  </span>
+                </div>
+                {build.estimateSubtotal && (
+                  <p className="text-[14px] text-slate-mute">Subtotal: {build.estimateSubtotal}</p>
+                )}
+                {build.taxAmount && (
+                  <p className="mt-1 text-[14px] text-slate-mute">Tax: {build.taxAmount}</p>
+                )}
+                {build.totalWithTax && (
+                  <p className="mt-2 text-[15px] font-semibold">Total with Tax: {build.totalWithTax}</p>
+                )}
               </div>
             )}
             <div className="rounded-xl border hairline-strong bg-background p-5">
@@ -220,9 +236,7 @@ function TrackBuildPage() {
                                   minute: "2-digit",
                                 })}
                               </span>
-                              {entry.note && (
-                                <p className="text-slate-mute mt-0.5">{entry.note}</p>
-                              )}
+                              {entry.note && <p className="text-slate-mute mt-0.5">{entry.note}</p>}
                             </div>
                           </div>
                         ))}

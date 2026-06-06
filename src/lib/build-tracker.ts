@@ -64,6 +64,12 @@ export interface BuildRecord {
   dropoffDate: string; // ISO date
   pickupCode: string; // 4-digit verification
   partsValue?: string;
+  /** Estimated subtotal (labor) sent from form */
+  estimateSubtotal?: string;
+  /** Tax amount (string, e.g. "$12.34") */
+  taxAmount?: string;
+  /** Total including tax (string) */
+  totalWithTax?: string;
   notes?: string;
   createdAt: string; // ISO 8601
 }
@@ -104,7 +110,7 @@ export function nextStatus(current: BuildStatus): BuildStatus | null {
 
 /** Get all statuses up to and including the current one */
 export function statusHistory(
-  current: BuildStatus
+  current: BuildStatus,
 ): { status: BuildStatus; label: string; icon: string; reached: boolean }[] {
   const idx = BUILD_STATUSES.indexOf(current);
   return BUILD_STATUSES.map((s, i) => ({

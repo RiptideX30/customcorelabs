@@ -6,11 +6,7 @@ import path from "path";
 
 export default defineConfig({
   base: "/",
-  plugins: [
-    tailwindcss(), 
-    TanStackRouterVite(), 
-    react()
-  ],
+  plugins: [tailwindcss(), TanStackRouterVite(), react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

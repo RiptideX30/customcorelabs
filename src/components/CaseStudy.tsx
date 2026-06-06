@@ -3,8 +3,18 @@ import { Cpu, Gpu, Fan, MonitorPlay, Wind, ArrowUpRight } from "lucide-react";
 const SPECS = [
   { icon: Cpu, label: "CPU", value: "AMD Ryzen 5 5500", meta: "6C / 12T · 65 W" },
   { icon: Gpu, label: "GPU", value: "AMD Radeon RX 7600", meta: "8 GB GDDR6 · RDNA 3" },
-  { icon: Fan, label: "Cooling", value: "9-fan high-airflow", meta: "Positive pressure · push-pull" },
-  { icon: MonitorPlay, label: "Target", value: "1080p / high-refresh", meta: "Ultra preset · 144 Hz+" },
+  {
+    icon: Fan,
+    label: "Cooling",
+    value: "9-fan high-airflow",
+    meta: "Positive pressure · push-pull",
+  },
+  {
+    icon: MonitorPlay,
+    label: "Target",
+    value: "1080p / high-refresh",
+    meta: "Ultra preset · 144 Hz+",
+  },
 ];
 
 const TELEMETRY = [
@@ -61,11 +71,10 @@ export default function CaseStudy() {
                   <span className="text-gradient-blue">Stealth.</span>
                 </h3>
                 <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-slate-mute">
-                  The builder's personal reference machine. Tuned for sustained
-                  1080p high-refresh performance in a black-on-black chassis,
-                  with a nine-fan airflow stack chosen to keep junction
-                  temperatures well below thermal limits — even after hours
-                  under load.
+                  The builder's personal reference machine. Tuned for sustained 1080p high-refresh
+                  performance in a black-on-black chassis, with a nine-fan airflow stack chosen to
+                  keep junction temperatures well below thermal limits — even after hours under
+                  load.
                 </p>
               </div>
 
@@ -89,22 +98,79 @@ export default function CaseStudy() {
                       </linearGradient>
                     </defs>
                     {/* Chassis */}
-                    <rect x="20" y="10" width="180" height="240" rx="6" fill="oklch(0.18 0.02 250)" stroke="oklch(1 0 0 / 0.08)" />
+                    <rect
+                      x="20"
+                      y="10"
+                      width="180"
+                      height="240"
+                      rx="6"
+                      fill="oklch(0.18 0.02 250)"
+                      stroke="oklch(1 0 0 / 0.08)"
+                    />
                     {/* Glass panel */}
-                    <rect x="30" y="20" width="160" height="220" rx="3" fill="url(#glass)" stroke="oklch(1 0 0 / 0.08)" />
+                    <rect
+                      x="30"
+                      y="20"
+                      width="160"
+                      height="220"
+                      rx="3"
+                      fill="url(#glass)"
+                      stroke="oklch(1 0 0 / 0.08)"
+                    />
                     {/* Internal components */}
-                    <rect x="40" y="30" width="140" height="42" rx="2" fill="oklch(0.22 0.02 250)" stroke="oklch(1 0 0 / 0.06)" />
-                    <rect x="40" y="80" width="100" height="70" rx="2" fill="oklch(0.22 0.02 250)" stroke="oklch(1 0 0 / 0.06)" />
-                    <rect x="40" y="160" width="140" height="32" rx="2" fill="oklch(0.22 0.02 250)" stroke="oklch(1 0 0 / 0.06)" />
+                    <rect
+                      x="40"
+                      y="30"
+                      width="140"
+                      height="42"
+                      rx="2"
+                      fill="oklch(0.22 0.02 250)"
+                      stroke="oklch(1 0 0 / 0.06)"
+                    />
+                    <rect
+                      x="40"
+                      y="80"
+                      width="100"
+                      height="70"
+                      rx="2"
+                      fill="oklch(0.22 0.02 250)"
+                      stroke="oklch(1 0 0 / 0.06)"
+                    />
+                    <rect
+                      x="40"
+                      y="160"
+                      width="140"
+                      height="32"
+                      rx="2"
+                      fill="oklch(0.22 0.02 250)"
+                      stroke="oklch(1 0 0 / 0.06)"
+                    />
                     {/* GPU LED */}
-                    <rect x="42" y="84" width="2" height="62" fill="oklch(0.62 0.24 255)" opacity="0.85" />
+                    <rect
+                      x="42"
+                      y="84"
+                      width="2"
+                      height="62"
+                      fill="oklch(0.62 0.24 255)"
+                      opacity="0.85"
+                    />
                     {/* Side fan grid (3 visible behind glass) */}
                     {[0, 1, 2].map((i) => (
                       <g key={i} transform={`translate(155, ${30 + i * 70})`}>
                         <circle r="20" cx="20" cy="20" fill="none" stroke="oklch(1 0 0 / 0.12)" />
                         <circle r="3" cx="20" cy="20" fill="oklch(0.62 0.24 255)" opacity="0.7" />
-                        <path d="M20 4 A16 16 0 0 1 33 28" stroke="oklch(1 0 0 / 0.18)" strokeWidth="1.2" fill="none" />
-                        <path d="M33 28 A16 16 0 0 1 7 28" stroke="oklch(1 0 0 / 0.18)" strokeWidth="1.2" fill="none" />
+                        <path
+                          d="M20 4 A16 16 0 0 1 33 28"
+                          stroke="oklch(1 0 0 / 0.18)"
+                          strokeWidth="1.2"
+                          fill="none"
+                        />
+                        <path
+                          d="M33 28 A16 16 0 0 1 7 28"
+                          stroke="oklch(1 0 0 / 0.18)"
+                          strokeWidth="1.2"
+                          fill="none"
+                        />
                       </g>
                     ))}
                   </svg>
@@ -115,8 +181,7 @@ export default function CaseStudy() {
                     Render · isometric reference
                   </div>
                   <div className="mono flex items-center gap-1.5 rounded-full border border-primary/40 bg-foreground/40 px-2.5 py-1 text-[9.5px] uppercase tracking-[0.18em] text-primary backdrop-blur">
-                    <Wind className="h-2.5 w-2.5" strokeWidth={2.5} />
-                    9 × 120 mm
+                    <Wind className="h-2.5 w-2.5" strokeWidth={2.5} />9 × 120 mm
                   </div>
                 </div>
               </div>

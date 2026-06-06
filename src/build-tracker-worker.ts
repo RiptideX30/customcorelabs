@@ -20,13 +20,20 @@ const CORS_HEADERS = {
 export interface BuildTrackerEnv {
   BUILD_TRACKER: {
     get(key: string): Promise<string | null>;
-    put(key: string, value: string, options?: { metadata?: Record<string, unknown> }): Promise<void>;
+    put(
+      key: string,
+      value: string,
+      options?: { metadata?: Record<string, unknown> },
+    ): Promise<void>;
     list(options: { prefix?: string }): Promise<{ keys: Array<{ name: string }> }>;
   };
   ADMIN_KEY?: string;
 }
 
-export async function handleTrackerRequest(request: Request, env: BuildTrackerEnv): Promise<Response> {
+export async function handleTrackerRequest(
+  request: Request,
+  env: BuildTrackerEnv,
+): Promise<Response> {
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
@@ -79,7 +86,11 @@ export default {
 };
 
 async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Response> {
-  const data = (await request.json()) as Partial<BuildRecord>;
+  const data = (await request.json()) as Partial<BuildRecord> & {
+    estimateSubtotal?: string;
+    taxAmount?: string;
+    totalWithTax?: string;
+  };
 
   const trackingCode = generateTrackingCode();
   const pickupCode = generatePickupCode();
@@ -102,6 +113,9 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
     dropoffDate: now.split("T")[0],
     pickupCode,
     partsValue: data.partsValue || "",
+    estimateSubtotal: data.estimateSubtotal || "",
+    taxAmount: data.taxAmount || "",
+    totalWithTax: data.totalWithTax || "",
     notes: data.notes || "",
     createdAt: now,
   };
@@ -110,13 +124,16 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
     metadata: { createdAt: now, customerName: record.customerName },
   });
 
-  return jsonResponse({
-    ok: true,
-    data: {
-      trackingCode,
-      pickupCode,
+  return jsonResponse(
+    {
+      ok: true,
+      data: {
+        trackingCode,
+        pickupCode,
+      },
     },
-  }, 201);
+    201,
+  );
 }
 
 async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Response> {
@@ -137,12 +154,19 @@ async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Respons
       status: record.status,
       timeline: record.timeline,
       partsValue: record.partsValue,
+      estimateSubtotal: record.estimateSubtotal,
+      taxAmount: record.taxAmount,
+      totalWithTax: record.totalWithTax,
       createdAt: record.createdAt,
     },
   });
 }
 
-async function handleUpdate(request: Request, code: string, env: BuildTrackerEnv): Promise<Response> {
+async function handleUpdate(
+  request: Request,
+  code: string,
+  env: BuildTrackerEnv,
+): Promise<Response> {
   const raw = await env.BUILD_TRACKER.get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
@@ -152,7 +176,10 @@ async function handleUpdate(request: Request, code: string, env: BuildTrackerEnv
   const data = (await request.json()) as { status?: string; note?: string };
 
   if (!data.status || !isValidStatus(data.status)) {
-    return jsonResponse({ ok: false, error: `Invalid status. Must be one of: ${BUILD_STATUSES.join(", ")}` }, 400);
+    return jsonResponse(
+      { ok: false, error: `Invalid status. Must be one of: ${BUILD_STATUSES.join(", ")}` },
+      400,
+    );
   }
 
   const newStatus = data.status as BuildStatus;
@@ -193,6 +220,10 @@ async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
         services: record.services,
         status: record.status,
         createdAt: record.createdAt,
+        partsValue: record.partsValue,
+        estimateSubtotal: record.estimateSubtotal,
+        taxAmount: record.taxAmount,
+        totalWithTax: record.totalWithTax,
       });
     }
   }

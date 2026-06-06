@@ -1,12 +1,17 @@
 import { useMemo, useState, ReactNode } from "react";
 import { z } from "zod";
-import { Cpu, FileText, Link2, HelpCircle, X, Check, Minus, Plus, Info, Clock } from "lucide-react";
-import { submitUrl } from "@/lib/submit-api";
+import { Cpu, FileText, Link2, HelpCircle, X, Check, Minus, Plus, Info } from "lucide-react";
 
 // Service definitions matching App.tsx
 const NEW_BUILDS = [
   { id: "basic", title: "Basic Build", price: 0, priceLabel: "Starting at $99", desc: "Pure hardware assembly. No OS or drivers." },
-  { id: "ultimate", title: "Ultimate Build", price: 139, priceLabel: "Starting at $139", desc: "Full assembly, OS provisioning, pro routing, 60-min stability stress test." },
+  {
+    id: "ultimate",
+    title: "Ultimate Build",
+    price: 139,
+    priceLabel: "Starting at $139",
+    desc: "Full assembly, OS provisioning, pro routing, 60-min stress testing, structural component balancing, and BIOS optimization.",
+  },
 ] as const;
 
 const SERVICE_REPAIR = [
@@ -16,6 +21,7 @@ const SERVICE_REPAIR = [
   { id: "cables", title: "Pro Cable Management", price: 18, desc: "Combs, velcro, precision routing." },
   { id: "wipe", title: "Secure Drive Wipe", price: 15, priceLabel: "$15/drive", desc: "Multi-pass military-grade erasure.", hasQuantity: true },
   { id: "upgrade", title: "Hardware Upgrade", price: 0, priceLabel: "Quoted", desc: "Component swap-in (GPU, RAM, storage)." },
+  { id: "thermal", title: "Fresh Thermal Paste", price: 10, priceLabel: "+ $10", desc: "Removal, cleanup, fresh application.", },
 ] as const;
 
 const PERFORMANCE_TUNING = [
@@ -73,6 +79,39 @@ function FieldLabel({
 
 function FieldHint({ children }: { children: ReactNode }) {
   return <p className="mt-1 text-xs text-red-600">{children}</p>;
+}
+
+function computeEstimator(services: Set<ServiceId>, partsValue: number, wipeQuantity: number) {
+  const items: { label: string; amount: number; taxable?: boolean }[] = [];
+
+  if (services.has("basic")) {
+    const basicAmount =
+      partsValue < 1000 ? 99 : partsValue < 2000 ? 139 : partsValue < 2500 ? 179 : 229;
+    items.push({ label: `Basic Build · $${basicAmount}`, amount: basicAmount, taxable: true });
+  }
+
+  if (services.has("ultimate")) {
+    const ultimateAmount = partsValue < 1500 ? 139 : 179;
+    items.push({ label: `Ultimate Build · $${ultimateAmount}`, amount: ultimateAmount, taxable: true });
+  }
+
+  if (services.has("refresh")) items.push({ label: "Desktop Refresh Bundle", amount: 49, taxable: true });
+  if (services.has("diagnostic")) items.push({ label: "Full System Diagnostic", amount: 25 });
+  if (services.has("software")) items.push({ label: "Software Install", amount: 39 });
+  if (services.has("cables")) items.push({ label: "Pro Cable Management", amount: 18, taxable: true });
+  if (services.has("wipe")) items.push({ label: `Secure Drive Wipe × ${wipeQuantity}`, amount: 15 * wipeQuantity, taxable: true });
+  if (services.has("upgrade")) items.push({ label: "Hardware Upgrade · TBD", amount: 0, taxable: true });
+  if (services.has("thermal")) items.push({ label: "Fresh Thermal Paste (add-on)", amount: 10, taxable: true });
+  if (services.has("bios")) items.push({ label: "BIOS / Firmware Tuning", amount: 35 });
+  if (services.has("validation")) items.push({ label: "24-Hour Bench Validation", amount: 59 });
+  if (services.has("overclock")) items.push({ label: "Memory + CPU Overclock Profile", amount: 49 });
+
+  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const taxableSubtotal = items.reduce((sum, item) => (item.taxable ? sum + item.amount : sum), 0);
+  const taxAmount = +(taxableSubtotal * 0.08).toFixed(2);
+  const total = +(subtotal + taxAmount).toFixed(2);
+
+  return { items, subtotal, taxAmount, total };
 }
 
 // PCPartPicker Instructions Modal Component
@@ -150,62 +189,6 @@ function PCPPInstructionsModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
 
         <div className="mt-6 rounded-md border hairline bg-secondary/40 px-4 py-3 text-[13px] text-slate-mute">
           <span className="font-medium text-primary">Tip:</span> Make sure your list is set to "Public" so we can view it.
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-[13.5px] font-medium text-primary-foreground hover:opacity-90"
-        >
-          Got it, thanks!
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// Case Details Explanation Modal
-function CaseDetailsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-lg rounded-2xl border hairline-strong bg-background p-6 md:p-8 shadow-[var(--shadow-elegant)]">
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-md border hairline-strong text-slate-ink hover:border-primary hover:text-primary"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary">
-          Why we ask
-        </div>
-        <h3 className="mt-2 text-[20px] font-semibold tracking-[-0.02em]">
-          Case and Power Supply Details
-        </h3>
-
-        <div className="mt-6 space-y-5">
-          <div>
-            <h4 className="text-[15px] font-semibold text-foreground">Why We Ask About ITX (Small Form Factor) Cases</h4>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-slate-mute">
-              Small Form Factor (ITX) builds require a specialized level of precision and patience because there is zero margin for error inside a compact enclosure. Managing cables, routing thick power connectors, and orienting component brackets in a tight space drastically increases the assembly time and requires a highly strategic build order compared to a spacious standard tower. Asking this upfront ensures we allocate the proper bench hours and engineering focus required to deliver a flawless, high-airflow build without damaging fragile, densely packed components.
-            </p>
-            <div className="mt-2 rounded-md bg-primary/5 border border-primary/20 px-3 py-2 text-[13px] font-medium text-primary">
-              ITX / SFF builds: <strong>+$30</strong> labor surcharge
-            </div>
-          </div>
-          <div>
-            <h4 className="text-[15px] font-semibold text-foreground">Why We Ask About Non-Modular Power Supplies</h4>
-            <p className="mt-2 text-[13.5px] leading-relaxed text-slate-mute">
-              Unlike modular power supplies that let us plug in only the specific cables your system actually needs, non-modular power supplies come with a thick, permanent bundle of every single potential cable attached. This means we have to manually hide, secure, and tightly route massive, unused cables inside the basement of your case while maintaining optimal airflow. We ask about this ahead of time so we can properly evaluate the structural cable management complexity and ensure your final build remains clean, organized, and perfectly ventilated.
-            </p>
-            <div className="mt-2 rounded-md bg-primary/5 border border-primary/20 px-3 py-2 text-[13px] font-medium text-primary">
-              Non-modular PSU: <strong>+$15</strong> labor surcharge
-            </div>
-          </div>
         </div>
 
         <button
@@ -306,44 +289,15 @@ function LiveEstimator({
   services,
   partsValue,
   wipeQuantity,
-  isITX,
-  nonModularPSU,
 }: {
   services: Set<ServiceId>;
   partsValue: number;
   wipeQuantity: number;
-  isITX: string;
-  nonModularPSU: string;
 }) {
-  const lineItems = useMemo(() => {
-    const items: { label: string; amount: number }[] = [];
-
-    if (services.has("basic")) {
-      const basicAmount = partsValue < 1000 ? 99 : partsValue < 2000 ? 139 : partsValue < 2500 ? 179 : 229;
-      items.push({ label: `Basic Build · $${basicAmount}`, amount: basicAmount });
-    }
-    if (services.has("ultimate")) {
-      const ultimateAmount = partsValue < 1000 ? 139 : partsValue < 2000 ? 179 : +(partsValue * 0.08).toFixed(2) + 49;
-      items.push({ label: `Ultimate Build · $${ultimateAmount}`, amount: ultimateAmount });
-    }
-    if (services.has("refresh")) items.push({ label: "Desktop Refresh Bundle", amount: 49 });
-    if (services.has("diagnostic")) items.push({ label: "Full System Diagnostic", amount: 25 });
-    if (services.has("software")) items.push({ label: "Software Install", amount: 39 });
-    if (services.has("cables")) items.push({ label: "Pro Cable Management", amount: 18 });
-    if (services.has("wipe")) items.push({ label: `Secure Drive Wipe × ${wipeQuantity}`, amount: 15 * wipeQuantity });
-    if (services.has("upgrade")) items.push({ label: "Hardware Upgrade · TBD", amount: 0 });
-    if (services.has("bios")) items.push({ label: "BIOS / Firmware Tuning", amount: 35 });
-    if (services.has("validation")) items.push({ label: "24-Hour Bench Validation", amount: 59 });
-    if (services.has("overclock")) items.push({ label: "Memory + CPU Overclock Profile", amount: 49 });
-
-    // Surcharges
-    if (isITX === "yes") items.push({ label: "ITX / SFF surcharge", amount: 30 });
-    if (nonModularPSU === "yes") items.push({ label: "Non-modular PSU surcharge", amount: 15 });
-
-    return items;
-  }, [services, partsValue, wipeQuantity, isITX, nonModularPSU]);
-
-  const total = lineItems.reduce((sum, item) => sum + item.amount, 0);
+  const { items: lineItems, subtotal, taxAmount, total } = useMemo(
+    () => computeEstimator(services, partsValue, wipeQuantity),
+    [services, partsValue, wipeQuantity],
+  );
 
   return (
     <div className="rounded-xl border hairline-strong bg-background p-6 shadow-[var(--shadow-elegant)]">
@@ -380,25 +334,19 @@ function LiveEstimator({
         )}
       </div>
 
-      {/* High-tier upselling callout */}
-      {partsValue >= 2500 && (
-        <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3">
-          <div className="flex items-start gap-2">
-            <span className="text-amber-600 text-[16px] shrink-0 mt-0.5">⭐</span>
-            <div>
-              <p className="text-[12.5px] font-semibold text-amber-800">
-                $2,500+ Enthusiast Build
-              </p>
-              <p className="mt-0.5 text-[12px] leading-relaxed text-amber-700">
-                Consider our Performance & Tuning add-ons — BIOS tuning, 24-hour bench validation, and overclock profiling maximize your high-end hardware investment.
-              </p>
-            </div>
-          </div>
+      <div className="mt-3 border-t hairline pt-3 text-[13px]">
+        <div className="flex items-center justify-between">
+          <span className="text-slate-ink">Estimated tax (NY 8%)</span>
+          <span className="mono tabular-nums text-foreground">${taxAmount.toFixed(2)}</span>
         </div>
-      )}
+        <div className="mt-2 flex items-baseline justify-between">
+          <span className="text-[13px] font-semibold">Estimated total</span>
+          <span className="text-[20px] font-semibold tabular-nums">${total.toFixed(2)}</span>
+        </div>
+      </div>
 
-      <div className="mt-4 rounded-md border hairline bg-secondary/40 px-4 py-3 text-[12.5px] leading-relaxed text-slate-ink">
-        <span className="font-medium text-primary">Note:</span> Final pricing is determined by your parts budget tier and selected services.
+      <div className="mt-6 rounded-md border hairline bg-secondary/40 px-4 py-3 text-[12.5px] leading-relaxed text-slate-ink">
+        <span className="font-medium text-primary">Note:</span> Final pricing may vary based on parts value for percentage-based services.
       </div>
     </div>
   );
@@ -419,12 +367,8 @@ export default function IntakeForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [noPCPP, setNoPCPP] = useState(false);
   const [showPCPPModal, setShowPCPPModal] = useState(false);
-  const [showCaseDetails, setShowCaseDetails] = useState(false);
   const [partsValueStr, setPartsValueStr] = useState("");
   const [wipeQuantity, setWipeQuantity] = useState(1);
-  const [timeSlot, setTimeSlot] = useState("");
-  const [isITX, setIsITX] = useState("");
-  const [nonModularPSU, setNonModularPSU] = useState("");
 
   const partsValue = Math.max(0, Number(partsValueStr) || 0);
 
@@ -513,8 +457,7 @@ function formatPhone(value: string): string {
       })
       .join(", ");
 
-    // Get Turnstile token for spam protection
-    const turnstileToken = (window as any).turnstile?.getResponse();
+    const estimate = computeEstimator(allSelectedServices, partsValue, wipeQuantity);
 
     const payload = {
       "customer-name": name,
@@ -524,15 +467,15 @@ function formatPhone(value: string): string {
       "parts-value": `$${partsValue.toFixed(2)}`,
       "symptoms-details": symptoms,
       "selected-services": activeServicesText || "None selected",
-      "preferred-time-slot": timeSlot || "Not specified",
-      "itx-sff-case": isITX || "Not specified",
-      "non-modular-psu": nonModularPSU || "Not specified",
-      "payment-terms": "Zero-Deposit Guarantee — payment due upon successful POST verification at pickup",
-      "cf-turnstile-response": turnstileToken || "",
+      "payment-terms": "100% payment due upon system boot verification and approval sign-off",
+      "estimate-subtotal": `$${estimate.subtotal.toFixed(2)}`,
+      "estimate-tax": `$${estimate.taxAmount.toFixed(2)}`,
+      "estimate-total": `$${estimate.total.toFixed(2)}`,
+      "customer-state": "NY",
     };
 
     try {
-      const response = await fetch(submitUrl("/api/submit"), {
+      const response = await fetch("https://submit-form.cdwojick.workers.dev", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -556,23 +499,28 @@ function formatPhone(value: string): string {
     }
   };
 
-if (submitted) {
-  // 1. Safely format the user data variables for a web URL string
-  const cleanName  = encodeURIComponent(name || "Client");
-  const cleanEmail = encodeURIComponent(email || "");
-
-  // 2. Direct the browser to seamlessly open your live booking calendar
-  //    Replace YOUR-CAL-LINK with your actual Cal.com booking slug when ready.
-  window.location.href = `https://cal.com/YOUR-CAL-LINK?name=${cleanName}&email=${cleanEmail}`;
-
-  // 3. Fallback blank view to hold the screen while the page loads the redirect
-  return null;
-}
+  if (submitted) {
+    return (
+      <section id="book" className="border-b hairline bg-secondary/30">
+        <div className="mx-auto max-w-[1280px] px-8 py-28">
+          <div className="grid grid-cols-12 items-end gap-8">
+            <div className="col-span-3">
+              <div className="mono text-[10.5px] uppercase tracking-[0.18em] text-primary">§ 05</div>
+              <div className="mono mt-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">Project intake · Form 003</div>
+            </div>
+            <h2 className="col-span-9 text-[56px] font-semibold leading-none tracking-[-0.03em]">Start a project</h2>
+          </div>
+          <div className="mt-16 overflow-hidden rounded-xl border hairline-strong bg-background shadow-[var(--shadow-elegant)]">
+            <SubmittedState />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="book" className="border-b hairline bg-secondary/30">
       <PCPPInstructionsModal isOpen={showPCPPModal} onClose={() => setShowPCPPModal(false)} />
-      <CaseDetailsModal isOpen={showCaseDetails} onClose={() => setShowCaseDetails(false)} />
       <div className="mx-auto max-w-[1280px] px-8 py-28">
         <div className="grid grid-cols-12 items-end gap-8">
           <div className="col-span-3">
@@ -685,10 +633,10 @@ if (submitted) {
                       <FieldLabel icon={Cpu}>Customer Name</FieldLabel>
                       <input
                         type="text"
-                        className="w-full rounded-[1.25rem] border border-slate-200 bg-white/95 px-4 py-3 text-[14px] text-slate-950 placeholder:text-slate-400 shadow-[0_12px_35px_-22px_rgba(15,23,42,0.35)] transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-md border border-slate-300 bg-background px-4 py-3 text-[14px] text-foreground placeholder:text-slate-mute/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="First & Last Name"
+                        placeholder="Jane Doe"
                       />
                       {errors.name && <FieldHint>{errors.name}</FieldHint>}
                     </div>
@@ -696,10 +644,10 @@ if (submitted) {
                       <FieldLabel icon={Cpu}>Phone Number</FieldLabel>
                       <input
                         type="tel"
-                        className="w-full rounded-[1.25rem] border border-slate-200 bg-white/95 px-4 py-3 text-[14px] text-slate-950 placeholder:text-slate-400 shadow-[0_12px_35px_-22px_rgba(15,23,42,0.35)] transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-md border border-slate-300 bg-background px-4 py-3 text-[14px] text-foreground placeholder:text-slate-mute/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={phone}
                         onChange={(e) => setPhone(formatPhone(e.target.value))}
-                        placeholder="(555) 000-0000"
+                        placeholder="(585) 555-0142"
                       />
                       {errors.phone && <FieldHint>{errors.phone}</FieldHint>}
                     </div>
@@ -707,23 +655,23 @@ if (submitted) {
                       <FieldLabel icon={Cpu}>Email Address</FieldLabel>
                       <input
                         type="email"
-                        className="w-full rounded-[1.25rem] border border-slate-200 bg-white/95 px-4 py-3 text-[14px] text-slate-950 placeholder:text-slate-400 shadow-[0_12px_35px_-22px_rgba(15,23,42,0.35)] transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-md border border-slate-300 bg-background px-4 py-3 text-[14px] text-foreground placeholder:text-slate-mute/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@email.com"
+                        placeholder="jane@email.com"
                       />
                       {errors.email && <FieldHint>{errors.email}</FieldHint>}
                     </div>
                     <div className="sm:col-span-2">
                       <FieldLabel icon={FileText}>Total Parts Value (USD)</FieldLabel>
-                      <div className="flex items-center gap-2 rounded-[1.25rem] border border-slate-200 bg-white/95 px-4 py-3 shadow-[0_12px_35px_-22px_rgba(15,23,42,0.18)] transition focus-within:border-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/20">
+                      <div className="flex items-center gap-2 rounded-md border border-slate-300 bg-background px-4 py-3 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
                         <span className="mono text-[14px] text-slate-mute">$</span>
                         <input
                           type="text"
-                          className="w-full bg-transparent text-[14px] text-slate-950 placeholder:text-slate-mute/70 focus:outline-none"
+                          className="w-full bg-transparent text-[14px] text-foreground placeholder:text-slate-mute/70 focus:outline-none"
                           value={partsValueStr}
                           onChange={(e) => setPartsValueStr(e.target.value.replace(/[^0-9.]/g, "").slice(0, 9))}
-                          placeholder="e.g. 1850.00"
+                          placeholder="1850.00"
                         />
                       </div>
                       <p className="mt-2 text-[12px] text-slate-mute">
@@ -745,7 +693,7 @@ if (submitted) {
                       </div>
                       <input
                         type="url"
-                        className="w-full rounded-[1.25rem] border border-slate-200 bg-white/95 px-4 py-3 text-[14px] text-slate-950 placeholder:text-slate-mute/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                        className="w-full rounded-md border border-slate-300 bg-background px-4 py-3 text-[14px] text-foreground placeholder:text-slate-mute/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
                         value={pcpp}
                         onChange={(e) => setPcpp(e.target.value)}
                         placeholder="https://pcpartpicker.com/list/..."
@@ -768,95 +716,13 @@ if (submitted) {
                     <div className="sm:col-span-2">
                       <FieldLabel icon={FileText}>Describe your project or issues</FieldLabel>
                       <textarea
-                        className="w-full rounded-[1.25rem] border border-slate-200 bg-white/95 px-4 py-3 text-[14px] text-slate-950 placeholder:text-slate-mute/70 shadow-[0_12px_35px_-22px_rgba(15,23,42,0.25)] transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full rounded-md border border-slate-300 bg-background px-4 py-3 text-[14px] text-foreground placeholder:text-slate-mute/70 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         value={symptoms}
                         onChange={(e) => setSymptoms(e.target.value)}
                         placeholder="Example: Building a new gaming PC, need help with cable management and BIOS setup..."
                         rows={4}
                       />
                       {errors.symptoms && <FieldHint>{errors.symptoms}</FieldHint>}
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <FieldLabel icon={Info}>
-                        Case and Power Supply Details
-                        <button
-                          type="button"
-                          onClick={() => setShowCaseDetails(true)}
-                          className="ml-2 text-[11px] font-medium text-primary underline underline-offset-2 hover:opacity-80"
-                        >
-                          See why we ask
-                        </button>
-                      </FieldLabel>
-                      <p className="mb-3 text-[12.5px] leading-relaxed text-slate-mute">
-                        These help us ensure accurate labor quotes for your specific hardware configuration.
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                            Is this an ITX / Small Form Factor (SFF) case?
-                          </label>
-                          <div className="flex gap-4">
-                            <label className="inline-flex items-center gap-1.5 text-[13px] text-slate-ink">
-                              <input
-                                type="radio"
-                                name="itx"
-                                value="yes"
-                                checked={isITX === "yes"}
-                                onChange={() => setIsITX("yes")}
-                                className="rounded-full border-slate-strong text-primary focus:ring-primary h-4 w-4"
-                              />
-                              Yes
-                            </label>
-                            <label className="inline-flex items-center gap-1.5 text-[13px] text-slate-ink">
-                              <input
-                                type="radio"
-                                name="itx"
-                                value="no"
-                                checked={isITX === "no"}
-                                onChange={() => setIsITX("no")}
-                                className="rounded-full border-slate-strong text-primary focus:ring-primary h-4 w-4"
-                              />
-                              No
-                            </label>
-                          </div>
-                          {isITX === "yes" && (
-                            <p className="mt-1.5 text-[12px] font-medium text-primary">+$30 ITX surcharge</p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block text-[13px] font-medium text-slate-700 mb-1.5">
-                            Does the system use a non-modular power supply?
-                          </label>
-                          <div className="flex gap-4">
-                            <label className="inline-flex items-center gap-1.5 text-[13px] text-slate-ink">
-                              <input
-                                type="radio"
-                                name="psu"
-                                value="yes"
-                                checked={nonModularPSU === "yes"}
-                                onChange={() => setNonModularPSU("yes")}
-                                className="rounded-full border-slate-strong text-primary focus:ring-primary h-4 w-4"
-                              />
-                              Yes
-                            </label>
-                            <label className="inline-flex items-center gap-1.5 text-[13px] text-slate-ink">
-                              <input
-                                type="radio"
-                                name="psu"
-                                value="no"
-                                checked={nonModularPSU === "no"}
-                                onChange={() => setNonModularPSU("no")}
-                                className="rounded-full border-slate-strong text-primary focus:ring-primary h-4 w-4"
-                              />
-                              No
-                            </label>
-                          </div>
-                          {nonModularPSU === "yes" && (
-                            <p className="mt-1.5 text-[12px] font-medium text-primary">+$15 non-modular PSU surcharge</p>
-                          )}
-                        </div>
-                      </div>
                     </div>
                     <div className="sm:col-span-2">
                       <label className="inline-flex items-center gap-2">
@@ -867,16 +733,10 @@ if (submitted) {
                           className="rounded border-slate-strong bg-background text-primary focus:ring-primary h-4 w-4"
                         />
                         <span className="text-sm text-slate-ink">
-                          I agree to the Custom Core Labs Service Agreement. I understand that 100% of labor is due upon visual confirmation of a successful system POST/boot at pickup.
+                          I agree to the terms and conditions. I understand that 100% payment is due only after the system boots and I verify operation.
                         </span>
                       </label>
                       {errors.consent && <FieldHint>{errors.consent}</FieldHint>}
-                      <p className="mt-3 text-[12.5px] leading-relaxed text-slate-mute">
-                        By submitting a build request, you agree to the terms of the Custom Core Labs Service Agreement, which will be co-signed with a parent or guardian during your 15-minute appointment at our Bushnell's Basin office. Clients under 18 must bring a parent or legal guardian to sign the contract.
-                      </p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <div className="cf-turnstile" {...{ "data-sitekey": "0x4AAAAAADbwqkm9C4wJZpUt" }} />
                     </div>
                     <div className="sm:col-span-2 mt-6">
                       <div className="rounded-xl border hairline-strong bg-gradient-to-br from-primary/5 via-background to-background p-6 shadow-[var(--shadow-elegant)]">
@@ -906,7 +766,7 @@ if (submitted) {
           {/* Live Estimator - Bottom Right Card */}
           <div className="lg:col-span-4">
             <div className="sticky top-24">
-              <LiveEstimator services={allSelectedServices} partsValue={partsValue} wipeQuantity={wipeQuantity} isITX={isITX} nonModularPSU={nonModularPSU} />
+              <LiveEstimator services={allSelectedServices} partsValue={partsValue} wipeQuantity={wipeQuantity} />
             </div>
           </div>
         </div>

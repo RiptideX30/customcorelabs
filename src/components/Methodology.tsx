@@ -50,16 +50,15 @@ export default function Methodology() {
 
                 <p className="mt-7 text-[22px] font-medium leading-[1.35] tracking-[-0.015em] text-foreground">
                   Custom Core Labs specializes
-                  <span className="text-gradient-blue"> exclusively in desktop towers</span> —
-                  the only chassis class that lets us guarantee maximum thermal
-                  efficiency and truly modular performance.
+                  <span className="text-gradient-blue"> exclusively in desktop towers</span> — the
+                  only chassis class that lets us guarantee maximum thermal efficiency and truly
+                  modular performance.
                 </p>
 
                 <p className="mt-6 text-[14px] leading-relaxed text-slate-mute">
-                  Constraint, not limitation. By refusing form factors that
-                  compromise airflow or solder critical components in place, we
-                  deliver systems that can be tuned, repaired, and upgraded for
-                  a decade.
+                  Constraint, not limitation. By refusing form factors that compromise airflow or
+                  solder critical components in place, we deliver systems that can be tuned,
+                  repaired, and upgraded for a decade.
                 </p>
 
                 <div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-md border hairline bg-border">
@@ -116,7 +115,8 @@ export default function Methodology() {
                 <p className="mt-3 text-[14px] leading-relaxed text-slate-ink">
                   You buy parts at street price. We bill bench hours.
                   <span className="text-slate-mute">
-                    {" "}No reseller margin between you and your hardware.
+                    {" "}
+                    No reseller margin between you and your hardware.
                   </span>
                 </p>
               </div>
@@ -127,7 +127,10 @@ export default function Methodology() {
                 </div>
                 <p className="mt-3 text-[14px] leading-relaxed text-slate-ink">
                   Greater Rochester &amp; Victor, NY.
-                  <span className="text-slate-mute"> Bench drop-off and on-site visits available.</span>
+                  <span className="text-slate-mute">
+                    {" "}
+                    Bench drop-off and on-site visits available.
+                  </span>
                 </p>
               </div>
             </div>
@@ -150,7 +153,9 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-background p-4">
       <div className="mono text-[9.5px] uppercase tracking-[0.18em] text-slate-mute">{label}</div>
-      <div className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-foreground">{value}</div>
+      <div className="mt-1 text-[22px] font-semibold tracking-[-0.025em] text-foreground">
+        {value}
+      </div>
     </div>
   );
 }

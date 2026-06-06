@@ -3,11 +3,41 @@ import { Check, Plus, Wrench, Cpu, HardDrive, Cable, Eraser, Download, Lock } fr
 
 type MaintenanceId = "refresh" | "software" | "cables" | "wipe";
 
-const MAINTENANCE: { id: MaintenanceId; title: string; price: number; icon: typeof Cpu; desc: string }[] = [
-  { id: "refresh", title: "Desktop Refresh", price: 59, icon: Wrench, desc: "Full clean, dust-out, and bench diagnostic." },
-  { id: "software", title: "Software Install", price: 39, icon: Download, desc: "OS, drivers, and toolchain provisioned." },
-  { id: "cables", title: "Pro Cable Management", price: 18, icon: Cable, desc: "Routed, combed, and tied to spec." },
-  { id: "wipe", title: "Secure Drive Wipe", price: 10, icon: Eraser, desc: "NIST 800-88 sanitisation with certificate." },
+const MAINTENANCE: {
+  id: MaintenanceId;
+  title: string;
+  price: number;
+  icon: typeof Cpu;
+  desc: string;
+}[] = [
+  {
+    id: "refresh",
+    title: "Desktop Refresh",
+    price: 59,
+    icon: Wrench,
+    desc: "Full clean, dust-out, and bench diagnostic.",
+  },
+  {
+    id: "software",
+    title: "Software Install",
+    price: 39,
+    icon: Download,
+    desc: "OS, drivers, and toolchain provisioned.",
+  },
+  {
+    id: "cables",
+    title: "Pro Cable Management",
+    price: 18,
+    icon: Cable,
+    desc: "Routed, combed, and tied to spec.",
+  },
+  {
+    id: "wipe",
+    title: "Secure Drive Wipe",
+    price: 10,
+    icon: Eraser,
+    desc: "NIST 800-88 sanitisation with certificate.",
+  },
 ];
 
 export default function Pricing() {
@@ -91,15 +121,17 @@ export default function Pricing() {
                   The Ultimate Build
                 </h3>
                 <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-slate-mute">
-                  End-to-end assembly, BIOS tuning, and 24-hour bench validation
-                  on your supplied components.
+                  End-to-end assembly, BIOS tuning, and 24-hour bench validation on your supplied
+                  components.
                 </p>
 
                 <div className="mt-8 flex items-end gap-3">
                   <span className="text-[14px] text-slate-mute">Starting at</span>
                   <div className="flex items-start gap-1">
                     <span className="mono text-[18px] text-slate-mute">$</span>
-                    <span className="text-[64px] font-semibold leading-none tracking-[-0.04em]">139</span>
+                    <span className="text-[64px] font-semibold leading-none tracking-[-0.04em]">
+                      139
+                    </span>
                   </div>
                 </div>
 
@@ -114,7 +146,11 @@ export default function Pricing() {
                         : "hairline-strong text-slate-mute group-hover:border-primary group-hover:text-primary"
                     }`}
                   >
-                    {ultimate ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : <Plus className="h-3.5 w-3.5" />}
+                    {ultimate ? (
+                      <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5" />
+                    )}
                   </div>
                 </div>
               </div>
@@ -167,7 +203,9 @@ export default function Pricing() {
                     <div className="mt-5 flex items-end justify-between">
                       <div className="flex items-baseline gap-1">
                         <span className="mono text-[11px] text-slate-mute">$</span>
-                        <span className="text-[28px] font-semibold leading-none tracking-[-0.03em]">{m.price}</span>
+                        <span className="text-[28px] font-semibold leading-none tracking-[-0.03em]">
+                          {m.price}
+                        </span>
                       </div>
                       <div
                         className={`flex h-6 w-6 items-center justify-center rounded-full border transition-all ${
@@ -176,7 +214,11 @@ export default function Pricing() {
                             : "hairline-strong text-slate-mute group-hover:border-primary group-hover:text-primary"
                         }`}
                       >
-                        {active ? <Check className="h-3 w-3" strokeWidth={2.5} /> : <Plus className="h-3 w-3" />}
+                        {active ? (
+                          <Check className="h-3 w-3" strokeWidth={2.5} />
+                        ) : (
+                          <Plus className="h-3 w-3" />
+                        )}
                       </div>
                     </div>
                   </button>
@@ -205,19 +247,25 @@ export default function Pricing() {
                 onClick={() => setThermal((t) => !t)}
                 aria-pressed={thermal}
                 className={`flex w-full items-center justify-between rounded-lg border bg-background px-5 py-4 text-left transition-all ${
-                  thermal ? "border-primary hairline-strong" : "hairline-strong hover:border-primary/60"
+                  thermal
+                    ? "border-primary hairline-strong"
+                    : "hairline-strong hover:border-primary/60"
                 }`}
               >
                 <div className="flex items-center gap-4">
                   <div
                     className={`flex h-5 w-5 items-center justify-center rounded border transition-all ${
-                      thermal ? "border-primary bg-primary text-primary-foreground" : "hairline-strong"
+                      thermal
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "hairline-strong"
                     }`}
                   >
                     {thermal && <Check className="h-3 w-3" strokeWidth={3} />}
                   </div>
                   <div>
-                    <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary">Add-on</div>
+                    <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary">
+                      Add-on
+                    </div>
                     <div className="mt-0.5 text-[14px] font-medium">Fresh Thermal Paste</div>
                   </div>
                 </div>
@@ -235,7 +283,9 @@ export default function Pricing() {
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="mono text-[12px] text-slate-mute">$</span>
-                <span className="text-[26px] font-semibold tracking-[-0.02em] tabular-nums">{total}</span>
+                <span className="text-[26px] font-semibold tracking-[-0.02em] tabular-nums">
+                  {total}
+                </span>
               </div>
             </div>
           </div>
@@ -252,7 +302,10 @@ function CategoryHeader({ index, title, count }: { index: string; title: string;
         <span className="mono flex h-6 w-6 items-center justify-center rounded-md border hairline-strong bg-background text-[10px] font-semibold text-primary">
           {index}
         </span>
-        <h3 className="text-[20px] font-semibold tracking-tight" dangerouslySetInnerHTML={{ __html: title }} />
+        <h3
+          className="text-[20px] font-semibold tracking-tight"
+          dangerouslySetInnerHTML={{ __html: title }}
+        />
       </div>
       <span className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">{count}</span>
     </div>

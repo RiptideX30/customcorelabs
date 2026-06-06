@@ -109,9 +109,8 @@ function Showcases() {
                     onError={(e) => {
                       console.log("Image failed to load:", e.currentTarget.src);
                       e.currentTarget.style.display = "none";
-                      const placeholder = e.currentTarget.parentElement?.querySelector(
-                        ".placeholder",
-                      );
+                      const placeholder =
+                        e.currentTarget.parentElement?.querySelector(".placeholder");
                       if (placeholder) placeholder.classList.remove("hidden");
                     }}
                   />

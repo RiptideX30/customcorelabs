@@ -8,6 +8,12 @@ interface FormData {
   "selected-services": string;
   "payment-terms": string;
   "cf-turnstile-response": string;
+  "customer-state"?: string;
+  "estimate-subtotal"?: string;
+  "estimate-tax"?: string;
+  "estimate-total"?: string;
+  "itx-sff-case"?: string;
+  "non-modular-psu"?: string;
 }
 
 const CORS_HEADERS = {
@@ -36,56 +42,64 @@ export async function handleSubmitRequest(request: Request, env: SubmitFormEnv):
     });
   }
 
-    if (request.method !== "POST") {
-      return new Response("Method not allowed", { status: 405 });
-    }
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
+  }
 
-    const RESEND_API_KEY = env.RESEND_API_KEY;
-    if (!RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: "Server misconfigured" }), {
-        status: 500,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-      });
-    }
+  const RESEND_API_KEY = env.RESEND_API_KEY;
+  if (!RESEND_API_KEY) {
+    return new Response(JSON.stringify({ error: "Server misconfigured" }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
 
-    try {
-      const data: FormData = await request.json();
+  try {
+    const data: FormData = await request.json();
 
-      // Verify Turnstile token
-      const turnstileToken = data["cf-turnstile-response"];
-      if (!turnstileToken) {
-        return new Response(JSON.stringify({ error: "Missing security token. Please refresh and try again." }), {
+    // Verify Turnstile token
+    const turnstileToken = data["cf-turnstile-response"];
+    if (!turnstileToken) {
+      return new Response(
+        JSON.stringify({ error: "Missing security token. Please refresh and try again." }),
+        {
           status: 403,
           headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-        });
-      }
+        },
+      );
+    }
 
-      const verifyResp = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          secret: TURNSTILE_SECRET,
-          response: turnstileToken,
-        }),
-      });
+    const verifyResp = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        secret: TURNSTILE_SECRET,
+        response: turnstileToken,
+      }),
+    });
 
-      const verifyResult = await verifyResp.json() as { success: boolean };
+    const verifyResult = (await verifyResp.json()) as { success: boolean };
 
-      if (!verifyResult.success) {
-        return new Response(JSON.stringify({ error: "Spam detected or token expired. Request blocked." }), {
+    if (!verifyResult.success) {
+      return new Response(
+        JSON.stringify({ error: "Spam detected or token expired. Request blocked." }),
+        {
           status: 403,
           headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-        });
-      }
+        },
+      );
+    }
 
-      // Turnstile passed — proceed to send email
-      const htmlBody = `
+    // Turnstile passed — proceed to send email
+    const htmlBody = `
         <h2 style="color:#2563eb;">New Lab Request</h2>
         <table style="border-collapse:collapse;width:100%;font-family:sans-serif;">
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Name</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-name"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Phone</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-phone"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Email</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-email"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Parts Value</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["parts-value"]}</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Estimated Tax</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["estimate-tax"] || "$0.00"}</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Estimated Total</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["estimate-total"] || data["parts-value"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">PCPartPicker URL</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["pcpartpicker-url"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Project / Issues</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["symptoms-details"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Selected Services</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["selected-services"]}</td></tr>
@@ -93,69 +107,74 @@ export async function handleSubmitRequest(request: Request, env: SubmitFormEnv):
         </table>
       `;
 
-      const emailRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: "Custom Core Labs <onboarding@resend.dev>",
-          to: "cdwojick@gmail.com",
-          subject: `New Lab Request — ${data["customer-name"]}`,
-          html: htmlBody,
-        }),
-      });
+    const emailRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Custom Core Labs <onboarding@resend.dev>",
+        to: "cdwojick@gmail.com",
+        subject: `New Lab Request — ${data["customer-name"]}`,
+        html: htmlBody,
+      }),
+    });
 
-      if (!emailRes.ok) {
-        const err = await emailRes.text();
-        console.error("Resend error:", err);
-        return new Response(JSON.stringify({ error: "Failed to send email" }), {
-          status: 500,
-          headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-        });
-      }
-
-      // After successful email, create a build tracking record
-      const servicesList = (data["selected-services"] || "None selected")
-        .split(", ")
-        .filter(Boolean);
-
-      const trackerPayload = {
-        customerName: data["customer-name"],
-        customerEmail: data["customer-email"],
-        customerPhone: data["customer-phone"],
-        services: servicesList,
-        partsValue: data["parts-value"] || "",
-      };
-
-      const trackerRes = await fetch(`${trackerOrigin}/api/track`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-key": env.ADMIN_KEY || "",
-        },
-        body: JSON.stringify(trackerPayload),
-      });
-
-      const trackerData = await trackerRes.json();
-      const trackingCode = trackerData?.data?.trackingCode;
-
-      return new Response(JSON.stringify({
-        ok: true,
-        trackingCode: trackingCode || null,
-        trackingUrl: trackingCode ? `${trackerOrigin}/track/${trackingCode}` : null,
-      }), {
-        status: 200,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-      });
-    } catch (error) {
-      console.error("Worker error:", error);
-      return new Response(JSON.stringify({ error: "Internal error" }), {
+    if (!emailRes.ok) {
+      const err = await emailRes.text();
+      console.error("Resend error:", err);
+      return new Response(JSON.stringify({ error: "Failed to send email" }), {
         status: 500,
         headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
+
+    // After successful email, create a build tracking record
+    const servicesList = (data["selected-services"] || "None selected").split(", ").filter(Boolean);
+
+    const trackerPayload = {
+      customerName: data["customer-name"],
+      customerEmail: data["customer-email"],
+      customerPhone: data["customer-phone"],
+      services: servicesList,
+      partsValue: data["parts-value"] || "",
+      estimateSubtotal: data["estimate-subtotal"] || "",
+      taxAmount: data["estimate-tax"] || "",
+      totalWithTax: data["estimate-total"] || "",
+      customerState: data["customer-state"] || "",
+    };
+
+    const trackerRes = await fetch(`${trackerOrigin}/api/track`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": env.ADMIN_KEY || "",
+      },
+      body: JSON.stringify(trackerPayload),
+    });
+
+    const trackerData = await trackerRes.json();
+    const trackingCode = trackerData?.data?.trackingCode;
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        trackingCode: trackingCode || null,
+        trackingUrl: trackingCode ? `${trackerOrigin}/track/${trackingCode}` : null,
+      }),
+      {
+        status: 200,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      },
+    );
+  } catch (error) {
+    console.error("Worker error:", error);
+    return new Response(JSON.stringify({ error: "Internal error" }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
 }
 
 export default {
