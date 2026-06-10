@@ -700,10 +700,22 @@ async function submitForm(payload: Record<string, string>) {
    MAIN INTAKE FORM COMPONENT
    ============================================================ */
 
+
+/** Generate a short, human-friendly tracking code: CCL-A7F3 */
+export function generateTrackingCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I, O, 0, 1 to avoid confusion
+  let code = "CCL-";
+  for (let i = 0; i < 4; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 export default function IntakeForm() {
   const [currentPath, setCurrentPath] = useState<PathId>("selector");
   const [submitted, setSubmitted] = useState(false);
   const [showBuildSuccess, setShowBuildSuccess] = useState(false);
+  const [trackingCode, setTrackingCode] = useState(""); // Added state string container
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Shared customer info
@@ -769,8 +781,10 @@ export default function IntakeForm() {
       setErrors(e);
       return;
     }
-
     setErrors({});
+
+    // Generate tracking identifier only if initializing a hardware system pipeline
+    const generatedCode = isBuildOrderPath ? generateTrackingCode() : "";
 
     // Build payload based on path
     let payload: Record<string, string> = {
@@ -779,12 +793,12 @@ export default function IntakeForm() {
       "customer-email": email,
       "payment-terms": "Parts cost is collected before any orders are placed. Labor and services are due after final pickup and validation.",
       "customer-state": "NY",
+      "tracking-code": generatedCode || "N/A" // Hooked straight into worker stream
     };
 
     const partsValueNum = Math.max(0, Number(knownPartsValue) || 0);
 
     if (currentPath === "repair") {
-      // Validate repair symptoms
       if (!repairSymptoms.trim()) {
         setErrors({ symptoms: "Please describe your issue" });
         return;
@@ -810,14 +824,11 @@ export default function IntakeForm() {
       if (knownBuild) allServices.add(knownBuild);
       knownPerformance.forEach((s) => allServices.add(s));
       if (allServices.has("ultimate") || allServices.has("basic")) allServices.add("thermal");
-
       const estimate = computeEstimator(allServices, partsValueNum, 1, knownITX, knownNonModular);
-
       const srvText = [...allServices].map((id) => {
         const s = [...NEW_BUILDS, ...PERFORMANCE_TUNING].find((x) => x.id === id);
         return s ? s.title : id;
       }).join(", ");
-
       const lookText = [knownRgb, knownColor, knownFans].filter(Boolean).join(" · ");
 
       payload = {
@@ -859,25 +870,30 @@ export default function IntakeForm() {
       return;
     }
 
-    try {
-      const response = await submitForm(payload);
-      if (response.ok) {
-        if (isBuildOrderPath) {
-          setShowBuildSuccess(true);
-        } else {
-          setSubmitted(true);
-          setTimeout(() => {
-            document.getElementById("book")?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }, 100);
-        }
-      } else {
-        const data = await response.json();
-        alert("Submission error: " + (data.error || "Please try again."));
-      }
-    } catch {
-      alert("Error sending details. Please check your internet connection.");
+  try {
+   // 1. Send the data to your worker so it saves to Cloudflare KV
+    const response = await submitForm(payload);
+  
+   if (response.ok) {
+      // 2. Set your submitted state to true for everyone
+      setSubmitted(true);
+    
+      // 3. Clear any transient build success views to keep layout uniform
+      setShowBuildSuccess(false);
+
+      // 4. Smoothly scroll them to your custom booking info area
+      setTimeout(() => {
+        document.getElementById("book")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+
+   } else {
+      const data = await response.json();
+      alert("Submission error: " + (data.error || "Please try again."));
     }
-  };
+  } catch {
+    alert("Error sending details. Please check your internet connection.");
+  }
+};
 
   if (showBuildSuccess) {
     return (
@@ -891,7 +907,8 @@ export default function IntakeForm() {
             <h2 className="col-span-9 text-[56px] font-semibold leading-none tracking-[-0.03em]">Start a project</h2>
           </div>
           <div className="mt-16 overflow-hidden rounded-xl border hairline-strong bg-background shadow-[var(--shadow-elegant)]">
-            <BuildOrderSuccess />
+            {/* Added code prop context to your success container child module */}
+            <BuildOrderSuccess /> 
           </div>
         </div>
       </section>
