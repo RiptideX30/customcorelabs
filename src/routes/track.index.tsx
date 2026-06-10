@@ -110,8 +110,8 @@ function TrackLookupPage() {
             </span>
           </div>
           <p className="text-[13px] leading-relaxed text-slate-mute">
-            Your tracking code is provided at drop-off. If you've lost your code, contact us at{" "}
-            <strong className="text-foreground">cdwojick@gmail.com</strong>.
+            Your tracking code is provided by email. If you've lost your code, contact us at {""}
+            <strong className="text-foreground">technician@cclbuilds.com</strong>.
           </p>
         </div>
       </div>

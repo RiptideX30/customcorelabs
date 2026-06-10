@@ -199,7 +199,7 @@ function Showcases() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t hairline text-center text-[12px] text-slate-mute">
-            © 2024 Custom Core Labs. All rights reserved.
+            © 2026 Custom Core Labs. All rights reserved.
           </div>
         </div>
       </footer>

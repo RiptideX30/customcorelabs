@@ -248,10 +248,10 @@ function TrackBuildPage() {
               {/* Pickup Info */}
               <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-5 text-center">
                 <div className="mono text-[9.5px] uppercase tracking-[0.18em] text-primary">
-                  Zero-Deposit Guarantee
+                  Pickup Settlement
                 </div>
                 <p className="mt-2 text-[13px] leading-relaxed text-slate-ink">
-                  Payment is due only after you verify your system boots successfully at pickup.
+                  Parts are procured before order placement. Final labor and service balance is due at pickup after validation.
                 </p>
               </div>
             </div>

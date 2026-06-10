@@ -96,11 +96,6 @@ export function generateTrackingCode(): string {
   return code;
 }
 
-/** Generate a 4-digit pickup verification code */
-export function generatePickupCode(): string {
-  return String(Math.floor(1000 + Math.random() * 9000));
-}
-
 /** Get the next valid status in the progression (or null if already terminal) */
 export function nextStatus(current: BuildStatus): BuildStatus | null {
   const idx = BUILD_STATUSES.indexOf(current);

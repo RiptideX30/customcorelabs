@@ -16,6 +16,7 @@ import {
   Wrench,
   Star,
   MessageCircle,
+  Menu,
 } from "lucide-react";
 import cclLogo from "@/assets/ccl-logo.jpg";
 import buildPhoto from "@/assets/builds/midnight-aero.jpg";
@@ -52,7 +53,7 @@ const SERVICES: Service[] = [
   {
     id: "basic",
     title: "Basic Build",
-    priceLabel: "Starting at $99",
+    priceLabel: "$109",
     short: "Pure hardware assembly. No OS or drivers.",
     category: "build",
     details: "Pure hardware assembly and standard cable routing. No OS or driver installation.",
@@ -60,7 +61,7 @@ const SERVICES: Service[] = [
   {
     id: "ultimate",
     title: "Ultimate Build",
-    priceLabel: "Starting at $139",
+    priceLabel: "Starting at $149",
     short: "Full assembly, OS provisioning, pro routing, 60-min stress testing, structural component balancing, and BIOS optimization.",
     category: "build",
     details:
@@ -173,12 +174,12 @@ function computeLineItems(active: Set<ServiceId>, partsValue: number) {
 
   if (active.has("basic")) {
     const basicAmount =
-      partsValue < 1000 ? 99 : partsValue < 2000 ? 139 : partsValue < 2500 ? 179 : 229;
+     partsValue < 1000 ? 99 : partsValue < 2000 ? 119 : 159;
     items.push({ id: "basic", label: `Basic Build · $${basicAmount}`, amount: basicAmount });
   }
   if (active.has("ultimate")) {
     const ultimateAmount =
-      partsValue < 1500 ? 139 : partsValue < 2000 ? 179 : +(partsValue * 0.08).toFixed(2) + 49;
+      partsValue < 1000 ? 149 : partsValue < 2000 ? 179 : 229;
     items.push({
       id: "ultimate",
       label: `Ultimate Build · $${ultimateAmount}`,
@@ -312,42 +313,103 @@ export default function App() {
 /* ---------------- Header ---------------- */
 
 function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleNavClick = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-foreground/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-5 md:px-8">
-        <a href="#top" className="flex items-center gap-2.5">
-          <img
-            src={cclLogo}
-            alt="Custom Core Labs logo"
-            className="h-8 w-8 rounded-md object-cover"
-          />
-          <span className="text-[13px] font-semibold tracking-tight text-white">
-            Custom <span className="text-primary">Core</span> Labs
-          </span>
-        </a>
-        <nav className="flex items-center gap-3 md:gap-6 text-[13px] text-white/70">
-          <a className="hidden sm:inline hover:text-white transition-colors" href="#services">
-            Services
+    <>
+      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-foreground/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-5 md:px-8">
+          <a href="#top" className="flex items-center gap-2.5">
+            <img
+              src={cclLogo}
+              alt="Custom Core Labs logo"
+              className="h-8 w-8 rounded-md object-cover"
+            />
+            <span className="text-[13px] font-semibold tracking-tight text-white">
+              Custom <span className="text-primary">Core</span> Labs
+            </span>
           </a>
-          <a className="hidden sm:inline hover:text-white transition-colors" href="#book">
-            Book Appointment
-          </a>
-          <Link className="hidden sm:inline hover:text-white transition-colors" to="/track">
-            Track Build
-          </Link>
-          <Link className="hidden sm:inline hover:text-white transition-colors" to="/showcases">
-            Showcases
-          </Link>
-          <a
-            href="#book"
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:opacity-90"
+          <nav className="hidden md:flex items-center gap-3 md:gap-6 text-[13px] text-white/70">
+            <a className="hover:text-white transition-colors" href="#services">
+              Services
+            </a>
+            <a className="hover:text-white transition-colors" href="#book">
+              Book Appointment
+            </a>
+            <Link className="hover:text-white transition-colors" to="/track">
+              Track Build
+            </Link>
+            <Link className="hover:text-white transition-colors" to="/showcases">
+              Showcases
+            </Link>
+            <a
+              href="#book"
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:opacity-90"
+            >
+              Book
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+          </nav>
+          <button
+            className="md:hidden text-white/70 hover:text-white transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
-            Book
-            <ArrowUpRight className="h-3.5 w-3.5" />
-          </a>
-        </nav>
-      </div>
-    </header>
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 top-14 z-40 bg-foreground/95 backdrop-blur-md md:hidden">
+          <nav className="mx-auto max-w-[1280px] px-5 py-6 flex flex-col gap-4 text-[15px] text-white/70">
+            <a
+              href="#services"
+              className="hover:text-white transition-colors py-2"
+              onClick={handleNavClick}
+            >
+              Services
+            </a>
+            <a
+              href="#book"
+              className="hover:text-white transition-colors py-2"
+              onClick={handleNavClick}
+            >
+              Book Appointment
+            </a>
+            <Link
+              to="/track"
+              className="hover:text-white transition-colors py-2"
+              onClick={handleNavClick}
+            >
+              Track Build
+            </Link>
+            <Link
+              to="/showcases"
+              className="hover:text-white transition-colors py-2"
+              onClick={handleNavClick}
+            >
+              Showcases
+            </Link>
+            <div className="border-t border-white/10 pt-4 mt-2">
+              <a
+                href="#book"
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-3 text-[14px] font-medium text-primary-foreground hover:opacity-90 transition-all"
+                onClick={handleNavClick}
+              >
+                Book Now
+                <ArrowUpRight className="h-4 w-4" />
+              </a>
+            </div>
+          </nav>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -383,9 +445,9 @@ function Hero() {
           WNY's Premium Computer Assembly & Testing
         </h2>
         <p className="animate-fade-up-delay-2 mt-4 max-w-xl text-[15px] md:text-[17px] leading-relaxed text-white/70">
-          Bring your own components at true market price. We handle the structural integration,
-          precision thermal application, and exhaustive hardware validation—delivering a flawless,
-          turn-key system ready for deployment.
+          We source premium components, perform precision assembly, and complete every build with
+          rigorous hardware validation. Your finished custom PC is ready for secure pickup at our
+          Bushnell's Basin workshop.
         </p>
         <div className="animate-fade-up-delay-3 mt-10 flex flex-wrap items-center gap-4">
           <a
@@ -409,6 +471,69 @@ function Hero() {
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
+      <div className="mt-16 max-w-5xl mx-auto px-4">
+        <p className="text-center text-xs font-semibold uppercase tracking-widest text-white/40 mb-6">
+          Select Your Profile
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          {/* Card 1: Gamer Avatar */}
+          <div 
+            onClick={() => {
+              document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+              // Fire a lightweight temporary trigger event 100ms later to give the scroll a head start
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent("select-profile-path", { detail: "build-known" }));
+              }, 100);
+            }}
+            className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-purple-950/20 via-slate-900/40 to-black/20 p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]"
+          >
+            <div className="space-y-3">
+              <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2.5 py-0.5 text-xs font-medium text-purple-400 border border-purple-500/20">
+                Elite Gaming & RGB
+              </span>
+              <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
+                Dream Gaming Systems
+              </h3>
+              <p className="text-sm text-white/60 leading-relaxed">
+                High-FPS rigs built for competition. Meticulous cable routing, optimized thermal curves, and clean-room assembly standards for premium hardware.
+              </p>
+            </div>
+            <div className="mt-6 flex items-center text-sm font-semibold text-purple-400 gap-1 group-hover:underline">
+              <span>Build Your Setup</span>
+              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </div>
+          </div>
+
+          {/* Card 2: Business Avatar */}
+          <div 
+            onClick={() => {
+              document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent("select-profile-path", { detail: "build-help" }));
+              }, 100);
+            }}
+            className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-950/20 via-slate-900/40 to-black/20 p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+          >
+            <div className="space-y-3">
+              <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-400 border border-blue-500/20">
+                Workstation Stability
+              </span>
+              <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                Professional Office PCs
+              </h3>
+              <p className="text-sm text-white/60 leading-relaxed">
+                Engineered for heavy productivity, editing suites, and whisper-quiet remote setups. 100% rigorous validation testing without any technical hassle.
+              </p>
+            </div>
+            <div className="mt-6 flex items-center text-sm font-semibold text-blue-400 gap-1 group-hover:underline">
+              <span>Get Expert Guidance</span>
+              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
       </div>
     </section>
   );
@@ -423,17 +548,15 @@ function ZeroDepositBanner() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="flex-1">
             <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary mb-3">
-              ⚡ Your Edge Over Big-Box Retail
+              Premium Build Procurement
             </div>
             <h3 className="text-[28px] md:text-[36px] font-semibold leading-[1.1] tracking-[-0.03em]">
-              <span className="text-primary">Pay When It Boots</span> — Zero Upfront.
+              <span className="text-primary">Parts Ordered First</span> — Labor Due at Pickup.
             </h3>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-slate-mute">
-              <strong className="text-foreground">Best Buy's Geek Squad</strong> charges massive
-              upfront flat rates just to look at your system. We don't. You pay{" "}
-              <strong className="text-foreground">exactly $0</strong> until you're standing at our
-              Bushnell's Basin bench watching your PC successfully POST and boot in person. That's
-              the local boutique advantage — no deposits, no surprises.
+              Custom Core Labs sources the exact premium components your build requires. Parts cost is
+              collected before any order is placed, then final labor and service fees settle at
+              pickup once your system passes our validation workflow.
             </p>
           </div>
           <div className="shrink-0 flex gap-3">
@@ -470,9 +593,9 @@ function ProofSection() {
                 Operated by a Specialist
               </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-slate-mute">
-                A dedicated 14-year-old desktop architecture technician based in Victor, NY. Every
-                cable route, BIOS setting, and stress test is performed by the same pair of hands —
-                no assembly line, no apprentices.
+                A seasoned desktop architecture technician based in Victor, NY. Every cable route,
+                BIOS profile, and stress test is performed by the same pair of hands — no assembly
+                line, no apprentices.
               </p>
             </div>
           </div>
@@ -500,13 +623,12 @@ function ProofSection() {
             </div>
             <div className="mt-5">
               <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary">
-                Zero risk
+                Final settlement
               </div>
-              <h3 className="mt-3 text-[20px] font-semibold tracking-tight">Pay When It Boots</h3>
+              <h3 className="mt-3 text-[20px] font-semibold tracking-tight">Pickup-Ready Settlement</h3>
               <p className="mt-2 text-[14px] leading-relaxed text-slate-mute">
-                No deposits. No upfront payments. 100% of the labor fee is due only after the system
-                is fully assembled, provisioned, and verified running in your presence. If it
-                doesn't POST, you don't pay.
+                Parts are procured once your quote is approved. The remaining labor and service fees
+                are due at pickup after full validation and verification of your finished system.
               </p>
             </div>
           </div>
@@ -516,13 +638,13 @@ function ProofSection() {
             <div className="text-[36px] md:text-[44px] font-semibold tracking-[-0.03em] text-foreground">
               100%
             </div>
-            <div className="mt-1 text-[13px] text-slate-mute">Zero Deposit Policy</div>
+            <div className="mt-1 text-[13px] text-slate-mute">Parts Prepaid, Labor at Pickup</div>
           </div>
           <div className="text-center">
             <div className="text-[36px] md:text-[44px] font-semibold tracking-[-0.03em] text-foreground">
-              24h
+              60m
             </div>
-            <div className="mt-1 text-[13px] text-slate-mute">Bench Validation</div>
+            <div className="mt-1 text-[13px] text-slate-mute">Ultimate Build Validation</div>
           </div>
           <div className="col-span-2 md:col-span-1 text-center">
             <div className="text-[36px] md:text-[44px] font-semibold tracking-[-0.03em] text-foreground">
@@ -542,21 +664,21 @@ function ProcessSection() {
   const steps = [
     {
       icon: Warehouse,
-      title: "Drop Off Parts",
+      title: "Approve Parts Procurement",
       description:
-        "Deliver your components to our secure Bushnell's Basin office during your scheduled 15-minute appointment window.",
+        "Review your premium component list and authorize orders. Parts cost is collected before any order is placed, so we can secure stock immediately.",
     },
     {
       icon: Wrench,
       title: "We Build & Validate",
       description:
-        "Full structural assembly, pro cable routing, BIOS optimization, and a standard 60-minute hardware stability stress test.",
+        "Premium assembly, precision thermal routing, BIOS optimization, and a 60-minute hardware stability validation for ultimate builds.",
     },
     {
       icon: Handshake,
-      title: "Verify & Deploy",
+      title: "Pickup & Final Settlement",
       description:
-        "Retrieve your completed system at our Bushnell's Basin bench. Watch your machine successfully initialize (POST), boot, and pass core diagnostic validation live in your presence. Our Zero-Deposit Promise: Complete payment is requested only after you have personally verified flawless operation.",
+        "Collect your finished system at our Bushnell's Basin shop. Final labor and service fees are due at pickup after your build passes validation.",
     },
   ];
 
@@ -621,8 +743,8 @@ function PricingTable() {
           </h2>
         </div>
         <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-slate-mute">
-          See exactly how much assembly costs based on your parts budget. No surprises — final
-          pricing is confirmed at drop-off.
+          See exactly how much assembly costs based on your parts budget. Final parts pricing is
+          confirmed before orders are placed, and labor estimates are finalized during pickup.
         </p>
         <div className="mt-10 overflow-hidden rounded-xl border hairline-strong shadow-[var(--shadow-elegant)]">
           <table className="pricing-table">
@@ -635,29 +757,19 @@ function PricingTable() {
             </thead>
             <tbody>
               <tr>
-                <td className="font-semibold">$1,000</td>
+                <td className="font-semibold">Under $1,000</td>
                 <td>$99</td>
-                <td>$139</td>
+                <td>$149</td>
               </tr>
               <tr>
-                <td className="font-semibold">$1,500</td>
-                <td>$139</td>
+                <td className="font-semibold">$1,000-$1,999</td>
+                <td>$119</td>
                 <td>$179</td>
               </tr>
               <tr>
-                <td className="font-semibold">$2,000</td>
-                <td>$179</td>
-                <td>
-                  <strong>8% of parts + $49 setup</strong>
-                </td>
-              </tr>
-              <tr>
-                <td className="font-semibold">
-                  $2,500+ <span className="text-[12px] text-slate-mute">(Enthusiast Tier)</span>
-                </td>
-                <td>$229</td>
-                <td>
-                  <strong>8% of parts + $49 setup</strong>
+                <td className="font-semibold">$2,000+</td>
+                <td>$159</td>
+                <td>$229
                 </td>
               </tr>
             </tbody>
@@ -756,17 +868,25 @@ function GeographySection() {
 function FAQSection() {
   const faqs = [
     {
-      q: "What happens if a part arrives broken (DOA)?",
-      a: "If a component is dead on arrival, we will pinpoint the exact broken part and hand you the diagnostic code so you can easily return it to Amazon, Newegg, or Best Buy for a fresh replacement.",
+      q: "What if I don't know anything about computers?",
+      a: "You don't have to! Our team of specialists will guide you through the entire process, from selecting compatible parts to understanding the final build. We handle all the technical details so you can focus on enjoying your new custom PC.",
     },
     {
       q: "Can I drop off parts after school or work?",
-      a: "Yes. We run by appointment only and offer flexible 15-minute drop-off and pickup windows to easily fit your evening or weekend schedule.",
+      a: "Of course! We run by appointment only and offer flexible 15-minute drop-off and pickup windows to easily fit your evening or weekend schedule.",
     },
     {
-      q: "Do I need to bring my own thermal paste?",
-      a: "No. Standard thermal compound comes pre-applied on most coolers, but we also keep fresh, premium thermal paste on the bench if your build requires a manual application.",
+      q: "How does Custom Core Labs compare to big-box retailers?",
+      a: "Unlike major retail assembly lines, we provide personalized service with a focus on precision and quality. Every build is hand-assembled by a specialist, ensuring meticulous cable management, optimal thermal routing, and rigorous hardware validation that mass-produced systems can't match.",
     },
+    {
+      q: "How does the orders and payment process work?",
+      a: "Once you approve your parts list, we collect the cost of components upfront to secure orders immediately. After your build is completed and passes our validation process, the remaining labor and service fees are due at pickup. This transparent approach ensures you know exactly what you're paying for at every step.",
+    },
+    {
+      q: "How can I track my build progress?",
+      a: "We provide a unique tracking number for every build, allowing you to monitor the status of your order through our online portal. From parts procurement to assembly and final validation, you'll have real-time updates on your build's progress.",
+    }
   ];
 
   return (
@@ -934,7 +1054,7 @@ function ServiceCard({
       </div>
       {service.id === "ultimate" && (
         <p className="mono mt-4 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
-          <span className="text-primary">↳</span> Under $1,500 → $139, $1,500–$1,999 → $179, $2,000+ → 8% of parts + $49.
+          <span className="text-primary">↳</span> Under $1,000 → $149, $1,000–$1,999 → $179, $2,000+ → $229.
         </p>
       )}
       {service.id === "diagnostic" && (
@@ -961,7 +1081,7 @@ function QuickContact() {
           <p>
             <MessageCircle className="inline h-4 w-4 text-primary mr-1.5 -mt-0.5" />
             Not sure what you need? Send us a message directly at{" "}
-            <strong>cdwojick@gmail.com</strong> and we'll get back to you same day.
+            <strong>technician@cclbuilds.com</strong> and we'll get back to you same day.
           </p>
         </div>
       </div>
@@ -1032,30 +1152,26 @@ function DetailsModal({ service, onClose }: { service: Service; onClose: () => v
                     </tr>
                     <tr>
                       <td className="text-slate-mute">$1,000–$1,999</td>
-                      <td className="text-right font-semibold">$139</td>
+                      <td className="text-right font-semibold">$119</td>
                     </tr>
                     <tr>
                       <td className="text-slate-mute">$2,000+</td>
-                      <td className="text-right font-semibold">$179</td>
-                    </tr>
-                    <tr>
-                      <td className="text-slate-mute">$2,500+</td>
-                      <td className="text-right font-semibold">$229</td>
+                      <td className="text-right font-semibold">$159</td>
                     </tr>
                   </>
                 ) : (
                   <>
                     <tr>
-                      <td className="text-slate-mute">Under $1,500</td>
-                      <td className="text-right font-semibold">$139</td>
+                      <td className="text-slate-mute">Under $1,000</td>
+                      <td className="text-right font-semibold">$149</td>
                     </tr>
                     <tr>
-                      <td className="text-slate-mute">$1,500–$1,999</td>
+                      <td className="text-slate-mute">$1,000–$1,999</td>
                       <td className="text-right font-semibold">$179</td>
                     </tr>
                     <tr>
                       <td className="text-slate-mute">$2,000+</td>
-                      <td className="text-right font-semibold">8% of parts + $49</td>
+                      <td className="text-right font-semibold">$229</td>
                     </tr>
                   </>
                 )}
@@ -1073,8 +1189,7 @@ function DetailsModal({ service, onClose }: { service: Service; onClose: () => v
         </ul>
         {service.id === "ultimate" && (
           <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4 text-[13.5px] leading-relaxed text-slate-ink">
-            <span className="font-semibold text-primary">↳ Saves $40</span> over ordering software
-            install and stress testing separately!
+            <span className="font-semibold text-primary">↳ Saves $40-$60</span> over ordering software, BIOS, cables, and stress testing separately!
           </div>
         )}
         <button
@@ -1108,13 +1223,12 @@ function Footer({ onOpenTerms }: { onOpenTerms: () => void }) {
           </div>
           <div className="mono flex items-center gap-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">
             <ShieldCheck className="h-3 w-3 text-primary" />
-            Zero upfront · Pay when it boots
+            Parts ordered first · Labor due at pickup
           </div>
         </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[12px] leading-relaxed text-slate-mute">
-            © {new Date().getFullYear()} Custom Core Labs. All hardware and activation keys supplied
-            by client.
+            © {new Date().getFullYear()} Custom Core Labs. All components are sourced and procured by Custom Core Labs on your behalf.
             <span className="hidden sm:inline mx-2 text-slate-mute">·</span>
             <br className="sm:hidden" />
             <a href="/privacy.html" className="text-primary underline-offset-4 hover:underline">
@@ -1146,19 +1260,19 @@ function Footer({ onOpenTerms }: { onOpenTerms: () => void }) {
 function ServiceAgreement() {
   const sections = [
     {
-      title: "1. Zero-Deposit Financial Policy",
+      title: "1. Parts Procurement & Settlement",
       bullets: [
-        "Custom Core Labs strictly operates on a zero-upfront-fee guarantee. We do not accept component procurement deposits or booking retainers.",
-        "One hundred percent (100%) of the structured assembly labor fee is due exclusively upon the successful completion of the hardware validation loop, verified in the client's presence at our Bushnell's Basin facility.",
+        "Premium components are ordered on your behalf. Parts cost is collected before any order is placed so we can reserve stock and begin build prep.",
+        "One hundred percent (100%) of the structured assembly labor fee is due only after your system passes final validation and you collect it at pickup.",
         "Authorized settlement methods are limited to secure digital transfers (Zelle, Apple Pay) or cash currency at the immediate time of handoff.",
       ],
     },
     {
       title: "2. Component Liability & Dead-On-Arrival (DOA) Provisions",
       bullets: [
-        "Custom Core Labs maintains a strict labor-only scope and assumes zero financial, physical, or legal liability for components arriving defective from the retailer (Dead on Arrival / DOA).",
-        "In the event that a client-supplied component fails physical initialization due to a factory defect, our technician will isolate the specific component error codes to enable a frictionless retail exchange with vendors like Amazon, Best Buy, or Newegg.",
-        "This policy applies equally to retail-new and pre-owned components. Custom Core Labs does not verify the functional history of secondhand or open-box hardware supplied by the client. If a system fails to POST due to underlying degradation of pre-owned components, the initial diagnostic fee or baseline labor rate is still applicable for bench time spent.",
+        "When we procure components on your behalf, we ensure all hardware arrives defect-free. If a component is Dead on Arrival (DOA), we handle the return process with the vendor.",
+        "Our technician will coordinate the replacement with the vendor and ensure your system gets the fresh component at no additional cost to you.",
+        "We take responsibility for the quality of parts we source for you, and we manage all returns and replacements to keep your project on schedule.",
       ],
     },
     {
@@ -1170,10 +1284,10 @@ function ServiceAgreement() {
       ],
     },
     {
-      title: "4. Parent Sign-Off Policy",
+      title: "4. Professional Service Guarantee",
       bullets: [
-        "Custom Core Labs is operated by a student builder. A business sponsor (parent or guardian) is present in the office to co-sign the build contract during every 15-minute appointment.",
-        "Clients under the age of 18 must bring a parent or legal guardian to the office to sign the service agreement. No exceptions can be made to this policy.",
+        "All system assembly, validation, and checklist completion is performed by a dedicated technician with extensive boutique build experience.",
+        "We do not subcontract work. Every premium custom build is completed in-house at our Bushnell's Basin facility.",
       ],
     },
     {
@@ -1237,7 +1351,6 @@ function ServiceAgreement() {
     </section>
   );
 }
-
 /* ---------------- Terms Modal ---------------- */
 
 const TERMS: { title: string; body: string }[] = [
@@ -1326,3 +1439,4 @@ function TermsModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
