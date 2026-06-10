@@ -26,7 +26,7 @@ export async function onRequestPost(context) {
 
     // 4. Save to Cloudflare KV 
     // (context.env.BUILD_TRACKING_KV automatically routes it to your database)
-    await context.env.BUILD_TRACKING_KV.put(newTrackingCode, JSON.stringify(buildData));
+    await context.env.BUILD-TRACKER.put(newTrackingCode, JSON.stringify(buildData));
 
     // 5. Send the new tracking code back to your React dashboard screen
     return new Response(JSON.stringify({ success: true, code: newTrackingCode }), {
