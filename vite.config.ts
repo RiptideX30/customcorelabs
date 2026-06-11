@@ -14,5 +14,12 @@ export default defineConfig({
   },
   server: {
     middlewareMode: false,
+    proxy: {
+      "/api": {
+        target: "https://build-tracker.cdwojick.workers.dev",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
 });
