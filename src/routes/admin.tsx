@@ -77,7 +77,7 @@ function CreateBuildDialog({
     setError("");
     setNewBuild(null);
     try {
-      const res = await fetch(trackerUrl("/admin/builds"), {
+      const res = await fetch(trackerUrl("/api/track"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -225,7 +225,7 @@ function AdminPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(trackerUrl("/admin/builds"), {
+      const res = await fetch(trackerUrl("/api/admin/builds"), {
         headers: { "x-admin-key": adminKey },
       });
       const data = await res.json();
@@ -255,7 +255,7 @@ function AdminPage() {
     async (code: string, newStatus: BuildStatus) => {
       setUpdatingCode(code);
       try {
-        const res = await fetch(trackerUrl(`/track/${code}`), {
+        const res = await fetch(trackerUrl(`/api/track/${code}`), {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
