@@ -62,7 +62,8 @@ const SERVICES: Service[] = [
     id: "ultimate",
     title: "Ultimate Build",
     priceLabel: "Starting at $149",
-    short: "Full assembly, OS provisioning, pro routing, 60-min stress testing, structural component balancing, and BIOS optimization.",
+    short:
+      "Full assembly, OS provisioning, pro routing, 60-min stress testing, structural component balancing, and BIOS optimization.",
     category: "build",
     details:
       "Full assembly, OS provisioning, pro routing, 60-min stress testing, structural component balancing, and BIOS optimization.",
@@ -173,13 +174,11 @@ function computeLineItems(active: Set<ServiceId>, partsValue: number) {
   const items: { id: ServiceId; label: string; amount: number }[] = [];
 
   if (active.has("basic")) {
-    const basicAmount =
-     partsValue < 1000 ? 99 : partsValue < 2000 ? 119 : 159;
+    const basicAmount = partsValue < 1000 ? 99 : partsValue < 2000 ? 119 : 159;
     items.push({ id: "basic", label: `Basic Build · $${basicAmount}`, amount: basicAmount });
   }
   if (active.has("ultimate")) {
-    const ultimateAmount =
-      partsValue < 1000 ? 149 : partsValue < 2000 ? 179 : 229;
+    const ultimateAmount = partsValue < 1000 ? 149 : partsValue < 2000 ? 179 : 229;
     items.push({
       id: "ultimate",
       label: `Ultimate Build · $${ultimateAmount}`,
@@ -471,69 +470,77 @@ function Hero() {
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-      <div className="mt-16 max-w-5xl mx-auto px-4">
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-white/40 mb-6">
-          Select Your Profile
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* Card 1: Gamer Avatar */}
-          <div 
-            onClick={() => {
-              document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
-              // Fire a lightweight temporary trigger event 100ms later to give the scroll a head start
-              setTimeout(() => {
-                window.dispatchEvent(new CustomEvent("select-profile-path", { detail: "build-known" }));
-              }, 100);
-            }}
-            className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-purple-950/20 via-slate-900/40 to-black/20 p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]"
-          >
-            <div className="space-y-3">
-              <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2.5 py-0.5 text-xs font-medium text-purple-400 border border-purple-500/20">
-                Elite Gaming & RGB
-              </span>
-              <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
-                Dream Gaming Systems
-              </h3>
-              <p className="text-sm text-white/60 leading-relaxed">
-                High-FPS rigs built for competition. Meticulous cable routing, optimized thermal curves, and clean-room assembly standards for premium hardware.
-              </p>
+        <div className="mt-16 max-w-5xl mx-auto px-4">
+          <p className="text-center text-xs font-semibold uppercase tracking-widest text-white/40 mb-6">
+            Select Your Profile
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Card 1: Gamer Avatar */}
+            <div
+              onClick={() => {
+                document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+                // Fire a lightweight temporary trigger event 100ms later to give the scroll a head start
+                setTimeout(() => {
+                  window.dispatchEvent(
+                    new CustomEvent("select-profile-path", { detail: "build-known" }),
+                  );
+                }, 100);
+              }}
+              className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-purple-950/20 via-slate-900/40 to-black/20 p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)]"
+            >
+              <div className="space-y-3">
+                <span className="inline-flex items-center rounded-full bg-purple-500/10 px-2.5 py-0.5 text-xs font-medium text-purple-400 border border-purple-500/20">
+                  Elite Gaming & RGB
+                </span>
+                <h3 className="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">
+                  Dream Gaming Systems
+                </h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  High-FPS rigs built for competition. Meticulous cable routing, optimized thermal
+                  curves, and clean-room assembly standards for premium hardware.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center text-sm font-semibold text-purple-400 gap-1 group-hover:underline">
+                <span>Build Your Setup</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
+              </div>
             </div>
-            <div className="mt-6 flex items-center text-sm font-semibold text-purple-400 gap-1 group-hover:underline">
-              <span>Build Your Setup</span>
-              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+
+            {/* Card 2: Business Avatar */}
+            <div
+              onClick={() => {
+                document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+                setTimeout(() => {
+                  window.dispatchEvent(
+                    new CustomEvent("select-profile-path", { detail: "build-help" }),
+                  );
+                }, 100);
+              }}
+              className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-950/20 via-slate-900/40 to-black/20 p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+            >
+              <div className="space-y-3">
+                <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-400 border border-blue-500/20">
+                  Workstation Stability
+                </span>
+                <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                  Professional Office PCs
+                </h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  Engineered for heavy productivity, editing suites, and whisper-quiet remote
+                  setups. 100% rigorous validation testing without any technical hassle.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center text-sm font-semibold text-blue-400 gap-1 group-hover:underline">
+                <span>Get Expert Guidance</span>
+                <span className="transition-transform duration-200 group-hover:translate-x-1">
+                  →
+                </span>
+              </div>
             </div>
           </div>
-
-          {/* Card 2: Business Avatar */}
-          <div 
-            onClick={() => {
-              document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
-              setTimeout(() => {
-                window.dispatchEvent(new CustomEvent("select-profile-path", { detail: "build-help" }));
-              }, 100);
-            }}
-            className="group relative cursor-pointer overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-blue-950/20 via-slate-900/40 to-black/20 p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.15)]"
-          >
-            <div className="space-y-3">
-              <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-medium text-blue-400 border border-blue-500/20">
-                Workstation Stability
-              </span>
-              <h3 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
-                Professional Office PCs
-              </h3>
-              <p className="text-sm text-white/60 leading-relaxed">
-                Engineered for heavy productivity, editing suites, and whisper-quiet remote setups. 100% rigorous validation testing without any technical hassle.
-              </p>
-            </div>
-            <div className="mt-6 flex items-center text-sm font-semibold text-blue-400 gap-1 group-hover:underline">
-              <span>Get Expert Guidance</span>
-              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-            </div>
-          </div>
-
         </div>
-      </div>
       </div>
     </section>
   );
@@ -554,8 +561,8 @@ function ZeroDepositBanner() {
               <span className="text-primary">Parts Ordered First</span> — Labor Due at Pickup.
             </h3>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-slate-mute">
-              Custom Core Labs sources the exact premium components your build requires. Parts cost is
-              collected before any order is placed, then final labor and service fees settle at
+              Custom Core Labs sources the exact premium components your build requires. Parts cost
+              is collected before any order is placed, then final labor and service fees settle at
               pickup once your system passes our validation workflow.
             </p>
           </div>
@@ -625,7 +632,9 @@ function ProofSection() {
               <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary">
                 Final settlement
               </div>
-              <h3 className="mt-3 text-[20px] font-semibold tracking-tight">Pickup-Ready Settlement</h3>
+              <h3 className="mt-3 text-[20px] font-semibold tracking-tight">
+                Pickup-Ready Settlement
+              </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-slate-mute">
                 Parts are procured once your quote is approved. The remaining labor and service fees
                 are due at pickup after full validation and verification of your finished system.
@@ -769,8 +778,7 @@ function PricingTable() {
               <tr>
                 <td className="font-semibold">$2,000+</td>
                 <td>$159</td>
-                <td>$229
-                </td>
+                <td>$229</td>
               </tr>
             </tbody>
           </table>
@@ -886,7 +894,7 @@ function FAQSection() {
     {
       q: "How can I track my build progress?",
       a: "We provide a unique tracking number for every build, allowing you to monitor the status of your order through our online portal. From parts procurement to assembly and final validation, you'll have real-time updates on your build's progress.",
-    }
+    },
   ];
 
   return (
@@ -1054,7 +1062,8 @@ function ServiceCard({
       </div>
       {service.id === "ultimate" && (
         <p className="mono mt-4 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
-          <span className="text-primary">↳</span> Under $1,000 → $149, $1,000–$1,999 → $179, $2,000+ → $229.
+          <span className="text-primary">↳</span> Under $1,000 → $149, $1,000–$1,999 → $179, $2,000+
+          → $229.
         </p>
       )}
       {service.id === "diagnostic" && (
@@ -1189,7 +1198,8 @@ function DetailsModal({ service, onClose }: { service: Service; onClose: () => v
         </ul>
         {service.id === "ultimate" && (
           <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4 text-[13.5px] leading-relaxed text-slate-ink">
-            <span className="font-semibold text-primary">↳ Saves $40-$60</span> over ordering software, BIOS, cables, and stress testing separately!
+            <span className="font-semibold text-primary">↳ Saves $40-$60</span> over ordering
+            software, BIOS, cables, and stress testing separately!
           </div>
         )}
         <button
@@ -1228,7 +1238,8 @@ function Footer({ onOpenTerms }: { onOpenTerms: () => void }) {
         </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[12px] leading-relaxed text-slate-mute">
-            © {new Date().getFullYear()} Custom Core Labs. All components are sourced and procured by Custom Core Labs on your behalf.
+            © {new Date().getFullYear()} Custom Core Labs. All components are sourced and procured
+            by Custom Core Labs on your behalf.
             <span className="hidden sm:inline mx-2 text-slate-mute">·</span>
             <br className="sm:hidden" />
             <a href="/privacy.html" className="text-primary underline-offset-4 hover:underline">
@@ -1439,4 +1450,3 @@ function TermsModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
-

@@ -94,10 +94,13 @@ export async function handleSubmitRequest(request: Request, env: SubmitFormEnv):
     // Turnstile passed — proceed to send email
     const formType = data["form-type"] || "standard";
     const formTypeLabel =
-      formType === "service-repair" ? "🔧 Service & Repair Request" :
-      formType === "build-known-parts" ? "🖥️ Build Request (Known Parts)" :
-      formType === "build-consultation" ? "💡 Build Consultation Request" :
-      "📝 Lab Request";
+      formType === "service-repair"
+        ? "🔧 Service & Repair Request"
+        : formType === "build-known-parts"
+          ? "🖥️ Build Request (Known Parts)"
+          : formType === "build-consultation"
+            ? "💡 Build Consultation Request"
+            : "📝 Lab Request";
 
     let extraRows = "";
     if (data["itx-sff-case"]) {
@@ -114,7 +117,7 @@ export async function handleSubmitRequest(request: Request, env: SubmitFormEnv):
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Name</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-name"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Phone</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-phone"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Email</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-email"]}</td></tr>
-          <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">State</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-state"] || 'N/A'}</td></tr>
+          <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">State</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["customer-state"] || "N/A"}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Estimate Subtotal</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["estimate-subtotal"] || data["parts-value"]}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Estimated Tax</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["estimate-tax"] || "$0.00"}</td></tr>
           <tr><td style="padding:8px 12px;border-bottom:1px solid #ddd;font-weight:600;color:#374151;">Estimated Total</td><td style="padding:8px 12px;border-bottom:1px solid #ddd;">${data["estimate-total"] || data["parts-value"]}</td></tr>

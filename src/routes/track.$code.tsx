@@ -156,7 +156,9 @@ function TrackBuildPage() {
                   <p className="mt-1 text-[14px] text-slate-mute">Tax: {build.taxAmount}</p>
                 )}
                 {build.totalWithTax && (
-                  <p className="mt-2 text-[15px] font-semibold">Total with Tax: {build.totalWithTax}</p>
+                  <p className="mt-2 text-[15px] font-semibold">
+                    Total with Tax: {build.totalWithTax}
+                  </p>
                 )}
               </div>
             )}
@@ -251,7 +253,8 @@ function TrackBuildPage() {
                   Pickup Settlement
                 </div>
                 <p className="mt-2 text-[13px] leading-relaxed text-slate-ink">
-                  Parts are procured before order placement. Final labor and service balance is due at pickup after validation.
+                  Parts are procured before order placement. Final labor and service balance is due
+                  at pickup after validation.
                 </p>
               </div>
             </div>

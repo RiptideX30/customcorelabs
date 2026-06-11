@@ -94,10 +94,13 @@ export async function handleSubmitRequest(request: Request, env: SubmitFormEnv):
     // Turnstile passed — proceed to send email
     const formType = data["form-type"] || "standard";
     const formTypeLabel =
-      formType === "service-repair" ? "🔧 Service & Repair Request" :
-      formType === "build-known-parts" ? "🖥️ Build Request (Known Parts)" :
-      formType === "build-consultation" ? "💡 Build Consultation Request" :
-      "📝 Lab Request";
+      formType === "service-repair"
+        ? "🔧 Service & Repair Request"
+        : formType === "build-known-parts"
+          ? "🖥️ Build Request (Known Parts)"
+          : formType === "build-consultation"
+            ? "💡 Build Consultation Request"
+            : "📝 Lab Request";
 
     let extraRows = "";
     if (data["itx-sff-case"]) {

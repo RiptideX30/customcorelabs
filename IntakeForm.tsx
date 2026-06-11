@@ -5,7 +5,9 @@ import { Cpu, FileText, Link2, HelpCircle, X } from "lucide-react";
 // Stubs for missing components
 // Replace these with your actual components or create these files accordingly
 function SubmittedState() {
-  return <div className="p-10 text-center text-green-600 font-bold">Form submitted successfully!</div>;
+  return (
+    <div className="p-10 text-center text-green-600 font-bold">Form submitted successfully!</div>
+  );
 }
 
 function StepHeader({ index, title }: { index: string; title: string }) {
@@ -61,10 +63,13 @@ const validationSchema = z.object({
   name: z.string().trim().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().trim().email({ message: "Enter a valid email address" }),
   phone: z.string().trim().min(10, { message: "Enter a valid phone number" }),
-  pcpp: z.string()
+  pcpp: z
+    .string()
     .trim()
     .max(300, { message: "Link must be under 300 characters" })
-    .refine((v) => v === "" || /^https?:\/\/(www\.)?(pcpartpicker\.com|pcpp\.cc)\/.+/i.test(v), { message: "Enter a valid PCPartPicker URL" }),
+    .refine((v) => v === "" || /^https?:\/\/(www\.)?(pcpartpicker\.com|pcpp\.cc)\/.+/i.test(v), {
+      message: "Enter a valid PCPartPicker URL",
+    }),
   symptoms: z.string().trim().max(2000, { message: "Description must be under 2000 characters" }),
 });
 
@@ -102,7 +107,16 @@ function PCPPInstructionsModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
             <div>
               <div className="text-[14px] font-medium">Go to PCPartPicker</div>
               <p className="mt-0.5 text-[13px] text-slate-mute">
-                Visit <a href="https://pcpartpicker.com" target="_blank" rel="noreferrer" className="text-primary underline underline-offset-2">pcpartpicker.com</a> and create a free account.
+                Visit{" "}
+                <a
+                  href="https://pcpartpicker.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline underline-offset-2"
+                >
+                  pcpartpicker.com
+                </a>{" "}
+                and create a free account.
               </p>
             </div>
           </li>
@@ -124,7 +138,8 @@ function PCPPInstructionsModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
             <div>
               <div className="text-[14px] font-medium">Add Your Components</div>
               <p className="mt-0.5 text-[13px] text-slate-mute">
-                Select each component category (CPU, GPU, Motherboard, etc.) and add your desired parts. The site will automatically check compatibility.
+                Select each component category (CPU, GPU, Motherboard, etc.) and add your desired
+                parts. The site will automatically check compatibility.
               </p>
             </div>
           </li>
@@ -135,14 +150,16 @@ function PCPPInstructionsModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
             <div>
               <div className="text-[14px] font-medium">Copy the Share Link</div>
               <p className="mt-0.5 text-[13px] text-slate-mute">
-                Click the "Share" button at the top, then copy the public link. Paste it in the form above.
+                Click the "Share" button at the top, then copy the public link. Paste it in the form
+                above.
               </p>
             </div>
           </li>
         </ol>
 
         <div className="mt-6 rounded-md border hairline bg-secondary/40 px-4 py-3 text-[13px] text-slate-mute">
-          <span className="font-medium text-primary">Tip:</span> Make sure your list is set to "Public" so we can view it.
+          <span className="font-medium text-primary">Tip:</span> Make sure your list is set to
+          "Public" so we can view it.
         </div>
 
         <button
@@ -174,7 +191,10 @@ export default function IntakeForm() {
   const catalog = track === "build" ? BUILD_SERVICES : REPAIR_SERVICES;
 
   const subtotal = useMemo(() => {
-    const all = [...BUILD_SERVICES, ...REPAIR_SERVICES] as readonly { id: ServiceId; price: number }[];
+    const all = [...BUILD_SERVICES, ...REPAIR_SERVICES] as readonly {
+      id: ServiceId;
+      price: number;
+    }[];
     return [...services].reduce((sum, id) => sum + (all.find((s) => s.id === id)?.price ?? 0), 0);
   }, [services]);
 
@@ -193,63 +213,63 @@ export default function IntakeForm() {
   };
 
   const submit = async () => {
-  const check = validationSchema.safeParse({ name, email, phone, pcpp, symptoms });
+    const check = validationSchema.safeParse({ name, email, phone, pcpp, symptoms });
 
-  if (!check.success) {
-    const e: Record<string, string> = {};
-    for (const issue of check.error.issues) {
-      e[issue.path[0] as string] = issue.message;
+    if (!check.success) {
+      const e: Record<string, string> = {};
+      for (const issue of check.error.issues) {
+        e[issue.path[0] as string] = issue.message;
+      }
+      setErrors(e);
+      return;
     }
-    setErrors(e);
-    return;
-  }
 
-  if (!consent) {
-    setErrors((prev) => ({ ...prev, consent: "You must accept the terms to continue" }));
-    return;
-  }
+    if (!consent) {
+      setErrors((prev) => ({ ...prev, consent: "You must accept the terms to continue" }));
+      return;
+    }
 
-  setErrors({});
+    setErrors({});
 
-  const activeServicesText = [...services]
-    .map((id) => {
-      const srv =
-        BUILD_SERVICES.find((s) => s.id === id) || REPAIR_SERVICES.find((s) => s.id === id);
-      return srv ? srv.title : id;
-    })
-    .join(", ");
+    const activeServicesText = [...services]
+      .map((id) => {
+        const srv =
+          BUILD_SERVICES.find((s) => s.id === id) || REPAIR_SERVICES.find((s) => s.id === id);
+        return srv ? srv.title : id;
+      })
+      .join(", ");
 
-  const payload = {
-    "customer-name": name,
-    "customer-phone": phone,
-    "customer-email": email,
-    "pcpartpicker-url": pcpp,
-    "symptoms-details": symptoms,
-    "selected-services": activeServicesText,
-    "labor-total": `$${subtotal.toLocaleString()}`,
-    "payment-terms": "100% payment due upon system boot verification and approval sign-off",
+    const payload = {
+      "customer-name": name,
+      "customer-phone": phone,
+      "customer-email": email,
+      "pcpartpicker-url": pcpp,
+      "symptoms-details": symptoms,
+      "selected-services": activeServicesText,
+      "labor-total": `$${subtotal.toLocaleString()}`,
+      "payment-terms": "100% payment due upon system boot verification and approval sign-off",
+    };
+
+    try {
+      const response = await fetch("https://formspree.io/f/xlgvdlok", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        const data = await response.json();
+        alert("Submission error: " + (data.error || "Please try again."));
+      }
+    } catch (error) {
+      alert("Error sending details to server. Please check your internet connection.");
+    }
   };
-
-  try {
-    const response = await fetch("https://formspree.io/f/xlgvdlok", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (response.ok) {
-      setSubmitted(true);
-    } else {
-      const data = await response.json();
-      alert("Submission error: " + (data.error || "Please try again."));
-    }
-  } catch (error) {
-    alert("Error sending details to server. Please check your internet connection.");
-  }
-};
 
   return (
     <section id="intake" className="border-b hairline bg-secondary/30">
@@ -258,9 +278,13 @@ export default function IntakeForm() {
         <div className="grid grid-cols-12 items-end gap-8">
           <div className="col-span-3">
             <div className="mono text-[10.5px] uppercase tracking-[0.18em] text-primary">§ 05</div>
-            <div className="mono mt-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">Project intake · Form 003</div>
+            <div className="mono mt-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">
+              Project intake · Form 003
+            </div>
           </div>
-          <h2 className="col-span-9 text-[56px] font-semibold leading-none tracking-[-0.03em]">Start a project</h2>
+          <h2 className="col-span-9 text-[56px] font-semibold leading-none tracking-[-0.03em]">
+            Start a project
+          </h2>
         </div>
 
         <div className="mt-16 overflow-hidden rounded-xl border hairline-strong bg-background shadow-[var(--shadow-elegant)]">
@@ -290,11 +314,17 @@ export default function IntakeForm() {
                         type="button"
                         onClick={() => pickTrack(o.id)}
                         className={`group relative overflow-hidden rounded-xl border bg-background p-7 text-left transition-all ${
-                          track === o.id ? "border-primary hairline-strong shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"
+                          track === o.id
+                            ? "border-primary hairline-strong shadow-[var(--shadow-glow)]"
+                            : "hairline-strong hover:border-primary/60"
                         }`}
                       >
-                        <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">{o.id === "build" ? "TRACK / A" : "TRACK / B"}</div>
-                        <h3 className="mt-5 text-[22px] font-semibold tracking-[-0.02em]">{o.title}</h3>
+                        <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+                          {o.id === "build" ? "TRACK / A" : "TRACK / B"}
+                        </div>
+                        <h3 className="mt-5 text-[22px] font-semibold tracking-[-0.02em]">
+                          {o.title}
+                        </h3>
                         <p className="mt-2 text-[13.5px] text-slate-mute">{o.desc}</p>
                       </button>
                     ))}
@@ -304,7 +334,10 @@ export default function IntakeForm() {
                 {/* 2. Services Checkboxes */}
                 {track && (
                   <div>
-                    <StepHeader index="02" title={track === "build" ? "Select build services" : "Select repair services"} />
+                    <StepHeader
+                      index="02"
+                      title={track === "build" ? "Select build services" : "Select repair services"}
+                    />
                     <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border hairline-strong bg-border">
                       {catalog.map((s) => (
                         <label
@@ -322,10 +355,14 @@ export default function IntakeForm() {
                             />
                             <div>
                               <div className="text-[14px] font-medium">{s.title}</div>
-                              <div className="mono mt-0.5 text-[10px] uppercase tracking-[0.18em] text-slate-mute">{s.id.toUpperCase()}</div>
+                              <div className="mono mt-0.5 text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+                                {s.id.toUpperCase()}
+                              </div>
                             </div>
                           </div>
-                          <div className="text-[20px] font-semibold tabular-nums tracking-[-0.02em]">${s.price}</div>
+                          <div className="text-[20px] font-semibold tabular-nums tracking-[-0.02em]">
+                            ${s.price}
+                          </div>
                         </label>
                       ))}
                     </div>
@@ -400,7 +437,9 @@ export default function IntakeForm() {
                           }}
                           className="rounded border-slate-strong bg-background text-primary focus:ring-primary h-4 w-4"
                         />
-                        <span className="text-sm text-slate-mute">I don't have a PCPartPicker link</span>
+                        <span className="text-sm text-slate-mute">
+                          I don't have a PCPartPicker link
+                        </span>
                       </label>
                     </div>
 
@@ -417,14 +456,23 @@ export default function IntakeForm() {
 
                     <div className="col-span-12 mt-6">
                       <label className="inline-flex items-center space-x-2">
-                        <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+                        <input
+                          type="checkbox"
+                          checked={consent}
+                          onChange={(e) => setConsent(e.target.checked)}
+                        />
                         <span className="text-sm">I agree to the terms and conditions</span>
                       </label>
                       {errors.consent && <FieldHint>{errors.consent}</FieldHint>}
                     </div>
 
                     <div className="col-span-12 mt-10">
-                      <button type="button" onClick={submit} className="btn-primary px-8 py-3 text-lg" disabled={!consent}>
+                      <button
+                        type="button"
+                        onClick={submit}
+                        className="btn-primary px-8 py-3 text-lg"
+                        disabled={!consent}
+                      >
                         Submit
                       </button>
                     </div>

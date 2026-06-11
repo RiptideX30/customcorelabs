@@ -161,7 +161,11 @@ function computeLineItems(active: Set<ServiceId>, partsValue: number) {
   const items: { id: ServiceId; label: string; amount: number }[] = [];
 
   if (active.has("basic")) {
-    items.push({ id: "basic", label: "Basic Build · 15% of parts", amount: +(partsValue * 0.15).toFixed(2) });
+    items.push({
+      id: "basic",
+      label: "Basic Build · 15% of parts",
+      amount: +(partsValue * 0.15).toFixed(2),
+    });
   }
   if (active.has("ultimate")) {
     if (partsValue > 1500) {
@@ -175,17 +179,24 @@ function computeLineItems(active: Set<ServiceId>, partsValue: number) {
       items.push({ id: "ultimate", label: "Ultimate Build · flat", amount: 159 });
     }
   }
-  if (active.has("refresh")) items.push({ id: "refresh", label: "Desktop Refresh Bundle", amount: 59 });
-  if (active.has("diagnostic")) items.push({ id: "diagnostic", label: "Full System Diagnostic", amount: 40 });
+  if (active.has("refresh"))
+    items.push({ id: "refresh", label: "Desktop Refresh Bundle", amount: 59 });
+  if (active.has("diagnostic"))
+    items.push({ id: "diagnostic", label: "Full System Diagnostic", amount: 40 });
   if (active.has("software")) items.push({ id: "software", label: "Software Install", amount: 39 });
   if (active.has("cables")) items.push({ id: "cables", label: "Pro Cable Management", amount: 18 });
   if (active.has("wipe")) items.push({ id: "wipe", label: "Secure Drive Wipe", amount: 15 });
-  if (active.has("upgrade")) items.push({ id: "upgrade", label: "Hardware Upgrade · TBD", amount: 0 });
-  if (active.has("thermal")) items.push({ id: "thermal", label: "Fresh Thermal Paste (add-on)", amount: 10 });
+  if (active.has("upgrade"))
+    items.push({ id: "upgrade", label: "Hardware Upgrade · TBD", amount: 0 });
+  if (active.has("thermal"))
+    items.push({ id: "thermal", label: "Fresh Thermal Paste (add-on)", amount: 10 });
   if (active.has("bios")) items.push({ id: "bios", label: "BIOS / Firmware Tuning", amount: 49 });
-  if (active.has("validation")) items.push({ id: "validation", label: "24-Hour Bench Validation", amount: 89 });
-  if (active.has("overclock")) items.push({ id: "overclock", label: "Memory + CPU Overclock Profile", amount: 79 });
-  if (active.has("osinstall")) items.push({ id: "osinstall", label: "OS Install & Driver Provisioning", amount: 39 });
+  if (active.has("validation"))
+    items.push({ id: "validation", label: "24-Hour Bench Validation", amount: 89 });
+  if (active.has("overclock"))
+    items.push({ id: "overclock", label: "Memory + CPU Overclock Profile", amount: 79 });
+  if (active.has("osinstall"))
+    items.push({ id: "osinstall", label: "OS Install & Driver Provisioning", amount: 39 });
 
   const total = items.reduce((s, i) => s + i.amount, 0);
   return { items, total: +total.toFixed(2) };
@@ -214,14 +225,26 @@ export default function App() {
       // Ultimate locks every other option — prune all non-ultimate selections.
       if (next.has("ultimate")) {
         for (const id of Array.from(next)) {
-          if (id !== "ultimate") { next.delete(id); changed = true; }
+          if (id !== "ultimate") {
+            next.delete(id);
+            changed = true;
+          }
         }
       } else if (next.has("basic")) {
-        if (next.has("refresh")) { next.delete("refresh"); changed = true; }
-        if (next.has("software")) { next.delete("software"); changed = true; }
+        if (next.has("refresh")) {
+          next.delete("refresh");
+          changed = true;
+        }
+        if (next.has("software")) {
+          next.delete("software");
+          changed = true;
+        }
       }
       const eligible = next.has("diagnostic") || next.has("refresh") || next.has("upgrade");
-      if (next.has("thermal") && !eligible) { next.delete("thermal"); changed = true; }
+      if (next.has("thermal") && !eligible) {
+        next.delete("thermal");
+        changed = true;
+      }
       return changed ? next : prev;
     });
   }, [active]);
@@ -250,7 +273,10 @@ export default function App() {
     });
   }
 
-  const { items, total } = useMemo(() => computeLineItems(active, partsValue), [active, partsValue]);
+  const { items, total } = useMemo(
+    () => computeLineItems(active, partsValue),
+    [active, partsValue],
+  );
 
   return (
     <main id="top" className="min-h-screen bg-background text-foreground antialiased">
@@ -279,15 +305,25 @@ function Header() {
     <header className="sticky top-0 z-40 w-full border-b hairline bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-5 md:px-8">
         <a href="#top" className="flex items-center gap-2.5">
-          <img src={cclLogo} alt="Custom Core Labs logo" className="h-8 w-8 rounded-md object-cover" />
+          <img
+            src={cclLogo}
+            alt="Custom Core Labs logo"
+            className="h-8 w-8 rounded-md object-cover"
+          />
           <span className="text-[13px] font-semibold tracking-tight">
             Custom <span className="text-primary">Core</span> Labs
           </span>
         </a>
         <nav className="flex items-center gap-3 md:gap-6 text-[13px] text-slate-ink">
-          <a className="hidden sm:inline hover:text-primary transition-colors" href="#services">Services</a>
-          <a className="hidden sm:inline hover:text-primary transition-colors" href="#book">Book Appointment</a>
-          <Link className="hidden sm:inline hover:text-primary transition-colors" to="/showcases">Showcases</Link>
+          <a className="hidden sm:inline hover:text-primary transition-colors" href="#services">
+            Services
+          </a>
+          <a className="hidden sm:inline hover:text-primary transition-colors" href="#book">
+            Book Appointment
+          </a>
+          <Link className="hidden sm:inline hover:text-primary transition-colors" to="/showcases">
+            Showcases
+          </Link>
           <a
             href="https://youtube.com"
             target="_blank"
@@ -330,15 +366,21 @@ function Hero() {
           <span className="text-gradient-blue">built to spec.</span>
         </h1>
         <p className="mt-6 max-w-xl text-[15px] md:text-[17px] leading-relaxed text-slate-mute">
-          Labor-only desktop assembly, diagnostics, and optimization. You buy the parts at street price.
-          We build, validate, and hand the system back ready to boot.
+          Labor-only desktop assembly, diagnostics, and optimization. You buy the parts at street
+          price. We build, validate, and hand the system back ready to boot.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a href="#services" className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-[14px] font-medium text-primary-foreground shadow-[var(--shadow-glow)] hover:opacity-95">
+          <a
+            href="#services"
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-[14px] font-medium text-primary-foreground shadow-[var(--shadow-glow)] hover:opacity-95"
+          >
             See services
             <ArrowUpRight className="h-4 w-4" />
           </a>
-          <a href="#book" className="inline-flex items-center gap-2 rounded-md border hairline-strong bg-background px-5 py-3 text-[14px] font-medium text-slate-ink hover:border-primary hover:text-primary">
+          <a
+            href="#book"
+            className="inline-flex items-center gap-2 rounded-md border hairline-strong bg-background px-5 py-3 text-[14px] font-medium text-slate-ink hover:border-primary hover:text-primary"
+          >
             Get an estimate
           </a>
         </div>
@@ -362,8 +404,16 @@ function ServicesGrid({
 }) {
   const groups: { title: string; tag: string; ids: ServiceId[] }[] = [
     { title: "New Builds", tag: "A · choose one", ids: ["basic", "ultimate"] },
-    { title: "Service & Repair", tag: "B · pick any", ids: ["refresh", "diagnostic", "software", "cables", "wipe", "upgrade"] },
-    { title: "Performance & Tuning", tag: "C · pick any", ids: ["bios", "validation", "overclock", "osinstall"] },
+    {
+      title: "Service & Repair",
+      tag: "B · pick any",
+      ids: ["refresh", "diagnostic", "software", "cables", "wipe", "upgrade"],
+    },
+    {
+      title: "Performance & Tuning",
+      tag: "C · pick any",
+      ids: ["bios", "validation", "overclock", "osinstall"],
+    },
     { title: "Add-on", tag: "D · conditional", ids: ["thermal"] },
   ];
 
@@ -377,7 +427,9 @@ function ServicesGrid({
               Transparent line items
             </div>
           </div>
-          <h2 className="text-[36px] md:text-[56px] font-semibold leading-[1] tracking-[-0.03em]">Services</h2>
+          <h2 className="text-[36px] md:text-[56px] font-semibold leading-[1] tracking-[-0.03em]">
+            Services
+          </h2>
         </div>
 
         {groups.map((g) => (
@@ -387,7 +439,9 @@ function ServicesGrid({
                 <span className="mono flex h-6 items-center rounded-md border hairline-strong bg-background px-2 text-[10px] font-semibold text-primary">
                   {g.tag}
                 </span>
-                <h3 className="text-[18px] md:text-[20px] font-semibold tracking-tight">{g.title}</h3>
+                <h3 className="text-[18px] md:text-[20px] font-semibold tracking-tight">
+                  {g.title}
+                </h3>
               </div>
               <span className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
                 {g.ids.length.toString().padStart(2, "0")} {g.ids.length === 1 ? "item" : "items"}
@@ -543,7 +597,12 @@ function DetailsModal({ service, onClose }: { service: Service; onClose: () => v
         </button>
 
         <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary">
-          {service.category === "build" ? "Build" : service.category === "addon" ? "Add-on" : "Service"} · {service.priceLabel}
+          {service.category === "build"
+            ? "Build"
+            : service.category === "addon"
+              ? "Add-on"
+              : "Service"}{" "}
+          · {service.priceLabel}
         </div>
         <h3 id="modal-title" className="mt-2 text-[24px] font-semibold tracking-[-0.02em]">
           {service.title}
@@ -578,7 +637,11 @@ function Footer({ onOpenTerms }: { onOpenTerms: () => void }) {
       <div className="mx-auto max-w-[1280px] px-5 md:px-8 py-10 md:py-12">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
-            <img src={cclLogo} alt="Custom Core Labs logo" className="h-8 w-8 rounded-md object-cover" />
+            <img
+              src={cclLogo}
+              alt="Custom Core Labs logo"
+              className="h-8 w-8 rounded-md object-cover"
+            />
             <span className="text-[13px] font-semibold tracking-tight">
               Custom <span className="text-primary">Core</span> Labs
             </span>
@@ -590,7 +653,8 @@ function Footer({ onOpenTerms }: { onOpenTerms: () => void }) {
         </div>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[12px] leading-relaxed text-slate-mute">
-            © {new Date().getFullYear()} Custom Core Labs. All hardware and activation keys supplied by client.
+            © {new Date().getFullYear()} Custom Core Labs. All hardware and activation keys supplied
+            by client.
           </p>
           <button
             type="button"
@@ -717,7 +781,9 @@ const TERMS: { title: string; body: string }[] = [
 
 function TermsModal({ onClose }: { onClose: () => void }) {
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
@@ -760,7 +826,9 @@ function TermsModal({ onClose }: { onClose: () => void }) {
         <ol className="mt-6 space-y-5">
           {TERMS.map((t) => (
             <li key={t.title} className="rounded-lg border hairline bg-zinc-50 p-4">
-              <h4 className="text-[14.5px] font-semibold tracking-tight text-foreground">{t.title}</h4>
+              <h4 className="text-[14.5px] font-semibold tracking-tight text-foreground">
+                {t.title}
+              </h4>
               <p className="mt-1.5 text-[13.5px] leading-relaxed text-slate-ink">{t.body}</p>
             </li>
           ))}
