@@ -18,7 +18,10 @@ export default defineConfig({
       "/api": {
         target: "https://build-tracker.cdwojick.workers.dev",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+      "/admin": {
+        target: "https://build-tracker.cdwojick.workers.dev",
+        changeOrigin: true,
       },
     },
   },
