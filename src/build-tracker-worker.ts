@@ -127,10 +127,7 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
   return jsonResponse(
     {
       ok: true,
-      data: {
-        trackingCode,
-        pickupCode,
-      },
+      data: record,
     },
     201,
   );

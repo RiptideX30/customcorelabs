@@ -51,7 +51,7 @@ function CreateBuildDialog({
   onBuildCreated,
 }: {
   adminKey: string;
-  onBuildCreated: () => void;
+  onBuildCreated: (newBuild: BuildSummary) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -91,8 +91,8 @@ function CreateBuildDialog({
       });
       const data = await res.json();
       if (data.ok) {
-        setNewBuild({ trackingCode: data.data.trackingCode, emailSent: data.data.emailSent });
-        onBuildCreated();
+        setNewBuild({ trackingCode: data.data.trackingCode, emailSent: false });
+        onBuildCreated(data.data);
       } else {
         setError(data.error || "Failed to create build.");
       }
@@ -335,7 +335,12 @@ function AdminPage() {
               <span className="text-slate-mute text-[12px]">Build Tracker Dashboard</span>
             </div>
             <div className="flex items-center gap-2">
-              <CreateBuildDialog adminKey={adminKey} onBuildCreated={fetchBuilds} />
+              <CreateBuildDialog
+                adminKey={adminKey}
+                onBuildCreated={(newBuild) => {
+                  setBuilds((prev) => [newBuild, ...prev]);
+                }}
+              />
               <button
                 onClick={fetchBuilds}
                 className="inline-flex items-center gap-1.5 rounded-md border hairline-strong bg-background px-3 py-1.5 text-[12px] font-medium hover:border-primary hover:text-primary transition-colors"
