@@ -441,7 +441,7 @@ function Hero() {
           </span>
         </h1>
         <h2 className="animate-fade-up-delay-2 mt-6 text-[22px] md:text-[26px] font-semibold tracking-tight text-white/90 max-w-xl">
-          WNY's Premium Computer Assembly & Testing
+          Rochester's Premium Computer Assembly & Testing
         </h2>
         <p className="animate-fade-up-delay-2 mt-4 max-w-xl text-[15px] md:text-[17px] leading-relaxed text-white/70">
           We source premium components, perform precision assembly, and complete every build with
@@ -600,7 +600,7 @@ function ProofSection() {
                 Operated by a Specialist
               </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-slate-mute">
-                A seasoned desktop architecture technician based in Victor, NY. Every cable route,
+                A seasoned desktop architecture technician based in Bushnell's Basin, Pittsford, NY. Every cable route,
                 BIOS profile, and stress test is performed by the same pair of hands — no assembly
                 line, no apprentices.
               </p>
@@ -830,7 +830,7 @@ function GeographySection() {
             <div className="inline-flex items-center gap-2 rounded-full border hairline bg-background px-3 py-1">
               <MapPin className="h-3.5 w-3.5 text-primary" />
               <span className="mono text-[10px] uppercase tracking-[0.16em] text-slate-ink">
-                Bushnell's Basin · Victor, NY
+                Bushnell's Basin · Pittsford, NY
               </span>
             </div>
             <h2 className="mt-5 text-[28px] md:text-[36px] font-semibold leading-[1.1] tracking-[-0.03em]">
@@ -855,7 +855,7 @@ function GeographySection() {
               <div className="mt-4 mono text-[12px] uppercase tracking-[0.18em] text-slate-mute">
                 Drop-off location
               </div>
-              <div className="mt-2 text-[16px] font-semibold">Bushnell's Basin, Victor, NY</div>
+              <div className="mt-2 text-[16px] font-semibold">Bushnell's Basin, Pittsford, NY</div>
               <div className="mt-1 text-[14px] text-slate-mute">
                 Monroe County · Greater Rochester Area
               </div>
@@ -974,7 +974,7 @@ function ServicesGrid({
           <div key={g.title} className="mt-12">
             <div className="flex items-center justify-between border-b hairline pb-3">
               <div className="flex items-center gap-3">
-                <span className="mono flex h-6 items-center rounded-md border hairline-strong bg-background px-2 text-[10px] font-semibold text-primary">
+                <span className="mono flex h-6 w-6 items-center justify-center rounded-md border hairline-strong bg-background px-2 text-[10px] font-semibold text-primary">
                   {g.tag}
                 </span>
                 <h3 className="text-[18px] md:text-[20px] font-semibold tracking-tight">

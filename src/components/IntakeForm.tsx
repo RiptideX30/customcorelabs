@@ -975,6 +975,21 @@ export default function IntakeForm() {
   const [repairServices, setRepairServices] = useState<Set<ServiceId>>(new Set());
   const [repairSymptoms, setRepairSymptoms] = useState("");
   const [repairWipeQty, setRepairWipeQty] = useState(1);
+  const thermalEligibleForRepair =
+    repairServices.has("refresh") ||
+    repairServices.has("software") ||
+    repairServices.has("cables") ||
+    repairServices.has("upgrade");
+
+  useEffect(() => {
+    if (!thermalEligibleForRepair && repairServices.has("thermal")) {
+      setRepairServices((prev) => {
+        const next = new Set(prev);
+        next.delete("thermal");
+        return next;
+      });
+    }
+  }, [thermalEligibleForRepair, repairServices]);
 
   // Path 2 — Build Known Parts
   const [knownBuild, setKnownBuild] = useState<ServiceId | null>(null);
@@ -1268,6 +1283,7 @@ export default function IntakeForm() {
                               key={s.id}
                               service={s}
                               selected={repairServices.has(s.id)}
+                              disabled={s.id === "thermal" && !thermalEligibleForRepair}
                               onSelect={() => {
                                 setRepairServices((prev) => {
                                   const next = new Set(prev);
