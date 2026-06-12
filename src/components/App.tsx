@@ -218,7 +218,10 @@ export default function App() {
 
   const buildSelected = active.has("basic") || active.has("ultimate");
   const thermalEligible =
-    active.has("diagnostic") || active.has("refresh") || active.has("upgrade");
+    active.has("refresh") ||
+    active.has("software") ||
+    active.has("cables") ||
+    active.has("upgrade");
 
   useEffect(() => {
     setActive((prev) => {
@@ -974,7 +977,7 @@ function ServicesGrid({
           <div key={g.title} className="mt-12">
             <div className="flex items-center justify-between border-b hairline pb-3">
               <div className="flex items-center gap-3">
-                <span className="mono flex h-6 w-6 items-center justify-center rounded-md border hairline-strong bg-background px-2 text-[10px] font-semibold text-primary">
+                <span className="mono flex items-center justify-center rounded-md border hairline-strong bg-background px-3 py-1 text-[10px] font-semibold text-primary">
                   {g.tag}
                 </span>
                 <h3 className="text-[18px] md:text-[20px] font-semibold tracking-tight">
@@ -1021,7 +1024,7 @@ function ServiceCard({
 
   return (
     <div
-      className={`relative w-full rounded-xl border bg-background p-6 transition-all ${disabled ? "hairline pointer-events-none opacity-40 bg-zinc-100" : active ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60 hover:shadow-[var(--shadow-elegant)]"}`}
+      className={`relative w-full rounded-xl border bg-background p-6 transition-all ${disabled && service.id !== "thermal" ? "hairline pointer-events-none opacity-40 bg-zinc-100" : active ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60 hover:shadow-[var(--shadow-elegant)]"}`}
     >
       {showRecommended && (
         <div className="absolute -top-2.5 right-4 inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-700 shadow-sm">
@@ -1073,7 +1076,7 @@ function ServiceCard({
       )}
       {service.id === "thermal" && disabled && (
         <p className="mono mt-4 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
-          <span className="text-primary">↳</span> Requires Diagnostic, Refresh, or Upgrade.
+          <span className="text-primary">↳</span> Requires Refresh, Software, Cables, or Upgrade.
         </p>
       )}
     </div>
@@ -1253,13 +1256,12 @@ function Footer({ onOpenTerms }: { onOpenTerms: () => void }) {
               Service Agreement & Warranty
             </a>
           </p>
-          <button
-            type="button"
-            onClick={onOpenTerms}
+          <a
+            href="/terms.html"
             className="self-start text-[12px] font-medium text-primary underline-offset-4 hover:underline"
           >
             Terms & Conditions / Service Contract
-          </button>
+          </a>
         </div>
       </div>
     </footer>
