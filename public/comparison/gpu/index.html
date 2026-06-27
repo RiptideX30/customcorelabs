@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPU Comparison Matrix | Live Hardware Engine</title>
+  <style>
+    :root {
+      --bg-dark: #09090b;
+      --bg-panel: #14141b;
+      --accent-blue: #2563eb;
+      --text-white: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --border-color: #27272a;
+      --zebra: #1c1c24;
+      --emerald: #10b981;
+    }
+    body { background-color: var(--bg-dark); color: var(--text-white); font-family: system-ui, sans-serif; padding: 40px 20px; margin: 0; }
+    .matrix-container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; margin: 0 0 6px 0; }
+    .subtitle { color: var(--text-muted); margin: 0 0 24px 0; font-size: 0.95rem; }
+    
+    .filter-dashboard { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 24px; background: var(--bg-panel); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color); }
+    .filter-group { display: flex; flex-direction: column; gap: 8px; }
+    .group-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 700; }
+    .btn-set { display: flex; gap: 6px; }
+    
+    .matrix-btn { background: var(--bg-dark); color: var(--text-muted); border: 1px solid var(--border-color); padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+    .matrix-btn:hover { border-color: var(--text-muted); color: var(--text-white); }
+    .matrix-btn.active { background: var(--accent-blue); color: var(--text-white); border-color: var(--accent-blue); }
+    
+    .loader { padding: 50px; text-align: center; color: var(--text-muted); font-style: italic; }
+    .table-responsive { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border-color); }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+    th { background: var(--bg-panel); color: var(--text-muted); padding: 14px 16px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--border-color); }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--border-color); }
+    tbody tr:nth-child(even) { background: var(--zebra); }
+    tbody tr:hover { background: rgba(37, 99, 235, 0.08); }
+    .rank-col { color: var(--accent-blue); font-weight: 700; }
+    .score-col { color: var(--emerald); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<div class="matrix-container">
+  <h1>Graphics Card Comparison Matrix</h1>
+  <p class="subtitle">Live, cross-compatible hardware metrics compiled directly from our sheet data engines.</p>
+
+  <div class="filter-dashboard">
+    <!-- Set 1: Brand Selection (NVIDIA / AMD) -->
+    <div class="filter-group">
+      <div class="group-label">Select Ecosystem</div>
+      <div class="btn-set">
+        <button class="matrix-btn active" onclick="setBrand('Nvidia', this)">NVIDIA</button>
+        <button class="matrix-btn" onclick="setBrand('AMD', this)">AMD</button>
+      </div>
+    </div>
+    <!-- Set 2: View Style Selection -->
+    <div class="filter-group">
+      <div class="group-label">Select Sorting Metric</div>
+      <div class="btn-set">
+        <button class="matrix-btn" onclick="setView('Performance', this)">Performance</button>
+        <button class="matrix-btn active" onclick="setView('Value', this)">Price / Performance</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="table-loader" class="loader">Querying spreadsheet data vectors...</div>
+
+  <div class="table-responsive" id="table-wrapper" style="display: none;">
+    <table>
+      <thead><tr id="headers-target"></tr></thead>
+      <tbody id="data-target"></tbody>
+    </table>
+  </div>
+</div>
+
+<script {nonce}>
+  const API_URL = "PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE";
+  
+  let currentBrand = "Nvidia";
+  let currentView = "Value";
+
+  function setBrand(brand, btn) {
+    currentBrand = brand;
+    toggleActive(btn);
+    resolveSheetTab();
+  }
+
+  function setView(view, btn) {
+    currentView = view;
+    toggleActive(btn);
+    resolveSheetTab();
+  }
+
+  function toggleActive(clickedBtn) {
+    clickedBtn.closest('.btn-set').querySelectorAll('.matrix-btn').forEach(b => b.classList.remove('active'));
+    clickedBtn.classList.add('active');
+  }
+
+  async function resolveSheetTab() {
+    const loader = document.getElementById("table-loader");
+    const wrapper = document.getElementById("table-wrapper");
+    const headers = document.getElementById("headers-target");
+    const body = document.getElementById("data-target");
+
+    wrapper.style.display = "none";
+    loader.style.display = "block";
+
+    const targetTab = `${currentView}_${currentBrand}_GPU`;
+
+    try {
+      const response = await fetch(`${API_URL}?tab=${targetTab}`);
+      const data = await response.json();
+
+      if (currentView === "Value") {
+        headers.innerHTML = `<th>Value Rank</th><th>Value Score</th><th>GPU Model</th><th>Perf Score</th><th>Street Price</th><th>Architecture</th><th>VRAM Size</th><th>Memory Type</th><th>Bus Width</th><th>TDP</th>`;
+        body.innerHTML = data.map(item => `
+          <tr>
+            <td class="rank-col">#${item.valuerank}</td>
+            <td class="score-col">${parseFloat(item.valuescore).toFixed(2)}</td>
+            <td><strong>${item.gpumodel}</strong></td>
+            <td>${item.perfscore}</td>
+            <td>$${item.streetprice}</td>
+            <td>${item.architecture}</td>
+            <td>${item.vramsize}</td>
+            <td>${item.memorytype}</td>
+            <td>${item.buswidth}</td>
+            <td>${item.tdpwatts || item.tdp}</td>
+          </tr>
+        `).join('');
+      } else {
+        headers.innerHTML = `<th>Perf Rank</th><th>Perf Score</th><th>GPU Model</th><th>Architecture</th><th>VRAM Size</th><th>Memory Type</th><th>Bus Width</th><th>TDP</th><th>Street Price</th>`;
+        body.innerHTML = data.map(item => `
+          <tr>
+            <td class="rank-col">#${item.perfrank}</td>
+            <td class="score-col">${item.perfscore}</td>
+            <td><strong>${item.gpumodel}</strong></td>
+            <td>${item.architecture}</td>
+            <td>${item.vramsize}</td>
+            <td>${item.memorytype}</td>
+            <td>${item.buswidth}</td>
+            <td>${item.tdpwatts || item.tdp}</td>
+            <td>$${item.streetprice}</td>
+          </tr>
+        `).join('');
+      }
+
+      loader.style.display = "none";
+      wrapper.style.display = "block";
+    } catch (e) {
+      loader.innerText = "Error pulling data. Verify tab mappings inside Apps Script.";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => resolveSheetTab());
+</script>
+</body>
+</html>
