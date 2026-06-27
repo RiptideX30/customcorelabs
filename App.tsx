@@ -324,6 +324,9 @@ function Header() {
           <Link className="hidden sm:inline hover:text-primary transition-colors" to="/showcases">
             Showcases
           </Link>
+          <Link className="hidden sm:inline hover:text-primary transition-colors" to="/comparison">
+            Comparison
+          </Link>
           <a
             href="https://youtube.com"
             target="_blank"
