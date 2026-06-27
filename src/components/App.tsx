@@ -348,6 +348,9 @@ function Header() {
             <Link className="hover:text-white transition-colors" to="/showcases">
               Showcases
             </Link>
+            <Link className="hover:text-white transition-colors" to="/comparison">
+              Comparison
+            </Link>
             <a
               href="#book"
               className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:opacity-90"
@@ -397,6 +400,13 @@ function Header() {
               onClick={handleNavClick}
             >
               Showcases
+            </Link>
+            <Link
+              to="/comparison"
+              className="hover:text-white transition-colors py-2"
+              onClick={handleNavClick}
+            >
+              Comparison
             </Link>
             <div className="border-t border-white/10 pt-4 mt-2">
               <a

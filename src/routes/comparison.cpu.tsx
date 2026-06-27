@@ -1,5 +1,4 @@
-
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/comparison/cpu")({
   component: CpuComparison,
@@ -7,19 +6,21 @@ export const Route = createFileRoute("/comparison/cpu")({
 
 function CpuComparison() {
   return (
-    <div className="p-2">
-      <div className="text-lg font-bold">CPU Comparison Matrix</div>
-      <p className="py-2">
-        The CPU Comparison Matrix provides a standardized evaluation of processor performance by neutralizing confusing marketing names and brand architectures. Every component is measured using a normalized index that weights 1440p gaming frame rates at sixty percent and multi-threaded rendering workloads at forty percent. Performance metrics are scaled against a fixed baseline reference processor—the AMD Ryzen 5 5600X—which is anchored at exactly fifty points. By dividing this performance score by real-time retail street pricing, the matrix generates an objective value score. It also utilizes a performance floor to filter out obsolete legacy hardware that fails to meet modern workflow demands.
-      </p>
-      <Link
-        to="/comparison"
-        className="text-blue-500 hover:text-blue-700"
-      >
-        Back
-      </Link>
-      <div className="py-4">
-        <iframe src="/comparison/cpu/index.html" className="w-full h-[80vh]" />
+    <div className="bg-background text-foreground">
+      <div className="mx-auto max-w-[1280px] px-5 md:px-8 py-16 md:py-20">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl">
+            CPU Comparison Matrix
+          </h1>
+          <p className="mt-6 text-lg leading-8 text-slate-mute">
+            This matrix provides a standardized evaluation of processor performance, neutralizing confusing marketing names and brand architectures. It uses a universal rating scale that benchmarks every CPU against a single baseline—the AMD Ryzen 5 7600X—to deliver a clear, objective assessment of raw power and value.
+          </p>
+        </div>
+        <div className="mt-16">
+          <div className="overflow-hidden rounded-xl border hairline-strong shadow-[var(--shadow-elegant)]">
+            <iframe src="/comparison/cpu/index.html" className="w-full h-[80vh]" />
+          </div>
+        </div>
       </div>
     </div>
   );
