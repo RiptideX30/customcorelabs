@@ -12,7 +12,7 @@ export const Route = createRootRoute({
             className="font-cal text-xl font-bold tracking-tight flex items-center gap-2"
           >
             <img
-              src="/ccl-logo.jpg"
+              src="/ccl-logo.favicon.jpg"
               alt="CCL Logo"
               className="w-8 h-8 rounded-full"
             />
