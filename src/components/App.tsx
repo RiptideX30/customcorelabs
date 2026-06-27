@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
@@ -632,9 +633,9 @@ function ProofSection() {
                 Operated by a Specialist
               </h3>
               <p className="mt-2 text-[14px] leading-relaxed text-slate-mute">
-                A seasoned desktop architecture technician based in Bushnell's Basin, Pittsford, NY. Every cable route,
-                BIOS profile, and stress test is performed by the same pair of hands — no assembly
-                line, no apprentices.
+                A seasoned desktop architecture technician based in Bushnell's Basin, Pittsford, NY.
+                Every cable route, BIOS profile, and stress test is performed by the same pair of
+                hands — no assembly line, no apprentices.
               </p>
             </div>
           </div>

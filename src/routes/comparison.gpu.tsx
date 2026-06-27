@@ -12,17 +12,18 @@ function GpuComparison() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const API_URL = "https://script.google.com/macros/s/AKfycbw8MZtUw-LVV50vHJ-AalREEqF1NeylyGH7ZY4C2jpPCDh38YTCOuIVj46dC5wOlNKsxQ/exec";
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbw8MZtUw-LVV50vHJ-AalREEqF1NeylyGH7ZY4C2jpPCDh38YTCOuIVj46dC5wOlNKsxQ/exec";
     const targetTab = `${view}_${brand}_GPU`;
 
     setLoading(true);
     fetch(`${API_URL}?tab=${targetTab}`)
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         setData(data);
         setLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching data:", error);
         setLoading(false);
       });
@@ -39,7 +40,11 @@ function GpuComparison() {
             GPU Comparison Matrix
           </h1>
           <p className="mt-6 text-lg leading-8 text-slate-mute">
-            This matrix offers a data-driven framework for analyzing graphics processing units across competing manufacturing ecosystems. It establishes an agnostic scoring system that measures the performance of any GPU relative to a universal baseline—the NVIDIA GeForce RTX 4060—to cut through brand-specific hype and deliver an impartial evaluation of graphical power.
+            This matrix offers a data-driven framework for analyzing graphics processing units
+            across competing manufacturing ecosystems. It establishes an agnostic scoring system
+            that measures the performance of any GPU relative to a universal baseline—the NVIDIA
+            GeForce RTX 4060—to cut through brand-specific hype and deliver an impartial evaluation
+            of graphical power.
           </p>
         </div>
         <div className="mt-16">
@@ -117,7 +122,9 @@ function GpuComparison() {
                         <>
                           <td>#{item.valuerank}</td>
                           <td>{parseFloat(item.valuescore).toFixed(2)}</td>
-                          <td><strong>{item.gpumodel}</strong></td>
+                          <td>
+                            <strong>{item.gpumodel}</strong>
+                          </td>
                           <td>{item.perfscore}</td>
                           <td>${item.streetprice}</td>
                           <td>{item.architecture}</td>
@@ -130,7 +137,9 @@ function GpuComparison() {
                         <>
                           <td>#{item.perfrank}</td>
                           <td>{item.perfscore}</td>
-                          <td><strong>{item.gpumodel}</strong></td>
+                          <td>
+                            <strong>{item.gpumodel}</strong>
+                          </td>
                           <td>{item.architecture}</td>
                           <td>{item.vramsize}</td>
                           <td>{item.memorytype}</td>

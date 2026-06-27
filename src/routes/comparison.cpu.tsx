@@ -12,17 +12,18 @@ function CpuComparison() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const API_URL = "https://script.google.com/macros/s/AKfycbw8MZtUw-LVV50vHJ-AalREEqF1NeylyGH7ZY4C2jpPCDh38YTCOuIVj46dC5wOlNKsxQ/exec";
+    const API_URL =
+      "https://script.google.com/macros/s/AKfycbw8MZtUw-LVV50vHJ-AalREEqF1NeylyGH7ZY4C2jpPCDh38YTCOuIVj46dC5wOlNKsxQ/exec";
     const targetTab = `${view}_${brand}_CPU`;
 
     setLoading(true);
     fetch(`${API_URL}?tab=${targetTab}`)
-      .then(response => response.json())
-      .then(data => {
+      .then((response) => response.json())
+      .then((data) => {
         setData(data);
         setLoading(false);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching data:", error);
         setLoading(false);
       });
@@ -39,7 +40,10 @@ function CpuComparison() {
             CPU Comparison Matrix
           </h1>
           <p className="mt-6 text-lg leading-8 text-slate-mute">
-            This matrix provides a standardized evaluation of processor performance, neutralizing confusing marketing names and brand architectures. It uses a universal rating scale that benchmarks every CPU against a single baseline—the AMD Ryzen 5 7600X—to deliver a clear, objective assessment of raw power and value.
+            This matrix provides a standardized evaluation of processor performance, neutralizing
+            confusing marketing names and brand architectures. It uses a universal rating scale that
+            benchmarks every CPU against a single baseline—the AMD Ryzen 5 7600X—to deliver a clear,
+            objective assessment of raw power and value.
           </p>
         </div>
         <div className="mt-16">
@@ -117,7 +121,9 @@ function CpuComparison() {
                         <>
                           <td>#{item.valuerank}</td>
                           <td>{parseFloat(item.valuescore).toFixed(2)}</td>
-                          <td><strong>{item.cpumodel}</strong></td>
+                          <td>
+                            <strong>{item.cpumodel}</strong>
+                          </td>
                           <td>{item.perfscore}</td>
                           <td>${item.streetprice}</td>
                           <td>{item.architecture}</td>
@@ -128,7 +134,9 @@ function CpuComparison() {
                         <>
                           <td>#{item.perfrank}</td>
                           <td>{item.perfscore}</td>
-                          <td><strong>{item.cpumodel}</strong></td>
+                          <td>
+                            <strong>{item.cpumodel}</strong>
+                          </td>
                           <td>{item.architecture}</td>
                           <td>{item.socket}</td>
                           <td>{item.coresthreads}</td>

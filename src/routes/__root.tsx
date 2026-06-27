@@ -1,9 +1,17 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { Youtube, Book, Layers } from "lucide-react";
 
-export const Route = createRootRoute({
-  component: () => (
+function Root() {
+  const { location } = useRouterState();
+  const isHome = location.pathname === "/";
+
+  // The home page has its own header and footer, so we don't want to render the root layout
+  if (isHome) {
+    return <Outlet />;
+  }
+
+  return (
     <>
       <header className="bg-background z-10 sticky top-0 border-b hairline-b">
         <div className="mx-auto max-w-[1280px] px-5 md:px-8 flex items-center justify-between h-16">
@@ -11,11 +19,7 @@ export const Route = createRootRoute({
             to="/"
             className="font-cal text-xl font-bold tracking-tight flex items-center gap-2"
           >
-            <img
-              src="/ccl-logo.favicon.jpg"
-              alt="CCL Logo"
-              className="w-8 h-8 rounded-full"
-            />
+            <img src="/ccl-logo.favicon.jpg" alt="CCL Logo" className="w-8 h-8 rounded-full" />
             <span className="hidden sm:inline">Component Comparison</span>
           </Link>
           <nav className="flex items-center gap-2">
@@ -58,16 +62,10 @@ export const Route = createRootRoute({
               <Link to="/" className="text-sm text-slate-mute hover:text-primary">
                 Home
               </Link>
-              <Link
-                to="/showcases"
-                className="text-sm text-slate-mute hover:text-primary"
-              >
+              <Link to="/showcases" className="text-sm text-slate-mute hover:text-primary">
                 Showcases
               </Link>
-              <Link
-                to="/comparison"
-                className="text-sm text-slate-mute hover:text-primary"
-              >
+              <Link to="/comparison" className="text-sm text-slate-mute hover:text-primary">
                 Comparison
               </Link>
             </div>
@@ -75,5 +73,9 @@ export const Route = createRootRoute({
         </div>
       </footer>
     </>
-  ),
+  );
+}
+
+export const Route = createRootRoute({
+  component: Root,
 });
