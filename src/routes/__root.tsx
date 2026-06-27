@@ -16,7 +16,7 @@ export const Route = createRootRoute({
               alt="CCL Logo"
               className="w-8 h-8 rounded-full"
             />
-            <span className="hidden sm:inline">Component Collector</span>
+            <span className="hidden sm:inline">Component Comparison</span>
           </Link>
           <nav className="flex items-center gap-2">
             <Link
@@ -27,7 +27,7 @@ export const Route = createRootRoute({
               <span className="hidden sm:inline">Showcases</span>
             </Link>
             <a
-              href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+              href="https://www.youtube.com/@CustomCoreLabs"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 rounded-md bg-zinc-100 px-5 h-10 text-[15px] font-medium text-zinc-800 hover:bg-zinc-200 transition-all"
@@ -52,7 +52,7 @@ export const Route = createRootRoute({
         <div className="mx-auto max-w-[1280px] px-5 md:px-8">
           <div className="flex justify-between items-center">
             <p className="text-sm text-slate-mute">
-              &copy; {new Date().getFullYear()} Component Collector. All rights reserved.
+              &copy; {new Date().getFullYear()} Component Comparison. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <Link to="/" className="text-sm text-slate-mute hover:text-primary">
