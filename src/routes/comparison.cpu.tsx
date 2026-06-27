@@ -4,6 +4,13 @@ export const Route = createFileRoute("/comparison/cpu")({
   component: CpuComparison,
 });
 
+const CPU_DATA = [
+  { name: "AMD Ryzen 5 7600X", score: 100 },
+  { name: "AMD Ryzen 7 7700X", score: 115 },
+  { name: "Intel Core i9-13900K", score: 130 },
+  // Add more CPU data here
+];
+
 function CpuComparison() {
   return (
     <div className="bg-background text-foreground">
@@ -18,7 +25,22 @@ function CpuComparison() {
         </div>
         <div className="mt-16">
           <div className="overflow-hidden rounded-xl border hairline-strong shadow-[var(--shadow-elegant)]">
-            <iframe src="/comparison/cpu/index.html" className="w-full h-[80vh]" />
+            <table className="w-full text-left pricing-table">
+              <thead>
+                <tr>
+                  <th className="p-4">Processor</th>
+                  <th className="p-4">Performance Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {CPU_DATA.map((cpu, index) => (
+                  <tr key={index}>
+                    <td className="p-4 font-semibold">{cpu.name}</td>
+                    <td className="p-4">{cpu.score}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

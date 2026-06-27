@@ -4,6 +4,13 @@ export const Route = createFileRoute("/comparison/gpu")({
   component: GpuComparison,
 });
 
+const GPU_DATA = [
+  { name: "NVIDIA GeForce RTX 4060", score: 100 },
+  { name: "NVIDIA GeForce RTX 4070", score: 120 },
+  { name: "AMD Radeon RX 7800 XT", score: 125 },
+  // Add more GPU data here
+];
+
 function GpuComparison() {
   return (
     <div className="bg-background text-foreground">
@@ -18,7 +25,22 @@ function GpuComparison() {
         </div>
         <div className="mt-16">
           <div className="overflow-hidden rounded-xl border hairline-strong shadow-[var(--shadow-elegant)]">
-            <iframe src="/comparison/gpu/index.html" className="w-full h-[80vh]" />
+            <table className="w-full text-left pricing-table">
+              <thead>
+                <tr>
+                  <th className="p-4">Graphics Card</th>
+                  <th className="p-4">Performance Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {GPU_DATA.map((gpu, index) => (
+                  <tr key={index}>
+                    <td className="p-4 font-semibold">{gpu.name}</td>
+                    <td className="p-4">{gpu.score}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

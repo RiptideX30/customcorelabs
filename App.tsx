@@ -325,7 +325,7 @@ function Header() {
             Showcases
           </Link>
           <Link className="hidden sm:inline hover:text-primary transition-colors" to="/comparison">
-            Comparison
+            Comparison Tables
           </Link>
           <a
             href="https://youtube.com"

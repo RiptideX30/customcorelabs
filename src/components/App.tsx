@@ -352,6 +352,16 @@ function Header() {
               Comparison
             </Link>
             <a
+              href="https://www.youtube.com/@CustomCoreLabs"
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label="YouTube channel"
+              className="inline-flex items-center gap-1.5 text-white/70 hover:text-white transition-colors"
+            >
+              <Youtube className="h-4 w-4" />
+              <span className="hidden sm:inline">YouTube</span>
+            </a>
+            <a
               href="#book"
               className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:opacity-90"
             >
@@ -408,6 +418,15 @@ function Header() {
             >
               Comparison
             </Link>
+            <a
+              href="https://www.youtube.com/@CustomCoreLabs"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="hover:text-white transition-colors py-2"
+              onClick={handleNavClick}
+            >
+              YouTube
+            </a>
             <div className="border-t border-white/10 pt-4 mt-2">
               <a
                 href="#book"
