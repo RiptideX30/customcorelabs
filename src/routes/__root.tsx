@@ -52,7 +52,7 @@ export const Route = createRootRoute({
         <div className="mx-auto max-w-[1280px] px-5 md:px-8">
           <div className="flex justify-between items-center">
             <p className="text-sm text-slate-mute">
-              &copy; {new Date().getFullYear()} Component Comparison. All rights reserved.
+              &copy; {new Date().getFullYear()} Custom Core Labs. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
               <Link to="/" className="text-sm text-slate-mute hover:text-primary">
