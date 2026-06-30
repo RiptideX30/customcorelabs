@@ -1222,7 +1222,7 @@ export default function IntakeForm() {
                                 onChange={setKeepComponentBoxes}
                                 label="Keep all component boxes."
                                />
-                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc. If you leave this unchecked, Custom Core Labs will recycle or retain boxes for workshop display.</p>
+                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc. If you leave this unselected, Custom Core Labs will recycle or retain boxes for workshop display.</p>
                             </div>
                             <button
                               type="submit"
