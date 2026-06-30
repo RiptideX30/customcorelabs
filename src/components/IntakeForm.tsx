@@ -51,7 +51,7 @@ function BuildOrderSuccess() {
       <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
         <Check className="h-8 w-8" />
       </div>
-      <h3 className="text-[28px] font-semibold tracking-tight">Project Initiated! 🚀</h3>
+      <h3 className="text-[28px] font-semibold tracking-tight">Project Initiated!</h3>
       <p className="mx-auto mt-6 max-w-2xl text-[15px] leading-8 text-slate-600">
         Thanks! We are reviewing your build specifications and drafting your custom component list.
         Check your email shortly to sign your digital service agreement so we can order your parts.
@@ -278,22 +278,42 @@ function LiveEstimator({
   wipeQuantity,
   isITX,
   nonModularPSU,
+  isPriority,
 }: {
   services: Set<ServiceId>;
   partsValue: number;
   wipeQuantity: number;
   isITX: boolean;
   nonModularPSU: boolean;
+  isPriority: boolean;
 }) {
   const {
     items: lineItems,
     subtotal,
     taxAmount,
     total,
-  } = useMemo(
-    () => computeEstimator(services, partsValue, wipeQuantity, isITX, nonModularPSU),
-    [services, partsValue, wipeQuantity, isITX, nonModularPSU],
-  );
+  } = useMemo(() => {
+    const estimatorResult = computeEstimator(
+      services,
+      partsValue,
+      wipeQuantity,
+      isITX,
+      nonModularPSU,
+    );
+    if (isPriority) {
+      const rushFee = 75;
+      estimatorResult.items.push({ label: "Priority Rush Fee", amount: rushFee });
+      const newSubtotal = estimatorResult.subtotal + rushFee;
+      const newTaxAmount = newSubtotal * 0.08; // NY tax is 8%
+      return {
+        items: estimatorResult.items,
+        subtotal: newSubtotal,
+        taxAmount: newTaxAmount,
+        total: newSubtotal + newTaxAmount,
+      };
+    }
+    return estimatorResult;
+  }, [services, partsValue, wipeQuantity, isITX, nonModularPSU, isPriority]);
 
   return (
     <div className="rounded-xl border hairline-strong bg-background p-6 shadow-[var(--shadow-elegant)]">
@@ -591,7 +611,7 @@ function BuildLookFields({
   // Your Main Section Return Code
   return (
     <div id="intake-form">
-      <StepHeader index="05" title="Build Aesthetics & Configuration" />
+      <StepHeader index="03" title="Build Aesthetics & Configuration" />
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <PremiumSelect
           label="RGB Preference"
@@ -783,6 +803,10 @@ export default function IntakeForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
 
+  // Shared submission fields
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [keepComponentBoxes, setKeepComponentBoxes] = useState(false);
+
   // Path 1 — Service & Repair
   const [repairServices, setRepairServices] = useState<Set<ServiceId>>(new Set());
   const [repairSymptoms, setRepairSymptoms] = useState("");
@@ -816,6 +840,7 @@ export default function IntakeForm() {
   const [knownFans, setKnownFans] = useState("");
   const [knownLook, setKnownLook] = useState("");
   const [knownNotes, setKnownNotes] = useState("");
+  const [knownTurnaround, setKnownTurnaround] = useState<"standard" | "priority">("standard");
   const [showPCPP, setShowPCPP] = useState(false);
 
   // Path 3 — Build Help
@@ -828,6 +853,7 @@ export default function IntakeForm() {
   const [helpFans, setHelpFans] = useState("");
   const [helpLook, setHelpLook] = useState("");
   const [helpNotes, setHelpNotes] = useState("");
+  const [helpTurnaround, setHelpTurnaround] = useState<"standard" | "priority">("standard");
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -856,6 +882,11 @@ export default function IntakeForm() {
       setErrors(e);
       return;
     }
+    
+    if (!agreedToTerms) {
+      setErrors(prev => ({...prev, terms: "You must agree to the terms and conditions."}));
+      return;
+    }
     setErrors({});
 
     // Generate tracking identifier only if initializing a hardware system pipeline
@@ -870,6 +901,7 @@ export default function IntakeForm() {
         "Parts cost is collected before any orders are placed. Labor and services are due after final pickup and validation.",
       "customer-state": "NY",
       "tracking-code": generatedCode || "N/A", // Hooked straight into worker stream
+      "keep-component-boxes": keepComponentBoxes ? "Yes, keep them" : "No, recycle them",
     };
 
     const partsValueNum = Math.max(0, Number(knownPartsValue) || 0);
@@ -904,6 +936,12 @@ export default function IntakeForm() {
       knownPerformance.forEach((s) => allServices.add(s));
       if (allServices.has("ultimate") || allServices.has("basic")) allServices.add("thermal");
       const estimate = computeEstimator(allServices, partsValueNum, 1, knownITX, knownNonModular);
+      if (knownTurnaround === 'priority') {
+          const rushFee = 75;
+          estimate.subtotal += rushFee;
+          estimate.taxAmount = estimate.subtotal * 0.08;
+          estimate.total = estimate.subtotal + estimate.taxAmount;
+      }
       const srvText = [...allServices]
         .map((id) => {
           const s = [...NEW_BUILDS, ...PERFORMANCE_TUNING].find((x) => x.id === id);
@@ -923,6 +961,7 @@ export default function IntakeForm() {
         "symptoms-details": `Look: ${lookText}${knownLook ? ` — ${knownLook}` : ""}${knownNotes ? `\nNotes: ${knownNotes}` : ""}`,
         "itx-sff-case": knownITX ? "Yes" : "No",
         "non-modular-psu": knownNonModular ? "Yes" : "No",
+        "build-turnaround": knownTurnaround,
         "estimate-subtotal": `$${estimate.subtotal.toFixed(2)}`,
         "estimate-tax": `$${estimate.taxAmount.toFixed(2)}`,
         "estimate-total": `$${estimate.total.toFixed(2)}`,
@@ -938,6 +977,7 @@ export default function IntakeForm() {
         "symptoms-details": `Purpose: ${helpPurpose || "Not specified"}\nLook: ${lookText}${helpLook ? ` — ${helpLook}` : ""}${helpNotes ? `\nNotes: ${helpNotes}` : ""}`,
         "itx-sff-case": helpITX ? "Yes" : "No",
         "non-modular-psu": helpNonModular ? "Yes" : "No",
+        "build-turnaround": helpTurnaround,
         "estimate-subtotal": "",
         "estimate-tax": "",
         "estimate-total": "",
@@ -1170,9 +1210,20 @@ export default function IntakeForm() {
                             <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
                               Ready to launch
                             </div>
-                            <p className="mt-1 text-[13px] text-slate-mute">
-                              By submitting you agree to the terms. We'll reach out within 24 hours.
-                            </p>
+                            <div className="space-y-4 mt-4">
+                               <CheckboxField
+                                checked={agreedToTerms}
+                                onChange={setAgreedToTerms}
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
+                                error={errors.terms}
+                               />
+                               <CheckboxField
+                                checked={keepComponentBoxes}
+                                onChange={setKeepComponentBoxes}
+                                label="Keep all component boxes."
+                               />
+                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc.</p>
+                            </div>
                             <button
                               type="submit"
                               className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-[15px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:opacity-90"
@@ -1238,9 +1289,23 @@ export default function IntakeForm() {
                           </div>
                         </div>
 
+                            {/* Build Look */}
+                        <div className="mt-8 border-t hairline pt-8">
+                          <BuildLookFields
+                            rgbPref={knownRgb}
+                            setRgbPref={setKnownRgb}
+                            colorPref={knownColor}
+                            setColorPref={setKnownColor}
+                            extraFans={knownFans}
+                            setExtraFans={setKnownFans}
+                            lookDescription={knownLook}
+                            setLookDescription={setKnownLook}
+                          />
+                        </div>
+
                         {/* Surcharges */}
                         <div className="mt-8">
-                          <StepHeader index="03" title="Build Complexity" />
+                          <StepHeader index="04" title="Build Complexity" />
                           <p className="text-[13px] text-slate-mute mb-2">
                             These help us quote accurately
                           </p>
@@ -1251,10 +1316,56 @@ export default function IntakeForm() {
                             setNonModularPSU={setKnownNonModular}
                           />
                         </div>
+                        
+                        <div className="mt-8 border-t hairline pt-8">
+                            <StepHeader index="05" title="Build Turnaround Time" />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                <div
+                                    className={`flex cursor-pointer flex-col gap-3 rounded-xl border bg-background p-5 transition-all ${
+                                    knownTurnaround === 'standard'
+                                        ? "border-primary shadow-[var(--shadow-glow)]"
+                                        : "hairline-strong hover:border-primary/60"
+                                    }`}
+                                    onClick={() => setKnownTurnaround('standard')}
+                                >
+                                    <div className="flex items-center justify-between">
+                                    <div className="text-[16px] font-semibold">Standard Turnaround</div>
+                                    {knownTurnaround === 'standard' ? (
+                                        <Check className="h-4 w-4 text-primary" />
+                                    ) : (
+                                        <div className="h-4 w-4 rounded-full border hairline-strong" />
+                                    )}
+                                    </div>
+                                    <p className="text-[13px] text-slate-mute">7 Business Days</p>
+                                    <p className="text-[13px] text-slate-mute">Cost: Base Labor Fee only.</p>
+                                    <p className="text-[13px] text-slate-mute">Details: Parts are ordered via standard ground shipping. Includes full assembly, professional cable management, and a routine system stability check.</p>
+                                </div>
+                                <div
+                                    className={`flex cursor-pointer flex-col gap-3 rounded-xl border bg-background p-5 transition-all ${
+                                    knownTurnaround === 'priority'
+                                        ? "border-primary shadow-[var(--shadow-glow)]"
+                                        : "hairline-strong hover:border-primary/60"
+                                    }`}
+                                    onClick={() => setKnownTurnaround('priority')}
+                                >
+                                    <div className="flex items-center justify-between">
+                                    <div className="text-[16px] font-semibold">Priority Focus Rush</div>
+                                     {knownTurnaround === 'priority' ? (
+                                        <Check className="h-4 w-4 text-primary" />
+                                    ) : (
+                                        <div className="h-4 w-4 rounded-full border hairline-strong" />
+                                    )}
+                                    </div>
+                                    <p className="text-[13px] text-slate-mute">4–5 Business Days</p>
+                                    <p className="text-[13px] text-slate-mute">Cost: Base Labor Fee + $75.00</p>
+                                    <p className="text-[13px] text-slate-mute">Details: Your build becomes the sole focus on the workbench the moment components arrive. Parts are processed immediately. Includes premium cable routing, extended hardware stress testing, and thermal optimization.</p>
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Parts info */}
                         <div className="mt-8 border-t hairline pt-8">
-                          <StepHeader index="04" title="Parts & Contact Info" />
+                          <StepHeader index="06" title="Parts & Contact Info" />
                           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div className="sm:col-span-2">
                               <div className="flex items-center justify-between">
@@ -1317,23 +1428,9 @@ export default function IntakeForm() {
                           />
                         </div>
 
-                        {/* Build Look */}
-                        <div className="mt-8 border-t hairline pt-8">
-                          <BuildLookFields
-                            rgbPref={knownRgb}
-                            setRgbPref={setKnownRgb}
-                            colorPref={knownColor}
-                            setColorPref={setKnownColor}
-                            extraFans={knownFans}
-                            setExtraFans={setKnownFans}
-                            lookDescription={knownLook}
-                            setLookDescription={setKnownLook}
-                          />
-                        </div>
-
                         {/* Additional notes */}
                         <div className="mt-8 border-t hairline pt-8">
-                          <StepHeader index="06" title="Additional Notes (Optional)" />
+                          <StepHeader index="07" title="Additional Notes (Optional)" />
                           <FormTextarea
                             value={knownNotes}
                             onChange={setKnownNotes}
@@ -1347,9 +1444,20 @@ export default function IntakeForm() {
                             <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
                               Ready to launch
                             </div>
-                            <p className="mt-1 text-[13px] text-slate-mute">
-                              By submitting you agree to the terms. We'll reach out within 24 hours.
-                            </p>
+                             <div className="space-y-4 mt-4">
+                               <CheckboxField
+                                checked={agreedToTerms}
+                                onChange={setAgreedToTerms}
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
+                                error={errors.terms}
+                               />
+                               <CheckboxField
+                                checked={keepComponentBoxes}
+                                onChange={setKeepComponentBoxes}
+                                label="Keep all component boxes."
+                               />
+                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc.</p>
+                            </div>
                             <button
                               type="submit"
                               className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-[15px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:opacity-90"
@@ -1438,10 +1546,56 @@ export default function IntakeForm() {
                             setLookDescription={setHelpLook}
                           />
                         </div>
+                        
+                        <div className="mt-8 border-t hairline pt-8">
+                            <StepHeader index="04" title="Build Turnaround Time" />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                <div
+                                    className={`flex cursor-pointer flex-col gap-3 rounded-xl border bg-background p-5 transition-all ${
+                                    helpTurnaround === 'standard'
+                                        ? "border-primary shadow-[var(--shadow-glow)]"
+                                        : "hairline-strong hover:border-primary/60"
+                                    }`}
+                                    onClick={() => setHelpTurnaround('standard')}
+                                >
+                                    <div className="flex items-center justify-between">
+                                    <div className="text-[16px] font-semibold">Standard Turnaround</div>
+                                    {helpTurnaround === 'standard' ? (
+                                        <Check className="h-4 w-4 text-primary" />
+                                    ) : (
+                                        <div className="h-4 w-4 rounded-full border hairline-strong" />
+                                    )}
+                                    </div>
+                                    <p className="text-[13px] text-slate-mute">7 Business Days</p>
+                                    <p className="text-[13px] text-slate-mute">Cost: Base Labor Fee only.</p>
+                                    <p className="text-[13px] text-slate-mute">Details: Parts are ordered via standard ground shipping. Includes full assembly, professional cable management, and a routine system stability check.</p>
+                                </div>
+                                <div
+                                    className={`flex cursor-pointer flex-col gap-3 rounded-xl border bg-background p-5 transition-all ${
+                                    helpTurnaround === 'priority'
+                                        ? "border-primary shadow-[var(--shadow-glow)]"
+                                        : "hairline-strong hover:border-primary/60"
+                                    }`}
+                                    onClick={() => setHelpTurnaround('priority')}
+                                >
+                                    <div className="flex items-center justify-between">
+                                    <div className="text-[16px] font-semibold">Priority Focus Rush</div>
+                                     {helpTurnaround === 'priority' ? (
+                                        <Check className="h-4 w-4 text-primary" />
+                                    ) : (
+                                        <div className="h-4 w-4 rounded-full border hairline-strong" />
+                                    )}
+                                    </div>
+                                    <p className="text-[13px] text-slate-mute">4–5 Business Days</p>
+                                    <p className="text-[13px] text-slate-mute">Cost: Base Labor Fee + $75.00</p>
+                                    <p className="text-[13px] text-slate-mute">Details: Your build becomes the sole focus on the workbench the moment components arrive. Parts are processed immediately. Includes premium cable routing, extended hardware stress testing, and thermal optimization.</p>
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Contact info */}
                         <div className="mt-8 border-t hairline pt-8">
-                          <StepHeader index="03" title="Contact Info" />
+                          <StepHeader index="05" title="Contact Info" />
                           <CustomerInfoFields
                             name={name}
                             setName={setName}
@@ -1455,7 +1609,7 @@ export default function IntakeForm() {
 
                         {/* Additional notes */}
                         <div className="mt-8 border-t hairline pt-8">
-                          <StepHeader index="04" title="Additional Notes (Optional)" />
+                          <StepHeader index="06" title="Additional Notes (Optional)" />
                           <FormTextarea
                             value={helpNotes}
                             onChange={setHelpNotes}
@@ -1469,9 +1623,20 @@ export default function IntakeForm() {
                             <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
                               Ready to launch
                             </div>
-                            <p className="mt-1 text-[13px] text-slate-mute">
-                              By submitting you agree to the terms. We'll reach out within 24 hours.
-                            </p>
+                            <div className="space-y-4 mt-4">
+                               <CheckboxField
+                                checked={agreedToTerms}
+                                onChange={setAgreedToTerms}
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
+                                error={errors.terms}
+                               />
+                               <CheckboxField
+                                checked={keepComponentBoxes}
+                                onChange={setKeepComponentBoxes}
+                                label="Keep all component boxes."
+                               />
+                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc.</p>
+                            </div>
                             <button
                               type="submit"
                               className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-[15px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:opacity-90"
@@ -1497,6 +1662,7 @@ export default function IntakeForm() {
                       wipeQuantity={repairWipeQty}
                       isITX={false}
                       nonModularPSU={false}
+                      isPriority={false}
                     />
                   </div>
                 )}
@@ -1514,6 +1680,7 @@ export default function IntakeForm() {
                       wipeQuantity={1}
                       isITX={knownITX}
                       nonModularPSU={knownNonModular}
+                      isPriority={knownTurnaround === 'priority'}
                     />
                   </div>
                 )}
