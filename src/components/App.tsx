@@ -1019,16 +1019,20 @@ function ServicesGrid({
               </span>
             </div>
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {g.ids.map((id) => (
-                <ServiceCard
-                  key={id}
-                  service={SERVICE_MAP[id]}
-                  active={active.has(id)}
-                  disabled={isDisabled(id)}
-                  onDetails={() => openModal(id)}
-                  isHighTier={partsValue >= 2500}
-                />
-              ))}
+              {g.ids.map((id) => {
+                const service = SERVICE_MAP[id];
+                if (!service) return null;
+                return (
+                  <ServiceCard
+                    key={id}
+                    service={service}
+                    active={active.has(id)}
+                    disabled={isDisabled(id)}
+                    onDetails={() => openModal(id)}
+                    isHighTier={partsValue >= 2500}
+                  />
+                );
+              })}
             </div>
           </div>
         ))}
