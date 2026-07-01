@@ -221,8 +221,8 @@ function ServiceCard({
         disabled
           ? "hairline pointer-events-none opacity-40 bg-zinc-100"
           : selected
-            ? "border-primary shadow-[var(--shadow-glow)]"
-            : "hairline-strong hover:border-primary/60"
+          ? "border-primary shadow-[var(--shadow-glow)]"
+          : "hairline-strong hover:border-primary/60"
       }`}
       onClick={disabled ? undefined : onSelect}
     >
@@ -345,7 +345,7 @@ function LiveEstimator({
               className="flex items-center justify-between border-b hairline py-2 text-[13px]"
             >
               <span className="text-slate-ink">{it.label}</span>
-              <span className="mono tabular-nums text-foreground">${it.amount.toFixed(2)}</span>
+              <span className="mono tabular-nums text-foreground">`${it.amount.toFixed(2)}</span>
             </div>
           ))
         )}
@@ -969,7 +969,8 @@ export default function IntakeForm() {
           ? "No URL given - Customer will provide parts list later"
           : knownPCPP,
         "parts-value": `$${partsValueNum.toFixed(2)}`,
-        "symptoms-details": `Look: ${lookText}${knownLook ? ` — ${knownLook}` : ""}${knownNotes ? `\nNotes: ${knownNotes}` : ""}`,
+        "symptoms-details": `Look: ${lookText}${knownLook ? ` — ${knownLook}` : ""}${knownNotes ? `
+Notes: ${knownNotes}` : ""}`,
         "itx-sff-case": knownITX ? "Yes" : "No",
         "non-modular-psu": knownNonModular ? "Yes" : "No",
         "build-turnaround": knownTurnaround,
@@ -985,7 +986,9 @@ export default function IntakeForm() {
         "selected-services": "Consultation — needs parts selection help",
         "pcpartpicker-url": "N/A",
         "parts-value": helpBudget ? `Budget: $${helpBudget}` : "N/A",
-        "symptoms-details": `Purpose: ${helpPurpose || "Not specified"}\nLook: ${lookText}${helpLook ? ` — ${helpLook}` : ""}${helpNotes ? `\nNotes: ${helpNotes}` : ""}`,
+        "symptoms-details": `Purpose: ${helpPurpose || "Not specified"}
+Look: ${lookText}${helpLook ? ` — ${helpLook}` : ""}${helpNotes ? `
+Notes: ${helpNotes}` : ""}`,
         "itx-sff-case": helpITX ? "Yes" : "No",
         "non-modular-psu": helpNonModular ? "Yes" : "No",
         "build-turnaround": helpTurnaround,
@@ -1225,8 +1228,9 @@ export default function IntakeForm() {
                                <CheckboxField
                                 checked={agreedToTerms}
                                 onChange={setAgreedToTerms}
-                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
-                                error={errors.terms}
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>
+                                }
+                                error={errors.terms} 
                                />
                                <CheckboxField
                                 checked={keepComponentBoxes}
@@ -1459,7 +1463,8 @@ export default function IntakeForm() {
                                <CheckboxField
                                 checked={agreedToTerms}
                                 onChange={setAgreedToTerms}
-                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>
+                                }
                                 error={errors.terms}
                                />
                                <CheckboxField
@@ -1467,7 +1472,7 @@ export default function IntakeForm() {
                                 onChange={setKeepComponentBoxes}
                                 label="Keep all component boxes."
                                />
-                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc.</p>
+                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc. If you leave this unselected, Custom Core Labs will recycle or retain boxes for workshop display.</p>
                             </div>
                             <button
                               type="submit"
@@ -1600,6 +1605,7 @@ export default function IntakeForm() {
                                     <p className="text-[13px] text-slate-mute">4–5 Business Days</p>
                                     <p className="text-[13px] text-slate-mute">Cost: Base Labor Fee + $75.00</p>
                                     <p className="text-[13px] text-slate-mute">Details: Your build becomes the sole focus on the workbench the moment components arrive. Parts are processed immediately. Includes premium cable routing, extended hardware stress testing, and thermal optimization.</p>
+
                                 </div>
                             </div>
                         </div>
@@ -1638,7 +1644,8 @@ export default function IntakeForm() {
                                <CheckboxField
                                 checked={agreedToTerms}
                                 onChange={setAgreedToTerms}
-                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>
+                                }
                                 error={errors.terms}
                                />
                                <CheckboxField
@@ -1646,7 +1653,7 @@ export default function IntakeForm() {
                                 onChange={setKeepComponentBoxes}
                                 label="Keep all component boxes."
                                />
-                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc.</p>
+                               <p className="text-xs text-slate-mute -mt-2 ml-8">The PC case box is always preserved for transport. Selecting this means you want to keep the boxes for other components like CPU, GPU, etc. If you leave this unselected, Custom Core Labs will recycle or retain boxes for workshop display.</p>
                             </div>
                             <button
                               type="submit"
