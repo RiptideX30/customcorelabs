@@ -231,8 +231,18 @@ function AdminPage() {
         headers: { "x-admin-key": adminKey },
       });
       const data = await res.json();
-      if (data.ok && data.data) {
-        setBuilds(data.data.map(getCorrectedStatus));
+      if (data.ok && Array.isArray(data.data)) {
+        const validBuilds = data.data.filter(
+          (b): b is BuildSummary =>
+            b &&
+            typeof b === "object" &&
+            typeof b.trackingCode === "string" &&
+            typeof b.customerName === "string" &&
+            typeof b.createdAt === "string" &&
+            typeof b.status === "string" &&
+            Array.isArray(b.services),
+        );
+        setBuilds(validBuilds.map(getCorrectedStatus));
         setAuthenticated(true);
       } else {
         setError(data.error || "Unauthorized");
@@ -381,8 +391,10 @@ function AdminPage() {
               </div>
 
               {builds.map((build) => {
-                const track = getTrackForServices(build.services || []);
-                if (!track || track.length === 0) return null;
+                const track = getTrackForServices(build.services);
+                if (!track || !Array.isArray(track)) {
+                  return null;
+                }
 
                 const currentStepIndex = (build.timeline || []).length - 1;
                 const nextStep = track[currentStepIndex + 1];

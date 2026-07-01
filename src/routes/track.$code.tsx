@@ -46,29 +46,49 @@ export const Route = createFileRoute("/track/$code")({
 
 const DynamicTimeline = ({ build }: { build: Partial<BuildRecord> }) => {
   if (!build.services || !build.timeline) return null;
-
   const track = getTrackForServices(build.services);
-  const activeStep = build.status === "completed" ? track.length : build.timeline.length;
+  
+  // FIXED: If build.timeline is empty, safely fallback to 0 instead of matching undefined lengths
+  const activeStep = build.status === "completed" 
+    ? track.length 
+    : (build.timeline?.length || 0);
 
   return (
     <div className="space-y-4">
       {track.map((step, index) => {
         const isCompleted = index < activeStep;
         const isActive = index === activeStep;
-        const IconComponent = STEP_ICONS[step];
+        
+        // FIXED: Safely fetch the icon configuration block or default it to null
+        const IconComponent = STEP_ICONS && typeof STEP_ICONS === 'object' ? STEP_ICONS[step] : null;
 
         return (
           <div key={step} className="flex items-start gap-4">
             <div className="flex flex-col items-center">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? "bg-primary text-primary-foreground" : isActive ? "bg-primary/10 text-primary" : "bg-slate-200 text-slate-500"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                  isCompleted
+                    ? "bg-primary text-primary-foreground"
+                    : isActive
+                    ? "bg-primary/10 text-primary"
+                    : "bg-slate-200 text-slate-500"
+                }`}
               >
-                <span className="text-lg">
-                  {IconComponent ? <IconComponent /> : "❓"}
+                {/* FIXED: Instead of letting an undefined component break execution, render an inline fallback dot */}
+                <span className="flex items-center justify-center h-4 w-4">
+                  {IconComponent ? (
+                    <IconComponent className="h-4 w-4" />
+                  ) : (
+                    <span className="h-2 w-2 rounded-full bg-current" />
+                  )}
                 </span>
               </div>
               {index < track.length - 1 && (
-                <div className={`w-0.5 h-12 mt-2 ${isCompleted ? "bg-primary" : "bg-slate-200"}`} />
+                <div
+                  className={`w-0.5 h-12 mt-2 ${
+                    isCompleted ? "bg-primary" : "bg-slate-200"
+                  }`}
+                />
               )}
             </div>
             <div>
