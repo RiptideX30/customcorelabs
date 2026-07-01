@@ -39,13 +39,6 @@ type BuildSummary = {
   createdAt: string;
 };
 
-type BuildSummaryWithEstimates = BuildSummary & {
-  partsValue?: string;
-  estimateSubtotal?: string;
-  taxAmount?: string;
-  totalWithTax?: string;
-};
-
 const ADMIN_KEY_STORAGE = "ccl_admin_key";
 
 const allServices = [
@@ -56,12 +49,14 @@ const allServices = [
 
 const getCorrectedStatus = (build: BuildSummary): BuildSummary => {
   const track = getTrackForServices(build.services || []);
+  if (!track || track.length === 0) {
+    return build;
+  }
   const isCompleted = (build.timeline || []).length >= track.length;
-  // Override server status if there are still steps left
+
   if (!isCompleted && build.status === "completed") {
     return { ...build, status: "in-progress" };
   }
-  // Or if the server thinks it's in progress but the track is done
   if (isCompleted && build.status !== "completed") {
     return { ...build, status: "completed" };
   }
@@ -387,6 +382,8 @@ function AdminPage() {
 
               {builds.map((build) => {
                 const track = getTrackForServices(build.services || []);
+                if (!track || track.length === 0) return null;
+
                 const currentStepIndex = (build.timeline || []).length - 1;
                 const nextStep = track[currentStepIndex + 1];
 

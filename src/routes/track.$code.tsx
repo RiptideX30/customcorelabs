@@ -55,7 +55,7 @@ const DynamicTimeline = ({ build }: { build: Partial<BuildRecord> }) => {
       {track.map((step, index) => {
         const isCompleted = index < activeStep;
         const isActive = index === activeStep;
-        const Icon = STEP_ICONS[step] || "❓";
+        const IconComponent = STEP_ICONS[step];
 
         return (
           <div key={step} className="flex items-start gap-4">
@@ -63,7 +63,9 @@ const DynamicTimeline = ({ build }: { build: Partial<BuildRecord> }) => {
               <div
                 className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? "bg-primary text-primary-foreground" : isActive ? "bg-primary/10 text-primary" : "bg-slate-200 text-slate-500"}`}
               >
-                <span className="text-lg"><Icon/></span>
+                <span className="text-lg">
+                  {IconComponent ? <IconComponent /> : "❓"}
+                </span>
               </div>
               {index < track.length - 1 && (
                 <div className={`w-0.5 h-12 mt-2 ${isCompleted ? "bg-primary" : "bg-slate-200"}`} />
@@ -84,6 +86,10 @@ const DynamicTimeline = ({ build }: { build: Partial<BuildRecord> }) => {
 
 function TrackBuildPage() {
   const { build, code } = Route.useLoaderData();
+
+  if (!code) {
+    return <div>No valid tracking code specified.</div>;
+  }
 
   const createdDate = build.createdAt
     ? new Date(build.createdAt).toLocaleDateString("en-US", {
@@ -200,7 +206,7 @@ function TrackBuildPage() {
                 </div>
                 {build.services && build.services.length > 0 ? (
                   <ul className="space-y-2">
-                    {build.services.map((service: string, i: number) => (
+                    {build.services.map((service, i) => (
                       <li
                         key={i}
                         className="flex items-center gap-3 rounded-lg border hairline bg-secondary/20 px-4 py-3 text-[14px] font-medium"
