@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type Build, type BuildStatus } from "@/lib/build-tracker";
+import { type Build, type BuildStatus } from "@/lib/build-tracker.tsx";
 import { getTrackForServices } from "@/lib/service-tracks";
 import { trackerUrl } from "@/lib/tracker-api";
 import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";

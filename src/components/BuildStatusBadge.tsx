@@ -1,4 +1,4 @@
-import { STATUS_LABELS, STATUS_ICONS, STATUS_COLORS, type BuildStatus } from "@/lib/build-tracker";
+import { STATUS_LABELS, STATUS_ICONS, STATUS_COLORS, type BuildStatus } from "@/lib/build-tracker.tsx";
 
 export default function BuildStatusBadge({
   status,

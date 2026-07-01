@@ -15,7 +15,7 @@ import {
 import cclLogo from "@/assets/ccl-logo.jpg";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
 import { trackerUrl } from "@/lib/tracker-api";
-import { type Build, type BuildTimelineEvent } from "@/lib/build-tracker";
+import { type Build, type BuildTimelineEvent } from "@/lib/build-tracker.tsx";
 import { getTrackForServices } from "@/lib/service-tracks";
 
 export const Route = createFileRoute("/track/$code")({
