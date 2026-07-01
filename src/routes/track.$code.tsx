@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, Clock, DollarSign } from "lucide-react";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
-import { type BuildRecord, type ApiResponse, STATUS_LABELS } from "@/lib/build-tracker";
-import { STEP_ICONS } from "@/lib/service-tracks";
+import { type BuildRecord, type ApiResponse } from "@/lib/build-tracker";
+import { getTrackForServices, STEP_ICONS } from "@/lib/service-tracks";
 import { trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/track/$code")({
@@ -43,29 +43,35 @@ export const Route = createFileRoute("/track/$code")({
   },
 });
 
-const DynamicTimeline = ({ timeline }: { timeline: BuildRecord['timeline'] }) => {
-  if (!timeline) return null;
+const DynamicTimeline = ({ build }: { build: Partial<BuildRecord> }) => {
+  if (!build.services || !build.timeline) return null;
+
+  const track = getTrackForServices(build.services);
+  const activeStep = build.status === "completed" ? track.length : build.timeline.length;
 
   return (
     <div className="space-y-4">
-      {timeline.map((item, index) => {
-        const isCompleted = item.status === 'completed';
-        const isActive = item.status === 'active';
-        const icon = STEP_ICONS[item.service] || '❓';
+      {track.map((step, index) => {
+        const isCompleted = index < activeStep;
+        const isActive = index === activeStep;
+        const icon = STEP_ICONS[step] || "❓";
 
         return (
-          <div key={item.service} className="flex items-start gap-4">
+          <div key={step} className="flex items-start gap-4">
             <div className="flex flex-col items-center">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? 'bg-primary text-primary-foreground' : isActive ? 'bg-primary/10 text-primary' :'bg-slate-200 text-slate-500'}`}>
-                    <span className="text-lg">{icon}</span>
-                </div>
-                {index < timeline.length - 1 && (
-                    <div className={`w-0.5 h-12 mt-2 ${isCompleted ? 'bg-primary' : 'bg-slate-200'}`} />
-                )}
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? "bg-primary text-primary-foreground" : isActive ? "bg-primary/10 text-primary" : "bg-slate-200 text-slate-500"}`}>
+                <span className="text-lg">{icon}</span>
+              </div>
+              {index < track.length - 1 && (
+                <div className={`w-0.5 h-12 mt-2 ${isCompleted ? "bg-primary" : "bg-slate-200"}`} />
+              )}
             </div>
             <div>
-              <p className={`font-semibold ${isActive ? 'text-primary' : ''}`}>{item.service}</p>
-              <p className="text-sm text-slate-500">{STATUS_LABELS[item.status] || item.status}</p>
+              <p className={`font-semibold ${isActive ? "text-primary" : ""}`}>{step}</p>
+              <p className="text-sm text-slate-500">
+                {isCompleted ? "Completed" : isActive ? "In Progress" : "Pending"}
+              </p>
             </div>
           </div>
         );
@@ -180,7 +186,7 @@ function TrackBuildPage() {
                 <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary mb-6">
                   Progress Timeline
                 </div>
-                {build.timeline && <DynamicTimeline timeline={build.timeline} />}
+                <DynamicTimeline build={build} />
               </div>
             </div>
 

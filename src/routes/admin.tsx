@@ -22,7 +22,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type BuildStatus, BUILD_STATUSES, STATUS_LABELS } from "@/lib/build-tracker";
+import { type BuildStatus } from "@/lib/build-tracker";
+import {
+  getTrackForServices,
+  STEP_ICONS,
+  SERVICE_TO_TRACK_MAP,
+  TRACKS,
+} from "@/lib/service-tracks";
 import { trackerUrl } from "@/lib/tracker-api";
 import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";
 
@@ -35,6 +41,7 @@ type BuildSummary = {
   customerName: string;
   services: string[];
   status: BuildStatus;
+  timeline: { status: string; timestamp: string }[];
   createdAt: string;
 };
 
@@ -268,17 +275,16 @@ function AdminPage() {
     }
   }, [adminKey, fetchBuilds]);
 
-  const updateStatus = useCallback(
-    async (code: string, newStatus: BuildStatus) => {
+  const advanceBuild = useCallback(
+    async (code: string) => {
       setUpdatingCode(code);
       try {
-        const res = await fetch(trackerUrl(`/api/track/${code}`), {
-          method: "PATCH",
+        const res = await fetch(trackerUrl(`/api/track/${code}/advance`), {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-admin-key": adminKey,
           },
-          body: JSON.stringify({ status: newStatus }),
         });
         const data = await res.json();
         if (data.ok) {
@@ -292,12 +298,6 @@ function AdminPage() {
     },
     [adminKey, fetchBuilds],
   );
-
-  const getNextStatus = (current: BuildStatus): BuildStatus | null => {
-    const idx = BUILD_STATUSES.indexOf(current);
-    if (idx === -1 || idx >= BUILD_STATUSES.length - 1) return null;
-    return BUILD_STATUSES[idx + 1];
-  };
 
   if (!authenticated) {
     return (
@@ -396,7 +396,10 @@ function AdminPage() {
 
               {builds.map((build0) => {
                 const build = build0 as BuildSummaryWithEstimates;
-                const next = getNextStatus(build.status);
+                const track = getTrackForServices(build.services);
+                const currentStepIndex = build.timeline.length - 1;
+                const nextStep = track[currentStepIndex + 1];
+
                 return (
                   <div
                     key={build.trackingCode}
@@ -454,9 +457,9 @@ function AdminPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        {next && (
+                        {nextStep && (
                           <button
-                            onClick={() => updateStatus(build.trackingCode, next)}
+                            onClick={() => advanceBuild(build.trackingCode)}
                             disabled={updatingCode === build.trackingCode}
                             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[12px] font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
                           >
@@ -464,7 +467,7 @@ function AdminPage() {
                               <span className="inline-block h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                             ) : (
                               <>
-                                Advance to {STATUS_LABELS[next]}
+                                Advance to "{nextStep}"
                                 <ArrowUpRight className="h-3 w-3" />
                               </>
                             )}
