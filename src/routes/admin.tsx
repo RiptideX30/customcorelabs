@@ -54,6 +54,20 @@ const allServices = [
   ...(Array.isArray(PERFORMANCE_TUNING) ? PERFORMANCE_TUNING : []),
 ];
 
+const getCorrectedStatus = (build: BuildSummary): BuildSummary => {
+  const track = getTrackForServices(build.services || []);
+  const isCompleted = (build.timeline || []).length >= track.length;
+  // Override server status if there are still steps left
+  if (!isCompleted && build.status === "completed") {
+    return { ...build, status: "in-progress" };
+  }
+  // Or if the server thinks it's in progress but the track is done
+  if (isCompleted && build.status !== "completed") {
+    return { ...build, status: "completed" };
+  }
+  return build;
+};
+
 function CreateBuildDialog({
   adminKey,
   onBuildCreated,
@@ -225,7 +239,7 @@ function AdminPage() {
       });
       const data = await res.json();
       if (data.ok && data.data) {
-        setBuilds(data.data);
+        setBuilds(data.data.map(getCorrectedStatus));
         setAuthenticated(true);
       } else {
         setError(data.error || "Unauthorized");
@@ -259,9 +273,10 @@ function AdminPage() {
         });
         const data = await res.json();
         if (data.ok && data.data) {
+          const correctedBuild = getCorrectedStatus(data.data);
           setBuilds((prevBuilds) =>
             prevBuilds.map((build) =>
-              build.trackingCode === code ? { ...build, ...data.data } : build,
+              build.trackingCode === code ? correctedBuild : build,
             ),
           );
         }
@@ -330,7 +345,8 @@ function AdminPage() {
               <CreateBuildDialog
                 adminKey={adminKey}
                 onBuildCreated={(newBuild) => {
-                  setBuilds((prev) => [newBuild, ...prev].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+                  const correctedBuild = getCorrectedStatus(newBuild)
+                  setBuilds((prev) => [correctedBuild, ...prev].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
                 }}
               />
               <button
@@ -369,8 +385,7 @@ function AdminPage() {
                 </span>
               </div>
 
-              {builds.map((build0) => {
-                const build = build0 as BuildSummaryWithEstimates;
+              {builds.map((build) => {
                 const track = getTrackForServices(build.services || []);
                 const currentStepIndex = (build.timeline || []).length - 1;
                 const nextStep = track[currentStepIndex + 1];
@@ -399,40 +414,13 @@ function AdminPage() {
                             {build.services.join(", ")}
                           </p>
                         )}
-                        {(build.estimateSubtotal || build.taxAmount || build.totalWithTax) && (
-                          <div className="mt-3 rounded-xl border hairline bg-secondary/10 p-3 text-[13px]">
-                            <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute mb-2">
-                              Estimate Details
-                            </div>
-                            <div className="space-y-1">
-                              {build.estimateSubtotal && (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-slate-500">Subtotal</span>
-                                  <span className="font-semibold">{build.estimateSubtotal}</span>
-                                </div>
-                              )}
-                              {build.taxAmount && (
-                                <div className="flex items-center justify-between">
-                                  <span className="text-slate-500">Tax</span>
-                                  <span className="font-semibold">{build.taxAmount}</span>
-                                </div>
-                              )}
-                              {build.totalWithTax && (
-                                <div className="flex items-center justify-between pt-1 border-t hairline">
-                                  <span className="font-medium">Total</span>
-                                  <span className="font-semibold">{build.totalWithTax}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
                         <p className="mt-4 text-[11px] text-slate-mute flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {new Date(build.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        {nextStep && (
+                        {nextStep && build.status !== "completed" && (
                           <button
                             onClick={() => advanceBuild(build.trackingCode)}
                             disabled={updatingCode === build.trackingCode}

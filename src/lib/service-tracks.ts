@@ -1,78 +1,27 @@
+const DEFAULT_TRACK = ["Build Created", "Build Complete"];
+const REPAIR_TRACK = ["Received for Service", "Diagnostics", "Repair", "Ready for Pickup"];
+const ULTIMATE_TRACK = ["Parts Ordered", "Parts Received", "Assembly", "Validation", "Ready for Pickup"];
 
-export const TRACKS = {
-  BUILD: [
-    "Parts Procurement & Reception",
-    "Core Hardware Assembly",
-    "Cable Architecture",
-    "OS & Validation Bench",
-    "Certified for Collection",
-  ],
-  REPAIR: [
-    "Device Workshop Intake",
-    "Deep Diagnostics & Trace Isolation",
-    "Service Implementation",
-    "Post-Service Validation",
-    "Certified for Collection",
-  ],
-  UPGRADE: [
-    "Device Workshop Intake",
-    "Legacy De-installation",
-    "Component Provisioning",
-    "Bandwidth & Driver Validation",
-    "Certified for Collection",
-  ],
-  TUNING: [
-    "Device Workshop Intake",
-    "Calibration & Firmware Update",
-    "Profiling & Memory Training",
-    "Deep Validation Stability Testing",
-    "Certified for Collection",
-  ],
+const SERVICE_TO_TRACK: Record<string, string[]> = {
+  "Ultimate Build": ULTIMATE_TRACK,
+  "Desktop Refresh Bundle": REPAIR_TRACK,
+  "Full System Diagnostic": REPAIR_TRACK,
+  "Hardware Upgrade": REPAIR_TRACK,
 };
 
-export const SERVICE_TO_TRACK_MAP: Record<string, keyof typeof TRACKS> = {
-  // BUILD
-  "Basic Build": "BUILD",
-  "Ultimate Build": "BUILD",
-  // REPAIR
-  "Desktop Refresh Bundle": "REPAIR",
-  "Full System Diagnostic": "REPAIR",
-  "Software Install": "REPAIR",
-  "Secure Drive Wipe": "REPAIR",
-  // UPGRADE
-  "Pro Cable Management": "UPGRADE",
-  "Hardware Upgrade": "UPGRADE",
-  "Fresh Thermal Paste": "UPGRADE",
-  // TUNING
-  "BIOS / Firmware Tuning": "TUNING",
-  "24-Hour Bench Validation": "TUNING",
-  "Memory + CPU Overclock Profile": "TUNING",
-};
-
-export const STEP_ICONS: Record<string, string> = {
-    "Parts Procurement & Reception": "📦",
-    "Core Hardware Assembly": "🔧",
-    "Cable Architecture": "🔌",
-    "OS & Validation Bench": "⚡",
-    "Certified for Collection": "✅",
-    "Device Workshop Intake": "📥",
-    "Deep Diagnostics & Trace Isolation": "🔍",
-    "Service Implementation": "🛠️",
-    "Post-Service Validation": "🧪",
-    "Legacy De-installation": "🔩",
-    "Component Provisioning": "⚙️",
-    "Bandwidth & Driver Validation": "📡",
-    "Calibration & Firmware Update": "🎛️",
-    "Profiling & Memory Training": "🧠",
-    "Deep Validation Stability Testing": "🔥",
-  };
-
+/**
+ * Determines the appropriate tracking timeline for a given set of services.
+ * @param services An array of service titles.
+ * @returns The corresponding array of timeline statuses.
+ */
 export function getTrackForServices(services: string[]): string[] {
+  if (!Array.isArray(services)) {
+    return DEFAULT_TRACK;
+  }
   for (const service of services) {
-    const trackName = SERVICE_TO_TRACK_MAP[service];
-    if (trackName) {
-      return TRACKS[trackName];
+    if (SERVICE_TO_TRACK[service]) {
+      return SERVICE_TO_TRACK[service];
     }
   }
-  return TRACKS.BUILD;
+  return DEFAULT_TRACK;
 }
