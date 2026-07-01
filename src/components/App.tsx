@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowUpRight,
-  Check,
   Info,
   Lock,
   Youtube,
@@ -296,7 +295,6 @@ export default function App() {
       <TestimonialSection />
       <GeographySection />
       <FAQSection />
-      <ServicePackages />
       <ServicesGrid
         active={active}
         toggle={toggle}
@@ -304,8 +302,8 @@ export default function App() {
         openModal={(id) => setModal(id)}
         partsValue={partsValue}
       />
+      <ServicePackages />
       <QuickContact />
-      <ServiceAgreement />
       <Footer onOpenTerms={() => setTermsOpen(true)} />
       {modal && <DetailsModal service={SERVICE_MAP[modal]} onClose={() => setModal(null)} />}
       {termsOpen && <TermsModal onClose={() => setTermsOpen(false)} />}
@@ -1298,102 +1296,6 @@ function Footer({ onOpenTerms }: { onOpenTerms: () => void }) {
   );
 }
 
-/* ---------------- Service Agreement (replaces old Disclosure) ---------------- */
-
-function ServiceAgreement() {
-  const sections = [
-    {
-      title: "1. Parts Procurement & Settlement",
-      bullets: [
-        "Premium components are ordered on your behalf. Parts cost is collected before any order is placed so we can reserve stock and begin build prep.",
-        "One hundred percent (100%) of the structured assembly labor fee is due only after your system passes final validation and you collect it at pickup.",
-        "Authorized settlement methods are limited to secure digital transfers (Zelle, Apple Pay) or cash currency at the immediate time of handoff.",
-      ],
-    },
-    {
-      title: "2. Component Liability & Dead-On-Arrival (DOA) Provisions",
-      bullets: [
-        "When we procure components on your behalf, we ensure all hardware arrives defect-free. If a component is Dead on Arrival (DOA), we handle the return process with the vendor.",
-        "Our technician will coordinate the replacement with the vendor and ensure your system gets the fresh component at no additional cost to you.",
-        "We take responsibility for the quality of parts we source for you, and we manage all returns and replacements to keep your project on schedule.",
-      ],
-    },
-    {
-      title: "3. 90-Day Artisanal Craftsmanship Warranty",
-      bullets: [
-        "Every system built on our bench carries an inclusive, ninety (90) day Limited Labor Warranty covering the physical configuration and manual execution of the build.",
-        "Covered Items: Loose or unseated interconnects, physical mounting hardware realignment, structural cable bundle adjustments, or incorrect BIOS configuration profile values applied by our technician.",
-        "Exclusions: Subsequent hardware component degradation, natural manufacturer product defects, user accidents (impact drops, liquid exposure), unauthorized hardware modifications, malware, or OS corruption introduced post-handoff.",
-      ],
-    },
-    {
-      title: "4. Professional Service Guarantee",
-      bullets: [
-        "All system assembly, validation, and checklist completion is performed by a dedicated technician with extensive boutique build experience.",
-        "We do not subcontract work. Every premium custom build is completed in-house at our Bushnell's Basin facility.",
-      ],
-    },
-    {
-      title: "5. Data Sovereignty & Privacy Policy",
-      bullets: [
-        "Client storage arrays are never duplicated, backed up, or manually reviewed.",
-        "All operating system installations utilize official, unaltered distributions from Microsoft or open-source maintainers.",
-      ],
-    },
-    {
-      title: "6. Storage Fees & Property Abandonment",
-      bullets: [
-        "Completed systems or diagnostic hardware not picked up within 14 calendar days of the completed service notification will incur a $10 per day storage fee.",
-        "Systems left unclaimed for more than 45 calendar days will be considered legally abandoned. Custom Core Labs reserves the right to liquidate the hardware to recover unpaid labor balances and accumulated storage costs.",
-      ],
-    },
-    {
-      title: "7. Used & Secondhand Component Disclaimer",
-      bullets: [
-        "Custom Core Labs is not responsible for system failures, POST errors, or hardware instability caused by components sourced from the used or secondhand market, including but not limited to eBay, Facebook Marketplace, Craigslist, pawn shops, or estate sales.",
-        "If a system fails to POST or exhibits instability due to pre-existing wear, damage, or degradation of client-supplied pre-owned hardware, the full applicable labor rate and diagnostic fees remain due for all bench time and assembly services rendered.",
-      ],
-    },
-  ];
-
-  return (
-    <section id="disclosure" className="w-full bg-zinc-50 border-y hairline">
-      <div className="mx-auto max-w-[1280px] px-5 md:px-8 py-16 md:py-24">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="mono text-[10.5px] uppercase tracking-[0.18em] text-primary">§ 06</div>
-            <div className="mono mt-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">
-              Service agreement · public record
-            </div>
-          </div>
-          <h2 className="text-[28px] md:text-[44px] font-semibold leading-[1.05] tracking-[-0.03em]">
-            Custom Core Labs // Service Agreement & Limited Labor Warranty
-          </h2>
-        </div>
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-5">
-          {sections.map((s) => (
-            <div
-              key={s.title}
-              className="w-full rounded-xl border border-primary/30 bg-background p-6 md:p-7"
-            >
-              <h3 className="text-[15.5px] font-semibold tracking-tight text-foreground">
-                {s.title}
-              </h3>
-              <ul className="mt-4 space-y-2.5">
-                {s.bullets.map((b, i) => (
-                  <li key={i} className="flex gap-3 text-[13.5px] leading-relaxed text-slate-ink">
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 /* ---------------- Terms Modal ---------------- */
 
 const TERMS: { title: string; body: string }[] = [
