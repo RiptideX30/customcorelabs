@@ -40,31 +40,52 @@ export async function handleTrackerRequest(
 
   const url = new URL(request.url);
   const path = url.pathname;
+  const pathParts = path.split("/").filter(Boolean);
 
   try {
-    // POST /api/track — create a new build record (called from submit form worker)
-    if (request.method === "POST" && path === "/api/track") {
+    // POST /api/track — create a new build record
+    if (
+      request.method === "POST" &&
+      pathParts[0] === "api" &&
+      pathParts[1] === "track" &&
+      pathParts.length === 2
+    ) {
       return handleCreate(request, env);
     }
 
-    // GET /api/track/:code — lookup a build by tracking code
-    if (request.method === "GET" && path.startsWith("/api/track/")) {
-      const code = path.replace("/api/track/", "").toUpperCase();
+    // GET /api/track/:code — lookup a build
+    if (
+      request.method === "GET" &&
+      pathParts[0] === "api" &&
+      pathParts[1] === "track" &&
+      pathParts[2]
+    ) {
+      const code = pathParts[2].toUpperCase();
       return handleLookup(code, env);
     }
 
-    // PATCH /api/track/:code — update build status (admin only)
-    if (request.method === "PATCH" && path.startsWith("/api/track/")) {
+    // PATCH /api/track/:code — update build status
+    if (
+      request.method === "PATCH" &&
+      pathParts[0] === "api" &&
+      pathParts[1] === "track" &&
+      pathParts[2]
+    ) {
       const adminKey = request.headers.get("x-admin-key");
       if (!adminKey || adminKey !== env.ADMIN_KEY) {
         return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       }
-      const code = path.replace("/api/track/", "").toUpperCase();
+      const code = pathParts[2].toUpperCase();
       return handleUpdate(request, code, env);
     }
 
-    // GET /api/admin/builds — list all active builds (admin only)
-    if (request.method === "GET" && path === "/api/admin/builds") {
+    // GET /api/admin/builds — list all builds
+    if (
+      request.method === "GET" &&
+      pathParts[0] === "api" &&
+      pathParts[1] === "admin" &&
+      pathParts[2] === "builds"
+    ) {
       const adminKey = request.headers.get("x-admin-key");
       if (!adminKey || adminKey !== env.ADMIN_KEY) {
         return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
@@ -107,7 +128,7 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
       {
         status: "received",
         timestamp: now,
-        note: "Parts received at Bushnell's Basin bench",
+        note: "Parts received at Bushnell\'s Basin bench",
       },
     ],
     dropoffDate: now.split("T")[0],

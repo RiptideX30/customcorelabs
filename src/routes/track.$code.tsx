@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, Clock, DollarSign } from "lucide-react";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
 import { type BuildRecord, type ApiResponse } from "@/lib/build-tracker";
-import { getTrackForServices, STEP_ICONS } from "@/lib/service-tracks";
+import { getTrackForServices } from "@/lib/service-tracks";
+import { STEP_ICONS } from "@/lib/step-icons";
 import { trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/track/$code")({
