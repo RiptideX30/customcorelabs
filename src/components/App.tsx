@@ -21,6 +21,7 @@ import {
 import cclLogo from "@/assets/ccl-logo.jpg";
 import buildPhoto from "@/assets/builds/midnight-aero.jpg";
 import ServicePackages from "./ServicePackages";
+import IntakeForm from "./IntakeForm";
 
 /* ---------------- Service catalog ---------------- */
 
@@ -303,6 +304,7 @@ export default function App() {
         partsValue={partsValue}
       />
       <ServicePackages />
+      <IntakeForm />
       <QuickContact />
       <Footer onOpenTerms={() => setTermsOpen(true)} />
       {modal && <DetailsModal service={SERVICE_MAP[modal]} onClose={() => setModal(null)} />}
@@ -828,28 +830,26 @@ function PricingTable() {
   );
 }
 
-/* ---------------- Testimonial ---------------- */ 
-function TestimonialSection() { 
-  // Returning null completely hides this entire section from the live site safely!
-  return null; 
+/* ---------------- Testimonial ---------------- */
 
-  /* The original layout is safely preserved below and ignored by the browser:
-  return ( 
-    <section className="border-b hairline bg-zinc-50"> 
-      <div className="mx-auto max-w-[800px] px-5 md:px-8 py-16 md:py-20"> 
-        <div className="mono text-center text-[10.5px] uppercase tracking-[0.18em] text-primary"> 
-          What our clients say 
-        </div> 
-        <div className="mt-8 testimonial-card"> 
-          <p className="quote"> 
-            "The structural cable management was absolutely flawless. Driving down to Bushnell's Basin to pick it up was well worth the trip. The build quality easily beats major retail assembly lines." 
-          </p> 
-          <p className="author">— Alex M., Rochester NY</p> 
-        </div> 
-      </div> 
-    </section> 
-  ); 
-  */
+function TestimonialSection() {
+  return (
+    <section className="border-b hairline bg-zinc-50">
+      <div className="mx-auto max-w-[800px] px-5 md:px-8 py-16 md:py-20">
+        <div className="mono text-center text-[10.5px] uppercase tracking-[0.18em] text-primary">
+          What our clients say
+        </div>
+        <div className="mt-8 testimonial-card">
+          <p className="quote">
+            "The structural cable management was absolutely flawless. Driving down to Bushnell's
+            Basin to pick it up was well worth the trip. The build quality easily beats major retail
+            assembly lines."
+          </p>
+          <p className="author">— Alex M., Rochester NY</p>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 /* ---------------- Geography Section ---------------- */
