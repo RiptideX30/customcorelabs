@@ -829,7 +829,7 @@ function PricingTable() {
 }
 
 /* ---------------- Testimonial ---------------- */
-
+{/*}
 function TestimonialSection() {
   return (
     <section className="border-b hairline bg-zinc-50">
@@ -849,7 +849,7 @@ function TestimonialSection() {
     </section>
   );
 }
-
+*/}
 /* ---------------- Geography Section ---------------- */
 
 function GeographySection() {
