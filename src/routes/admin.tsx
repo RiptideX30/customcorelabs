@@ -376,7 +376,7 @@ function AdminPage() {
             <div className="text-center py-20">
               <PackageSearch className="h-12 w-12 text-slate-mute mx-auto mb-4" />
               <h2 className="text-[20px] font-semibold">No active builds</h2>
-              <p className="text-[14px] text-slate-mute mt-1">
+              <p className_="text-[14px] text-slate-mute mt-1">
                 Use the "Create New Build" button to manually create a build.
               </p>
             </div>
@@ -391,7 +391,7 @@ function AdminPage() {
 
               {builds.map((build0) => {
                 const build = build0 as BuildSummaryWithEstimates;
-                const track = getTrackForServices(build.services);
+                const track = getTrackForServices(build.services || []);
                 const currentStepIndex = (build.timeline || []).length - 1;
                 const nextStep = track[currentStepIndex + 1];
 
