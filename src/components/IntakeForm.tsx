@@ -345,7 +345,7 @@ function LiveEstimator({
               className="flex items-center justify-between border-b hairline py-2 text-[13px]"
             >
               <span className="text-slate-ink">{it.label}</span>
-              <span className="mono tabular-nums text-foreground">`${it.amount.toFixed(2)}</span>
+              <span className="mono tabular-nums text-foreground">${it.amount.toFixed(2)}</span>
             </div>
           ))
         )}
@@ -353,11 +353,11 @@ function LiveEstimator({
       <div className="mt-3 border-t hairline pt-3 text-[13px]">
         <div className="flex items-center justify-between">
           <span className="text-slate-ink">Estimated tax (NY 8%)</span>
-          <span className="mono tabular-nums text-foreground">`${taxAmount.toFixed(2)}</span>
+          <span className="mono tabular-nums text-foreground">${taxAmount.toFixed(2)}</span>
         </div>
         <div className="mt-2 flex items-baseline justify-between">
           <span className="text-[13px] font-semibold">Estimated total</span>
-          <span className="text-[20px] font-semibold tabular-nums">`${total.toFixed(2)}</span>
+          <span className="text-[20px] font-semibold tabular-nums">${total.toFixed(2)}</span>
         </div>
       </div>
     </div>
@@ -969,8 +969,7 @@ export default function IntakeForm() {
           ? "No URL given - Customer will provide parts list later"
           : knownPCPP,
         "parts-value": `$${partsValueNum.toFixed(2)}`,
-        "symptoms-details": `Look: ${lookText}${knownLook ? ` — ${knownLook}` : ""}${knownNotes ? `
-Notes: ${knownNotes}` : ""}`,
+        "symptoms-details": `Look: ${lookText}${knownLook ? ` — ${knownLook}` : ""}${knownNotes ? `\nNotes: ${knownNotes}` : ""}`,
         "itx-sff-case": knownITX ? "Yes" : "No",
         "non-modular-psu": knownNonModular ? "Yes" : "No",
         "build-turnaround": knownTurnaround,
@@ -986,9 +985,7 @@ Notes: ${knownNotes}` : ""}`,
         "selected-services": "Consultation — needs parts selection help",
         "pcpartpicker-url": "N/A",
         "parts-value": helpBudget ? `Budget: $${helpBudget}` : "N/A",
-        "symptoms-details": `Purpose: ${helpPurpose || "Not specified"}
-Look: ${lookText}${helpLook ? ` — ${helpLook}` : ""}${helpNotes ? `
-Notes: ${helpNotes}` : ""}`,
+        "symptoms-details": `Purpose: ${helpPurpose || "Not specified"}\nLook: ${lookText}${helpLook ? ` — ${helpLook}` : ""}${helpNotes ? `\nNotes: ${helpNotes}` : ""}`,
         "itx-sff-case": helpITX ? "Yes" : "No",
         "non-modular-psu": helpNonModular ? "Yes" : "No",
         "build-turnaround": helpTurnaround,
@@ -1228,9 +1225,8 @@ Notes: ${helpNotes}` : ""}`,
                                <CheckboxField
                                 checked={agreedToTerms}
                                 onChange={setAgreedToTerms}
-                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>
-                                }
-                                error={errors.terms} 
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
+                                error={errors.terms}
                                />
                                <CheckboxField
                                 checked={keepComponentBoxes}
@@ -1463,8 +1459,7 @@ Notes: ${helpNotes}` : ""}`,
                                <CheckboxField
                                 checked={agreedToTerms}
                                 onChange={setAgreedToTerms}
-                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>
-                                }
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
                                 error={errors.terms}
                                />
                                <CheckboxField
@@ -1533,7 +1528,9 @@ Notes: ${helpNotes}` : ""}`,
                             />
                             <p className="mt-2 text-[12px] text-slate-mute">
                               <Info className="inline h-3 w-3 mr-1" />
-                              Include everything — parts, labor, and tax
+                              {helpTurnaround === 'priority'
+                                ? "Include everything — parts, labor, tax, and the $75 priority fee."
+                                : "Include everything — parts, labor, and tax."}
                             </p>
                           </div>
                         </div>
@@ -1605,7 +1602,6 @@ Notes: ${helpNotes}` : ""}`,
                                     <p className="text-[13px] text-slate-mute">4–5 Business Days</p>
                                     <p className="text-[13px] text-slate-mute">Cost: Base Labor Fee + $75.00</p>
                                     <p className="text-[13px] text-slate-mute">Details: Your build becomes the sole focus on the workbench the moment components arrive. Parts are processed immediately. Includes premium cable routing, extended hardware stress testing, and thermal optimization.</p>
-
                                 </div>
                             </div>
                         </div>
@@ -1644,8 +1640,7 @@ Notes: ${helpNotes}` : ""}`,
                                <CheckboxField
                                 checked={agreedToTerms}
                                 onChange={setAgreedToTerms}
-                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>
-                                }
+                                label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
                                 error={errors.terms}
                                />
                                <CheckboxField
@@ -1691,7 +1686,9 @@ Notes: ${helpNotes}` : ""}`,
                         const s = new Set<ServiceId>();
                         if (knownBuild) s.add(knownBuild);
                         knownPerformance.forEach((x) => s.add(x));
-                        if (knownBuild) s.add("thermal"); // thermal paste always available for builds
+                        if (s.has("ultimate") || s.has("basic")) {
+                          s.add("thermal");
+                        }
                         return s;
                       })()}
                       partsValue={Math.max(0, Number(knownPartsValue) || 0)}
