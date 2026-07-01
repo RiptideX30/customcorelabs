@@ -340,9 +340,6 @@ function Header() {
             <a className="hover:text-white transition-colors" href="#services">
               Services
             </a>
-            <a className="hover:text-white transition-colors" href="#book">
-              Book Appointment
-            </a>
             <Link className="hover:text-white transition-colors" to="/track">
               Track Build
             </Link>
@@ -390,13 +387,6 @@ function Header() {
               onClick={handleNavClick}
             >
               Services
-            </a>
-            <a
-              href="#book"
-              className="hover:text-white transition-colors py-2"
-              onClick={handleNavClick}
-            >
-              Book Appointment
             </a>
             <Link
               to="/track"

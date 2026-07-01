@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TrackRouteImport } from './routes/track'
-import { Route as StartAProjectRouteImport } from './routes/start-a-project'
 import { Route as ShowcasesRouteImport } from './routes/showcases'
 import { Route as PackagesRouteImport } from './routes/packages'
 import { Route as ComparisonRouteImport } from './routes/comparison'
@@ -25,11 +24,6 @@ import { Route as ComparisonCpuRouteImport } from './routes/comparison.cpu'
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StartAProjectRoute = StartAProjectRouteImport.update({
-  id: '/start-a-project',
-  path: '/start-a-project',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShowcasesRoute = ShowcasesRouteImport.update({
@@ -89,7 +83,6 @@ export interface FileRoutesByFullPath {
   '/comparison': typeof ComparisonRouteWithChildren
   '/packages': typeof PackagesRoute
   '/showcases': typeof ShowcasesRoute
-  '/start-a-project': typeof StartAProjectRoute
   '/track': typeof TrackRouteWithChildren
   '/comparison/cpu': typeof ComparisonCpuRoute
   '/comparison/gpu': typeof ComparisonGpuRoute
@@ -102,7 +95,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/packages': typeof PackagesRoute
   '/showcases': typeof ShowcasesRoute
-  '/start-a-project': typeof StartAProjectRoute
   '/comparison/cpu': typeof ComparisonCpuRoute
   '/comparison/gpu': typeof ComparisonGpuRoute
   '/track/$code': typeof TrackCodeRoute
@@ -116,7 +108,6 @@ export interface FileRoutesById {
   '/comparison': typeof ComparisonRouteWithChildren
   '/packages': typeof PackagesRoute
   '/showcases': typeof ShowcasesRoute
-  '/start-a-project': typeof StartAProjectRoute
   '/track': typeof TrackRouteWithChildren
   '/comparison/cpu': typeof ComparisonCpuRoute
   '/comparison/gpu': typeof ComparisonGpuRoute
@@ -132,7 +123,6 @@ export interface FileRouteTypes {
     | '/comparison'
     | '/packages'
     | '/showcases'
-    | '/start-a-project'
     | '/track'
     | '/comparison/cpu'
     | '/comparison/gpu'
@@ -145,7 +135,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/packages'
     | '/showcases'
-    | '/start-a-project'
     | '/comparison/cpu'
     | '/comparison/gpu'
     | '/track/$code'
@@ -158,7 +147,6 @@ export interface FileRouteTypes {
     | '/comparison'
     | '/packages'
     | '/showcases'
-    | '/start-a-project'
     | '/track'
     | '/comparison/cpu'
     | '/comparison/gpu'
@@ -173,7 +161,6 @@ export interface RootRouteChildren {
   ComparisonRoute: typeof ComparisonRouteWithChildren
   PackagesRoute: typeof PackagesRoute
   ShowcasesRoute: typeof ShowcasesRoute
-  StartAProjectRoute: typeof StartAProjectRoute
   TrackRoute: typeof TrackRouteWithChildren
 }
 
@@ -184,13 +171,6 @@ declare module '@tanstack/react-router' {
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/start-a-project': {
-      id: '/start-a-project'
-      path: '/start-a-project'
-      fullPath: '/start-a-project'
-      preLoaderRoute: typeof StartAProjectRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/showcases': {
@@ -300,7 +280,6 @@ const rootRouteChildren: RootRouteChildren = {
   ComparisonRoute: ComparisonRouteWithChildren,
   PackagesRoute: PackagesRoute,
   ShowcasesRoute: ShowcasesRoute,
-  StartAProjectRoute: StartAProjectRoute,
   TrackRoute: TrackRouteWithChildren,
 }
 export const routeTree = rootRouteImport

@@ -867,7 +867,7 @@ function PathSelector({ onSelect }: { onSelect: (path: PathId) => void }) {
    ============================================================ */
 
 export default function IntakeForm() {
-  const search = useSearch({ from: "/start-a-project" });
+  const search = useSearch({ from: "/" });
   const [currentPath, setCurrentPath] = useState<PathId>(() => {
     if (
       search.path === "package" &&
