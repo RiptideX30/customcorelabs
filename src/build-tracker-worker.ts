@@ -4,7 +4,6 @@ import {
   type ApiResponse,
   isValidStatus,
   generateTrackingCode,
-  generatePickupCode,
   kvKey,
   KV_KEY_PREFIX,
   BUILD_STATUSES,
@@ -114,7 +113,6 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
   };
 
   const trackingCode = generateTrackingCode();
-  const pickupCode = generatePickupCode();
   const now = new Date().toISOString();
 
   const record: BuildRecord = {
@@ -132,7 +130,6 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
       },
     ],
     dropoffDate: now.split("T")[0],
-    pickupCode,
     partsValue: data.partsValue || "",
     estimateSubtotal: data.estimateSubtotal || "",
     taxAmount: data.taxAmount || "",
@@ -201,10 +198,7 @@ async function handleUpdate(
   }
 
   const newStatus = data.status as BuildStatus;
-  const currentIdx = BUILD_STATUSES.indexOf(record.status);
-  const newIdx = BUILD_STATUSES.indexOf(newStatus);
 
-  // Allow moving forward or backward (admin flexibility)
   record.status = newStatus;
   record.timeline.push({
     status: newStatus,

@@ -4,35 +4,34 @@
  */
 
 /** Possible build statuses in order of progression */
-export const BUILD_STATUSES = ["pending", "active", "completed"] as const;
+export const BUILD_STATUSES = ["received", "in-progress", "completed"] as const;
 
 export type BuildStatus = (typeof BUILD_STATUSES)[number];
 
 /** Human-readable labels for each status */
 export const STATUS_LABELS: Record<BuildStatus, string> = {
-  pending: "Pending",
-  active: "Active",
+  received: "Received",
+  "in-progress": "In Progress",
   completed: "Completed",
 };
 
 /** Emoji/icon indicators per status */
 export const STATUS_ICONS: Record<BuildStatus, string> = {
-  pending: "📦",
-  active: "⚡",
+  received: "📦",
+  "in-progress": "⚡",
   completed: "✅",
 };
 
 /** Color classes for status badges */
 export const STATUS_COLORS: Record<BuildStatus, string> = {
-  pending: "bg-zinc-100 text-zinc-500 border-zinc-200",
-  active: "bg-blue-100 text-blue-800 border-blue-200",
+  received: "bg-zinc-100 text-zinc-500 border-zinc-200",
+  "in-progress": "bg-blue-100 text-blue-800 border-blue-200",
   completed: "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
 /** A single timeline entry recording a status change */
 export interface TimelineEntry {
-  service: string;
-  status: BuildStatus;
+  status: string;
   timestamp: string; // ISO 8601
   note?: string;
 }
@@ -47,7 +46,6 @@ export interface BuildRecord {
   status: BuildStatus;
   timeline: TimelineEntry[];
   dropoffDate: string; // ISO date
-  pickupCode: string; // 4-digit verification
   partsValue?: string;
   /** Estimated subtotal (labor) sent from form */
   estimateSubtotal?: string;
