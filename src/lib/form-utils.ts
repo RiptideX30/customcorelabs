@@ -168,28 +168,28 @@ export function computeEstimator(
 }
 
 export function computeSignatureEstimator(
-  tier: 'esports' | 'apex' | 'horizon',
+  tier: "esports" | "apex" | "horizon",
   isPriority: boolean,
 ) {
   const items: { label: string; amount: number }[] = [];
   let dueToday = 0;
 
-  if (tier === 'esports') {
-    items.push({ label: "Parts Cost", amount: 1021.00 });
-    items.push({ label: "Ultimate Labor", amount: 179.00 });
-    dueToday = 1021.00;
-  } else if (tier === 'apex') {
-    items.push({ label: "Parts Cost", amount: 1586.00 });
-    items.push({ label: "Ultimate Labor + Tuning", amount: 214.00 });
-    dueToday = 1586.00;
-  } else if (tier === 'horizon') {
-    items.push({ label: "Parts Cost", amount: 2077.00 });
-    items.push({ label: "Ultimate Labor + Full Validation Suite", amount: 323.00 });
-    dueToday = 2077.00;
+  if (tier === "esports") {
+    items.push({ label: "Parts Cost", amount: 1021.0 });
+    items.push({ label: "Ultimate Labor", amount: 179.0 });
+    dueToday = 1021.0;
+  } else if (tier === "apex") {
+    items.push({ label: "Parts Cost", amount: 1586.0 });
+    items.push({ label: "Ultimate Labor + Tuning", amount: 214.0 });
+    dueToday = 1586.0;
+  } else if (tier === "horizon") {
+    items.push({ label: "Parts Cost", amount: 2077.0 });
+    items.push({ label: "Ultimate Labor + Full Validation Suite", amount: 323.0 });
+    dueToday = 2077.0;
   }
 
   if (isPriority) {
-    dueToday += 150.00;
+    dueToday += 150.0;
   }
 
   items.push({ label: "Due Today", amount: dueToday });
@@ -197,7 +197,6 @@ export function computeSignatureEstimator(
   const total = items.reduce((sum, item) => sum + item.amount, 0);
   return { items, total };
 }
-
 
 export async function submitForm(payload: Record<string, string>) {
   const response = await fetch("https://submit-form.cdwojick.workers.dev", {

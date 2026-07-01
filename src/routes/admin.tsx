@@ -175,9 +175,7 @@ function CreateBuildDialog({
                         if (e.target.checked) {
                           setSelectedServices((prev) => [...prev, service.title]);
                         } else {
-                          setSelectedServices((prev) =>
-                            prev.filter((s) => s !== service.title),
-                          );
+                          setSelectedServices((prev) => prev.filter((s) => s !== service.title));
                         }
                       }}
                     />
@@ -275,9 +273,7 @@ function AdminPage() {
         if (data.ok && data.data) {
           const correctedBuild = getCorrectedStatus(data.data);
           setBuilds((prevBuilds) =>
-            prevBuilds.map((build) =>
-              build.trackingCode === code ? correctedBuild : build,
-            ),
+            prevBuilds.map((build) => (build.trackingCode === code ? correctedBuild : build)),
           );
         }
       } catch (error) {
@@ -345,8 +341,12 @@ function AdminPage() {
               <CreateBuildDialog
                 adminKey={adminKey}
                 onBuildCreated={(newBuild) => {
-                  const correctedBuild = getCorrectedStatus(newBuild)
-                  setBuilds((prev) => [correctedBuild, ...prev].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+                  const correctedBuild = getCorrectedStatus(newBuild);
+                  setBuilds((prev) =>
+                    [correctedBuild, ...prev].sort(
+                      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+                    ),
+                  );
                 }}
               />
               <button

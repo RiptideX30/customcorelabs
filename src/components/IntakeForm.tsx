@@ -1,5 +1,5 @@
 import { useMemo, useState, ReactNode, type FormEvent, useEffect, useRef } from "react";
-import { useSearch } from '@tanstack/react-router';
+import { useSearch } from "@tanstack/react-router";
 import {
   Cpu,
   FileText,
@@ -224,8 +224,8 @@ function ServiceCard({
         disabled
           ? "hairline pointer-events-none opacity-40 bg-zinc-100"
           : selected
-          ? "border-primary shadow-[var(--shadow-glow)]"
-          : "hairline-strong hover:border-primary/60"
+            ? "border-primary shadow-[var(--shadow-glow)]"
+            : "hairline-strong hover:border-primary/60"
       }`}
       onClick={disabled ? undefined : onSelect}
     >
@@ -363,7 +363,8 @@ function LiveEstimator({
           <span className="text-[20px] font-semibold tabular-nums">${total.toFixed(2)}</span>
         </div>
         <p className="mt-2 text-center text-[11px] text-slate-500">
-          *Prices shown reflect cash/direct transfer discount. A 3% convenience fee applies to credit card payments.
+          *Prices shown reflect cash/direct transfer discount. A 3% convenience fee applies to
+          credit card payments.
         </p>
       </div>
     </div>
@@ -371,48 +372,50 @@ function LiveEstimator({
 }
 
 function SignatureLiveEstimator({
-    tier,
-    isPriority,
-  }: {
-    tier: 'esports' | 'apex' | 'horizon' | null;
-    isPriority: boolean;
-  }) {
-    const { items, total } = useMemo(() => {
-      if (!tier) return { items: [], total: 0 };
-      return computeSignatureEstimator(tier, isPriority);
-    }, [tier, isPriority]);
-  
-    const dueTodayItem = items.find(item => item.label === 'Due Today');
+  tier,
+  isPriority,
+}: {
+  tier: "esports" | "apex" | "horizon" | null;
+  isPriority: boolean;
+}) {
+  const { items, total } = useMemo(() => {
+    if (!tier) return { items: [], total: 0 };
+    return computeSignatureEstimator(tier, isPriority);
+  }, [tier, isPriority]);
 
-    return (
-      <div className="rounded-xl border hairline-strong bg-background p-6 shadow-[var(--shadow-elegant)]">
-        <div className="mono flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-slate-mute">
-          <span>Live estimator</span>
-          <span className="text-primary">Real-time</span>
+  const dueTodayItem = items.find((item) => item.label === "Due Today");
+
+  return (
+    <div className="rounded-xl border hairline-strong bg-background p-6 shadow-[var(--shadow-elegant)]">
+      <div className="mono flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+        <span>Live estimator</span>
+        <span className="text-primary">Real-time</span>
+      </div>
+
+      {dueTodayItem && (
+        <div className="mt-6">
+          <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+            Due Today
+          </div>
+          <div className="mt-1 flex items-baseline gap-1.5">
+            <span className="mono text-[14px] text-slate-mute">$</span>
+            <span className="text-[44px] font-semibold leading-none tracking-[-0.03em] tabular-nums">
+              {dueTodayItem.amount.toFixed(2)}
+              {isPriority && <span className="text-lg"> +$150.00</span>}
+            </span>
+          </div>
         </div>
-  
-        {dueTodayItem && (
-            <div className="mt-6">
-                <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
-                Due Today
-                </div>
-                <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="mono text-[14px] text-slate-mute">$</span>
-                <span className="text-[44px] font-semibold leading-none tracking-[-0.03em] tabular-nums">
-                    {dueTodayItem.amount.toFixed(2)}
-                    {isPriority && <span className="text-lg"> +$150.00</span>}
-                </span>
-                </div>
-            </div>
-        )}
+      )}
 
-        <div className="mt-6 space-y-2">
-          {items.filter(item => item.label !== 'Due Today').length === 0 ? (
-            <div className="rounded-md border hairline bg-secondary/30 px-3 py-3 text-[13px] text-slate-mute">
-              Select a package to see your live quote.
-            </div>
-          ) : (
-            items.filter(item => item.label !== 'Due Today').map((it, i) => (
+      <div className="mt-6 space-y-2">
+        {items.filter((item) => item.label !== "Due Today").length === 0 ? (
+          <div className="rounded-md border hairline bg-secondary/30 px-3 py-3 text-[13px] text-slate-mute">
+            Select a package to see your live quote.
+          </div>
+        ) : (
+          items
+            .filter((item) => item.label !== "Due Today")
+            .map((it, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between border-b hairline py-2 text-[13px]"
@@ -421,14 +424,15 @@ function SignatureLiveEstimator({
                 <span className="mono tabular-nums text-foreground">${it.amount.toFixed(2)}</span>
               </div>
             ))
-          )}
-        </div>
-        <p className="mt-2 text-center text-[11px] text-slate-500">
-          *Prices shown reflect cash/direct transfer discount. A 3% convenience fee applies to credit card payments.
-        </p>
+        )}
       </div>
-    );
-  }
+      <p className="mt-2 text-center text-[11px] text-slate-500">
+        *Prices shown reflect cash/direct transfer discount. A 3% convenience fee applies to credit
+        card payments.
+      </p>
+    </div>
+  );
+}
 
 /* ============================================================
    PCPARTPICKER INSTRUCTIONS MODAL
@@ -804,7 +808,7 @@ function PathSelector({ onSelect }: { onSelect: (path: PathId) => void }) {
       icon: Package,
       title: "Signature Packages",
       desc: "Choose from our expertly crafted, pre-configured PC packages for a streamlined experience.",
-      tag: "Pre-configured"
+      tag: "Pre-configured",
     },
     {
       id: "repair" as PathId,
@@ -858,205 +862,192 @@ function PathSelector({ onSelect }: { onSelect: (path: PathId) => void }) {
   );
 }
 
-
 /* ============================================================
    MAIN INTAKE FORM COMPONENT
    ============================================================ */
 
 export default function IntakeForm() {
-    const search = useSearch({ from: '/start-a-project' });
-    const [currentPath, setCurrentPath] = useState<PathId>(() => {
-        if (search.path === 'package' && (search.tier === 'esports' || search.tier === 'apex' || search.tier === 'horizon')) {
-            return 'signature';
-        }
-        return 'selector';
-    });
-    const [submitted, setSubmitted] = useState(false);
-    const [showBuildSuccess, setShowBuildSuccess] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-  
-    // Shared customer info
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
-    const [email, setEmail] = useState("");
-  
-    // Shared submission fields
-    const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [keepComponentBoxes, setKeepComponentBoxes] = useState(false);
-
-    // Path: Signature Packages
-    const [signaturePackage, setSignaturePackage] = useState<'esports' | 'apex' | 'horizon' | null>(() => {
-        if (search.path === 'package' && (search.tier === 'esports' || search.tier === 'apex' || search.tier === 'horizon')) {
-            return search.tier;
-        }
-        return null;
-    });
-    const [signatureLogistics, setSignatureLogistics] = useState<'standard' | 'express'>('standard');
-    const [signatureNotes, setSignatureNotes] = useState("");
-  
-    // Path 1 — Service & Repair
-    const [repairServices, setRepairServices] = useState<Set<ServiceId>>(new Set());
-    const [repairSymptoms, setRepairSymptoms] = useState("");
-    const [repairWipeQty, setRepairWipeQty] = useState(1);
-    const thermalEligibleForRepair =
-      repairServices.has("refresh") ||
-      repairServices.has("software") ||
-      repairServices.has("cables") ||
-      repairServices.has("upgrade");
-  
-    useEffect(() => {
-      if (!thermalEligibleForRepair && repairServices.has("thermal")) {
-        setRepairServices((prev) => {
-          const next = new Set(prev);
-          next.delete("thermal");
-          return next;
-        });
-      }
-    }, [thermalEligibleForRepair, repairServices]);
-  
-    // Path 2 — Build Known Parts
-    const [knownBuild, setKnownBuild] = useState<ServiceId | null>(null);
-    const [knownPCPP, setKnownPCPP] = useState("");
-    const [knownNoPCPP, setKnownNoPCPP] = useState(false);
-    const [knownPartsValue, setKnownPartsValue] = useState("");
-    const [knownITX, setKnownITX] = useState(false);
-    const [knownNonModular, setKnownNonModular] = useState(false);
-    const [knownPerformance, setKnownPerformance] = useState<Set<ServiceId>>(new Set());
-    const [knownRgb, setKnownRgb] = useState("");
-    const [knownColor, setKnownColor] = useState("");
-    const [knownFans, setKnownFans] = useState("");
-    const [knownLook, setKnownLook] = useState("");
-    const [knownNotes, setKnownNotes] = useState("");
-    const [knownTurnaround, setKnownTurnaround] = useState<"standard" | "priority">("standard");
-    const [showPCPP, setShowPCPP] = useState(false);
-  
-    // Path 3 — Build Help
-    const [helpBudget, setHelpBudget] = useState("");
-    const [helpPurpose, setHelpPurpose] = useState("");
-    const [helpITX, setHelpITX] = useState(false);
-    const [helpNonModular, setHelpNonModular] = useState(false);
-    const [helpRgb, setHelpRgb] = useState("");
-    const [helpColor, setHelpColor] = useState("");
-    const [helpFans, setHelpFans] = useState("");
-    const [helpLook, setHelpLook] = useState("");
-    const [helpNotes, setHelpNotes] = useState("");
-    const [helpTurnaround, setHelpTurnaround] = useState<"standard" | "priority">("standard");
-  
-    const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      await processFormSubmission();
-    };
-  
-    const processFormSubmission = async () => {
-      const customerName = name.trim();
-      const customerEmail = email.trim();
-  
-      const baseSchema = z.object({
-        name: z.string().trim().min(2, "Name is required"),
-        email: z.string().trim().email("Valid email required"),
-        phone: z.string().trim().min(10, "Phone number required (10 digits)"),
-      });
-  
-      const baseCheck = baseSchema.safeParse({ name, email, phone });
-      if (!baseCheck.success) {
-        const e: Record<string, string> = {};
-        for (const issue of baseCheck.error.issues) {
-          e[issue.path[0] as string] = issue.message;
-        }
-        setErrors(e);
-        return;
-      }
-      
-      if (!agreedToTerms) {
-        setErrors(prev => ({...prev, terms: "You must agree to the terms and conditions."}));
-        return;
-      }
-      setErrors({});
-  
-      const isBuildOrderPath = currentPath === "build-known" || currentPath === "build-help" || currentPath === "signature";
-      const generatedCode = isBuildOrderPath ? generateTrackingCode() : "";
-  
-      let payload: Record<string, any> = {
-        "customer-name": name,
-        "customer-phone": phone,
-        "customer-email": email,
-        "tracking-code": generatedCode || "N/A",
-      };
-  
-      if (currentPath === "signature") {
-        if (!signaturePackage) {
-            setErrors({ package: "Please select a package." });
-            return;
-        }
-        const estimate = computeSignatureEstimator(signaturePackage, signatureLogistics === 'express');
-        payload = {
-            ...payload,
-            "form-type": "signature-package",
-            "selected-package": signaturePackage,
-            "logistics-timeline": signatureLogistics,
-            "additional-notes": signatureNotes,
-            "estimate-details": JSON.stringify(estimate.items),
-            "due-today": estimate.items.find(item => item.label === 'Due Today')?.amount.toFixed(2),
-        };
-      } else if (currentPath === "repair") {
-        // ... (rest of the logic for other paths)
-      }
-  
-      try {
-        const response = await submitForm(payload);
-        if (response.ok) {
-          setSubmitted(true);
-          setTimeout(() => {
-            document.getElementById("book")?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }, 100);
-        } else {
-          const data = await response.json();
-          alert("Submission error: " + (data.error || "Please try again."));
-        }
-      } catch (error) {
-        alert("Error sending details. Please check your internet connection.");
-      }
-    };
-
-    const signaturePackages = [
-        { id: 'esports', name: 'Esports Core Package', price: '$1,200.00' },
-        { id: 'apex', name: 'Apex Performance Package', price: '$1,800.00' },
-        { id: 'horizon', name: 'Horizon Showcase Package', price: '$2,400.00' }
-    ];
-
-  
-    if (submitted) {
-        return (
-            <section id="book" className="border-b hairline bg-secondary/30">
-              <div className="mx-auto max-w-[1280px] px-8 py-28">
-                <div className="grid grid-cols-12 items-end gap-8">
-                  <div className="col-span-3">
-                    <div className="mono text-[10.5px] uppercase tracking-[0.18em] text-primary">
-                      § 05
-                    </div>
-                    <div className="mono mt-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">
-                      Project intake · Form 003
-                    </div>
-                  </div>
-                  <h2 className="col-span-9 text-[56px] font-semibold leading-none tracking-[-0.03em]">
-                    Start a project
-                  </h2>
-                </div>
-                <div className="mt-16 overflow-hidden rounded-xl border hairline-strong bg-background shadow-[var(--shadow-elegant)]">
-                  <SubmittedState />
-                </div>
-              </div>
-            </section>
-          );
+  const search = useSearch({ from: "/start-a-project" });
+  const [currentPath, setCurrentPath] = useState<PathId>(() => {
+    if (
+      search.path === "package" &&
+      (search.tier === "esports" || search.tier === "apex" || search.tier === "horizon")
+    ) {
+      return "signature";
     }
-  
+    return "selector";
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [showBuildSuccess, setShowBuildSuccess] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Shared customer info
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Shared submission fields
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [keepComponentBoxes, setKeepComponentBoxes] = useState(false);
+
+  // Path: Signature Packages
+  const [signaturePackage, setSignaturePackage] = useState<"esports" | "apex" | "horizon" | null>(
+    () => {
+      if (
+        search.path === "package" &&
+        (search.tier === "esports" || search.tier === "apex" || search.tier === "horizon")
+      ) {
+        return search.tier;
+      }
+      return null;
+    },
+  );
+  const [signatureLogistics, setSignatureLogistics] = useState<"standard" | "express">("standard");
+  const [signatureNotes, setSignatureNotes] = useState("");
+
+  // Path 1 — Service & Repair
+  const [repairServices, setRepairServices] = useState<Set<ServiceId>>(new Set());
+  const [repairSymptoms, setRepairSymptoms] = useState("");
+  const [repairWipeQty, setRepairWipeQty] = useState(1);
+  const thermalEligibleForRepair =
+    repairServices.has("refresh") ||
+    repairServices.has("software") ||
+    repairServices.has("cables") ||
+    repairServices.has("upgrade");
+
+  useEffect(() => {
+    if (!thermalEligibleForRepair && repairServices.has("thermal")) {
+      setRepairServices((prev) => {
+        const next = new Set(prev);
+        next.delete("thermal");
+        return next;
+      });
+    }
+  }, [thermalEligibleForRepair, repairServices]);
+
+  // Path 2 — Build Known Parts
+  const [knownBuild, setKnownBuild] = useState<ServiceId | null>(null);
+  const [knownPCPP, setKnownPCPP] = useState("");
+  const [knownNoPCPP, setKnownNoPCPP] = useState(false);
+  const [knownPartsValue, setKnownPartsValue] = useState("");
+  const [knownITX, setKnownITX] = useState(false);
+  const [knownNonModular, setKnownNonModular] = useState(false);
+  const [knownPerformance, setKnownPerformance] = useState<Set<ServiceId>>(new Set());
+  const [knownRgb, setKnownRgb] = useState("");
+  const [knownColor, setKnownColor] = useState("");
+  const [knownFans, setKnownFans] = useState("");
+  const [knownLook, setKnownLook] = useState("");
+  const [knownNotes, setKnownNotes] = useState("");
+  const [knownTurnaround, setKnownTurnaround] = useState<"standard" | "priority">("standard");
+  const [showPCPP, setShowPCPP] = useState(false);
+
+  // Path 3 — Build Help
+  const [helpBudget, setHelpBudget] = useState("");
+  const [helpPurpose, setHelpPurpose] = useState("");
+  const [helpITX, setHelpITX] = useState(false);
+  const [helpNonModular, setHelpNonModular] = useState(false);
+  const [helpRgb, setHelpRgb] = useState("");
+  const [helpColor, setHelpColor] = useState("");
+  const [helpFans, setHelpFans] = useState("");
+  const [helpLook, setHelpLook] = useState("");
+  const [helpNotes, setHelpNotes] = useState("");
+  const [helpTurnaround, setHelpTurnaround] = useState<"standard" | "priority">("standard");
+
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await processFormSubmission();
+  };
+
+  const processFormSubmission = async () => {
+    const customerName = name.trim();
+    const customerEmail = email.trim();
+
+    const baseSchema = z.object({
+      name: z.string().trim().min(2, "Name is required"),
+      email: z.string().trim().email("Valid email required"),
+      phone: z.string().trim().min(10, "Phone number required (10 digits)"),
+    });
+
+    const baseCheck = baseSchema.safeParse({ name, email, phone });
+    if (!baseCheck.success) {
+      const e: Record<string, string> = {};
+      for (const issue of baseCheck.error.issues) {
+        e[issue.path[0] as string] = issue.message;
+      }
+      setErrors(e);
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setErrors((prev) => ({ ...prev, terms: "You must agree to the terms and conditions." }));
+      return;
+    }
+    setErrors({});
+
+    const isBuildOrderPath =
+      currentPath === "build-known" || currentPath === "build-help" || currentPath === "signature";
+    const generatedCode = isBuildOrderPath ? generateTrackingCode() : "";
+
+    let payload: Record<string, any> = {
+      "customer-name": name,
+      "customer-phone": phone,
+      "customer-email": email,
+      "tracking-code": generatedCode || "N/A",
+    };
+
+    if (currentPath === "signature") {
+      if (!signaturePackage) {
+        setErrors({ package: "Please select a package." });
+        return;
+      }
+      const estimate = computeSignatureEstimator(
+        signaturePackage,
+        signatureLogistics === "express",
+      );
+      payload = {
+        ...payload,
+        "form-type": "signature-package",
+        "selected-package": signaturePackage,
+        "logistics-timeline": signatureLogistics,
+        "additional-notes": signatureNotes,
+        "estimate-details": JSON.stringify(estimate.items),
+        "due-today": estimate.items.find((item) => item.label === "Due Today")?.amount.toFixed(2),
+      };
+    } else if (currentPath === "repair") {
+      // ... (rest of the logic for other paths)
+    }
+
+    try {
+      const response = await submitForm(payload);
+      if (response.ok) {
+        setSubmitted(true);
+        setTimeout(() => {
+          document.getElementById("book")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      } else {
+        const data = await response.json();
+        alert("Submission error: " + (data.error || "Please try again."));
+      }
+    } catch (error) {
+      alert("Error sending details. Please check your internet connection.");
+    }
+  };
+
+  const signaturePackages = [
+    { id: "esports", name: "Esports Core Package", price: "$1,200.00" },
+    { id: "apex", name: "Apex Performance Package", price: "$1,800.00" },
+    { id: "horizon", name: "Horizon Showcase Package", price: "$2,400.00" },
+  ];
+
+  if (submitted) {
     return (
       <section id="book" className="border-b hairline bg-secondary/30">
-        <PCPPInstructionsModal isOpen={showPCPP} onClose={() => setShowPCPP(false)} />
         <div className="mx-auto max-w-[1280px] px-8 py-28">
           <div className="grid grid-cols-12 items-end gap-8">
             <div className="col-span-3">
-              <div className="mono text-[10.5px] uppercase tracking-[0.18em] text-primary">§ 05</div>
+              <div className="mono text-[10.5px] uppercase tracking-[0.18em] text-primary">
+                § 05
+              </div>
               <div className="mono mt-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">
                 Project intake · Form 003
               </div>
@@ -1065,126 +1056,211 @@ export default function IntakeForm() {
               Start a project
             </h2>
           </div>
-  
-          {currentPath === "selector" && (
-            <>
-              <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-slate-mute">
-                Choose the path that best describes what you need. We source premium parts when needed
-                and prepare your system for final pickup with clear payment milestones.
-              </p>
-              <PathSelector onSelect={setCurrentPath} />
-            </>
-          )}
-  
-          {currentPath !== "selector" && (
-            <form onSubmit={handleFormSubmit}>
-              <button
-                type="button"
-                onClick={() => setCurrentPath("selector")}
-                className="mt-8 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary hover:underline"
-              >
-                ← Back to path selection
-              </button>
-  
-              <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-8">
-                  <div className="overflow-hidden rounded-xl border hairline-strong bg-background shadow-[var(--shadow-elegant)]">
-                    <div className="px-8 py-8">
-                        {currentPath === 'signature' && (
-                            <div>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary"><Package className="h-5 w-5" /></div>
-                                    <div>
-                                        <h3 className="text-[20px] font-semibold">Signature Package</h3>
-                                        <p className="text-[13px] text-slate-mute">Order one of our pre-configured systems</p>
-                                    </div>
-                                </div>
-
-                                <StepHeader index="01" title="Client Metrics" />
-                                <CustomerInfoFields name={name} setName={setName} phone={phone} setPhone={setPhone} email={email} setEmail={setEmail} errors={errors} />
-
-                                <div className="mt-8 border-t hairline pt-8">
-                                    <StepHeader index="02" title="Package Selector" />
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                        {signaturePackages.map(pkg => (
-                                            <div key={pkg.id} onClick={() => setSignaturePackage(pkg.id as any)} className={`cursor-pointer rounded-xl border p-5 transition-all ${signaturePackage === pkg.id ? 'border-primary shadow-[var(--shadow-glow)]' : 'hairline-strong hover:border-primary/60'}`}>
-                                                <div className="flex items-center justify-between">
-                                                    <h4 className="text-md font-semibold">{pkg.name}</h4>
-                                                    {signaturePackage === pkg.id ? <Check className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border hairline-strong" />} 
-                                                </div>
-                                                <p className="mt-2 text-lg font-semibold">{pkg.price}</p>
-                                            </div>
-                                        ))}
-                                        {errors.package && <FieldHint>{errors.package}</FieldHint>}
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 border-t hairline pt-8">
-                                    <StepHeader index="03" title="Logistics Timeline Selector" />
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div onClick={() => setSignatureLogistics('standard')} className={`cursor-pointer rounded-xl border p-5 transition-all ${signatureLogistics === 'standard' ? 'border-primary shadow-[var(--shadow-glow)]' : 'hairline-strong hover:border-primary/60'}`}>
-                                            <div className="flex items-center justify-between">
-                                                <h4 className="text-md font-semibold">Standard Handcrafted Delivery (Free)</h4>
-                                                {signatureLogistics === 'standard' ? <Check className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border hairline-strong" />} 
-                                            </div>
-                                            <p className="mt-2 text-sm text-slate-mute">Ready in 5-7 business days</p>
-                                        </div>
-                                        <div onClick={() => setSignatureLogistics('express')} className={`cursor-pointer rounded-xl border p-5 transition-all ${signatureLogistics === 'express' ? 'border-primary shadow-[var(--shadow-glow)]' : 'hairline-strong hover:border-primary/60'}`}>
-                                            <div className="flex items-center justify-between">
-                                                <h4 className="text-md font-semibold">Express Priority Rush (+$150.00)</h4>
-                                                {signatureLogistics === 'express' ? <Check className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border hairline-strong" />} 
-                                            </div>
-                                            <p className="mt-2 text-sm text-slate-mute">Air-freight component routing. Ready in 3-4 business days.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 border-t hairline pt-8">
-                                    <StepHeader index="04" title="Additional Configuration Notes" />
-                                    <FormTextarea value={signatureNotes} onChange={setSignatureNotes} placeholder="Any custom requests..." rows={4} />
-                                </div>
-
-                                <div className="mt-8 border-t hairline pt-8">
-                                  <div className="rounded-xl border hairline-strong bg-gradient-to-br from-primary/5 via-background to-background p-6 shadow-[var(--shadow-elegant)]">
-                                    <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
-                                      Ready to launch
-                                    </div>
-                                    <div className="space-y-4 mt-4">
-                                      <CheckboxField
-                                        checked={agreedToTerms}
-                                        onChange={setAgreedToTerms}
-                                        label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>}
-                                        error={errors.terms}
-                                      />
-                                    </div>
-                                    <button type="submit" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-[15px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:opacity-90">
-                                      <Check className="h-5 w-5" />
-                                      Submit Signature Project Request
-                                    </button>
-                                  </div>
-                                </div>
-                            </div>
-                        )}
-
-                      {/* ... (rest of the paths) */}
-  
-                    </div>
-                  </div>
-                </div>
-  
-                <div className="lg:col-span-4">
-                    {currentPath === 'signature' && (
-                        <div className="sticky top-24">
-                            <SignatureLiveEstimator tier={signaturePackage} isPriority={signatureLogistics === 'express'} />
-                        </div>
-                    )}
-                    {/* ... (rest of the estimators) */}
-                </div>
-              </div>
-            </form>
-          )}
+          <div className="mt-16 overflow-hidden rounded-xl border hairline-strong bg-background shadow-[var(--shadow-elegant)]">
+            <SubmittedState />
+          </div>
         </div>
       </section>
     );
   }
 
+  return (
+    <section id="book" className="border-b hairline bg-secondary/30">
+      <PCPPInstructionsModal isOpen={showPCPP} onClose={() => setShowPCPP(false)} />
+      <div className="mx-auto max-w-[1280px] px-8 py-28">
+        <div className="grid grid-cols-12 items-end gap-8">
+          <div className="col-span-3">
+            <div className="mono text-[10.5px] uppercase tracking-[0.18em] text-primary">§ 05</div>
+            <div className="mono mt-2 text-[10.5px] uppercase tracking-[0.18em] text-slate-mute">
+              Project intake · Form 003
+            </div>
+          </div>
+          <h2 className="col-span-9 text-[56px] font-semibold leading-none tracking-[-0.03em]">
+            Start a project
+          </h2>
+        </div>
+
+        {currentPath === "selector" && (
+          <>
+            <p className="mt-6 max-w-2xl text-[15px] leading-relaxed text-slate-mute">
+              Choose the path that best describes what you need. We source premium parts when needed
+              and prepare your system for final pickup with clear payment milestones.
+            </p>
+            <PathSelector onSelect={setCurrentPath} />
+          </>
+        )}
+
+        {currentPath !== "selector" && (
+          <form onSubmit={handleFormSubmit}>
+            <button
+              type="button"
+              onClick={() => setCurrentPath("selector")}
+              className="mt-8 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary hover:underline"
+            >
+              ← Back to path selection
+            </button>
+
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-8">
+                <div className="overflow-hidden rounded-xl border hairline-strong bg-background shadow-[var(--shadow-elegant)]">
+                  <div className="px-8 py-8">
+                    {currentPath === "signature" && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <Package className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-[20px] font-semibold">Signature Package</h3>
+                            <p className="text-[13px] text-slate-mute">
+                              Order one of our pre-configured systems
+                            </p>
+                          </div>
+                        </div>
+
+                        <StepHeader index="01" title="Client Metrics" />
+                        <CustomerInfoFields
+                          name={name}
+                          setName={setName}
+                          phone={phone}
+                          setPhone={setPhone}
+                          email={email}
+                          setEmail={setEmail}
+                          errors={errors}
+                        />
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <StepHeader index="02" title="Package Selector" />
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {signaturePackages.map((pkg) => (
+                              <div
+                                key={pkg.id}
+                                onClick={() => setSignaturePackage(pkg.id as any)}
+                                className={`cursor-pointer rounded-xl border p-5 transition-all ${signaturePackage === pkg.id ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <h4 className="text-md font-semibold">{pkg.name}</h4>
+                                  {signaturePackage === pkg.id ? (
+                                    <Check className="h-4 w-4 text-primary" />
+                                  ) : (
+                                    <div className="h-4 w-4 rounded-full border hairline-strong" />
+                                  )}
+                                </div>
+                                <p className="mt-2 text-lg font-semibold">{pkg.price}</p>
+                              </div>
+                            ))}
+                            {errors.package && <FieldHint>{errors.package}</FieldHint>}
+                          </div>
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <StepHeader index="03" title="Logistics Timeline Selector" />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div
+                              onClick={() => setSignatureLogistics("standard")}
+                              className={`cursor-pointer rounded-xl border p-5 transition-all ${signatureLogistics === "standard" ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-md font-semibold">
+                                  Standard Handcrafted Delivery (Free)
+                                </h4>
+                                {signatureLogistics === "standard" ? (
+                                  <Check className="h-4 w-4 text-primary" />
+                                ) : (
+                                  <div className="h-4 w-4 rounded-full border hairline-strong" />
+                                )}
+                              </div>
+                              <p className="mt-2 text-sm text-slate-mute">
+                                Ready in 5-7 business days
+                              </p>
+                            </div>
+                            <div
+                              onClick={() => setSignatureLogistics("express")}
+                              className={`cursor-pointer rounded-xl border p-5 transition-all ${signatureLogistics === "express" ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-md font-semibold">
+                                  Express Priority Rush (+$150.00)
+                                </h4>
+                                {signatureLogistics === "express" ? (
+                                  <Check className="h-4 w-4 text-primary" />
+                                ) : (
+                                  <div className="h-4 w-4 rounded-full border hairline-strong" />
+                                )}
+                              </div>
+                              <p className="mt-2 text-sm text-slate-mute">
+                                Air-freight component routing. Ready in 3-4 business days.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <StepHeader index="04" title="Additional Configuration Notes" />
+                          <FormTextarea
+                            value={signatureNotes}
+                            onChange={setSignatureNotes}
+                            placeholder="Any custom requests..."
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <div className="rounded-xl border hairline-strong bg-gradient-to-br from-primary/5 via-background to-background p-6 shadow-[var(--shadow-elegant)]">
+                            <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+                              Ready to launch
+                            </div>
+                            <div className="space-y-4 mt-4">
+                              <CheckboxField
+                                checked={agreedToTerms}
+                                onChange={setAgreedToTerms}
+                                label={
+                                  <>
+                                    I agree to the{" "}
+                                    <a
+                                      href="/terms.html"
+                                      target="_blank"
+                                      className="text-primary underline"
+                                    >
+                                      Terms and Conditions
+                                    </a>
+                                  </>
+                                }
+                                error={errors.terms}
+                              />
+                            </div>
+                            <button
+                              type="submit"
+                              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-[15px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:opacity-90"
+                            >
+                              <Check className="h-5 w-5" />
+                              Submit Signature Project Request
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ... (rest of the paths) */}
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-4">
+                {currentPath === "signature" && (
+                  <div className="sticky top-24">
+                    <SignatureLiveEstimator
+                      tier={signaturePackage}
+                      isPriority={signatureLogistics === "express"}
+                    />
+                  </div>
+                )}
+                {/* ... (rest of the estimators) */}
+              </div>
+            </div>
+          </form>
+        )}
+      </div>
+    </section>
+  );
+}

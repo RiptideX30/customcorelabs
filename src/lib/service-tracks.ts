@@ -1,6 +1,12 @@
 const DEFAULT_TRACK = ["Build Created", "Build Complete"];
 const REPAIR_TRACK = ["Received for Service", "Diagnostics", "Repair", "Ready for Pickup"];
-const ULTIMATE_TRACK = ["Parts Ordered", "Parts Received", "Assembly", "Validation", "Ready for Pickup"];
+const ULTIMATE_TRACK = [
+  "Parts Ordered",
+  "Parts Received",
+  "Assembly",
+  "Validation",
+  "Ready for Pickup",
+];
 
 const SERVICE_TO_TRACK: Record<string, string[]> = {
   "Ultimate Build": ULTIMATE_TRACK,

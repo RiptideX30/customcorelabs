@@ -60,7 +60,8 @@ const DynamicTimeline = ({ build }: { build: Partial<BuildRecord> }) => {
           <div key={step} className="flex items-start gap-4">
             <div className="flex flex-col items-center">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? "bg-primary text-primary-foreground" : isActive ? "bg-primary/10 text-primary" : "bg-slate-200 text-slate-500"}`}>
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? "bg-primary text-primary-foreground" : isActive ? "bg-primary/10 text-primary" : "bg-slate-200 text-slate-500"}`}
+              >
                 <span className="text-lg">{icon}</span>
               </div>
               {index < track.length - 1 && (

@@ -4,11 +4,7 @@
  */
 
 /** Possible build statuses in order of progression */
-export const BUILD_STATUSES = [
-  "pending",
-  "active",
-  "completed",
-] as const;
+export const BUILD_STATUSES = ["pending", "active", "completed"] as const;
 
 export type BuildStatus = (typeof BUILD_STATUSES)[number];
 
