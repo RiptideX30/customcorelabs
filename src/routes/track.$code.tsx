@@ -1,92 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Calendar, Clock, DollarSign, CheckCircle, Circle } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, DollarSign } from "lucide-react";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
 import { type BuildRecord, type ApiResponse, STATUS_LABELS } from "@/lib/build-tracker";
+import { STEP_ICONS } from "@/lib/service-tracks";
 import { trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/track/$code")({
   component: TrackBuildPage,
   loader: async ({ params }) => {
-    return { code: params.code };
-  },
-});
-
-const DynamicTimeline = ({ timeline }: { timeline: BuildRecord['timeline'] }) => {
-  if (!timeline) return null;
-
-  return (
-    <div className="space-y-4">
-      {timeline.map((item, index) => {
-        const isCompleted = item.status === 'completed';
-        const isActive = item.status === 'active';
-
-        return (
-          <div key={item.service} className="flex items-start gap-4">
-            <div className="flex flex-col items-center">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? 'bg-primary text-primary-foreground' : 'bg-slate-200 text-slate-500'}`}>
-                    {isCompleted ? <CheckCircle className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
-                </div>
-                {index < timeline.length - 1 && (
-                    <div className={`w-0.5 h-12 mt-2 ${isCompleted ? 'bg-primary' : 'bg-slate-200'}`} />
-                )}
-            </div>
-            <div>
-              <p className={`font-semibold ${isActive ? 'text-primary' : ''}`}>{item.service}</p>
-              <p className="text-sm text-slate-500">{STATUS_LABELS[item.status] || item.status}</p>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-function TrackBuildPage() {
-  const { code } = Route.useLoaderData();
-  const [build, setBuild] = useState<Partial<BuildRecord> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    async function fetchBuild() {
-      try {
-        const res = await fetch(trackerUrl(`/api/track/${code}`));
-        const data: ApiResponse<Partial<BuildRecord>> = await res.json();
-
-        if (data.ok && data.data) {
-          setBuild(data.data);
-        } else {
-          setError(data.error || "Build not found.");
-        }
-      } catch {
-        setError("Unable to load build data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+    const res = await fetch(trackerUrl(`/api/track/${params.code}`));
+    const data: ApiResponse<Partial<BuildRecord>> = await res.json();
+    if (!data.ok) {
+      throw new Error(data.error || "Build not found.");
     }
-
-    fetchBuild();
-  }, [code]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-          <p className="mt-4 text-[14px] text-slate-mute">Loading build data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !build) {
+    return { build: data.data, code: params.code };
+  },
+  errorComponent: ({ error }) => {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center max-w-md px-5">
           <div className="text-[48px] mb-4">🔍</div>
           <h1 className="text-[24px] font-semibold tracking-tight mb-2">Build Not Found</h1>
-          <p className="text-[14px] text-slate-mute mb-8">{error || "No build data available."}</p>
+          <p className="text-[14px] text-slate-mute mb-8">{error.message}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/track"
@@ -105,7 +40,42 @@ function TrackBuildPage() {
         </div>
       </div>
     );
-  }
+  },
+});
+
+const DynamicTimeline = ({ timeline }: { timeline: BuildRecord['timeline'] }) => {
+  if (!timeline) return null;
+
+  return (
+    <div className="space-y-4">
+      {timeline.map((item, index) => {
+        const isCompleted = item.status === 'completed';
+        const isActive = item.status === 'active';
+        const icon = STEP_ICONS[item.service] || '❓';
+
+        return (
+          <div key={item.service} className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? 'bg-primary text-primary-foreground' : isActive ? 'bg-primary/10 text-primary' :'bg-slate-200 text-slate-500'}`}>
+                    <span className="text-lg">{icon}</span>
+                </div>
+                {index < timeline.length - 1 && (
+                    <div className={`w-0.5 h-12 mt-2 ${isCompleted ? 'bg-primary' : 'bg-slate-200'}`} />
+                )}
+            </div>
+            <div>
+              <p className={`font-semibold ${isActive ? 'text-primary' : ''}`}>{item.service}</p>
+              <p className="text-sm text-slate-500">{STATUS_LABELS[item.status] || item.status}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+function TrackBuildPage() {
+  const { build, code } = Route.useLoaderData();
 
   const createdDate = build.createdAt
     ? new Date(build.createdAt).toLocaleDateString("en-US", {

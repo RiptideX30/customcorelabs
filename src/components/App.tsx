@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import cclLogo from "@/assets/ccl-logo.jpg";
 import buildPhoto from "@/assets/builds/midnight-aero.jpg";
-import IntakeForm from "./IntakeForm";
+import ServicePackages from "./ServicePackages";
 
 /* ---------------- Service catalog ---------------- */
 
@@ -296,6 +296,7 @@ export default function App() {
       <TestimonialSection />
       <GeographySection />
       <FAQSection />
+      <ServicePackages />
       <ServicesGrid
         active={active}
         toggle={toggle}
@@ -304,7 +305,6 @@ export default function App() {
         partsValue={partsValue}
       />
       <QuickContact />
-      <IntakeForm />
       <ServiceAgreement />
       <Footer onOpenTerms={() => setTermsOpen(true)} />
       {modal && <DetailsModal service={SERVICE_MAP[modal]} onClose={() => setModal(null)} />}
