@@ -23,12 +23,14 @@ import {
 } from "@/components/ui/dialog";
 import { type Build, type BuildStatus } from "@/lib/build-tracker.tsx";
 import { getTrackForServices } from "@/lib/service-tracks";
-import { trackerUrl } from "@/lib/tracker-api";
 import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
+
+const TRACKER_API_URL = "https://build-tracker.cclbuilds.com";
+export const trackerUrl = (path: string) => `${TRACKER_API_URL}${path}`;
 
 type BuildSummary = {
   trackingCode: string;
@@ -472,5 +474,5 @@ function AdminPage() {
         </div>
       </section>
     </main>
-  );
+ );
 }

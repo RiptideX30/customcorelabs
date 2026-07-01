@@ -1034,9 +1034,9 @@ export default function IntakeForm() {
   };
 
   const signaturePackages = [
-    { id: "esports", name: "Esports Core Package", price: "$1,200.00" },
-    { id: "apex", name: "Apex Performance Package", price: "$1,800.00" },
-    { id: "horizon", name: "Horizon Showcase Package", price: "$2,400.00" },
+    { id: "nebula-core", name: "Nebula Core", price: "$1200" },
+    { id: "zenith-performance", name: "Zenith Performance", price: "$1800" },
+    { id: "horizon-showcase", name: "Horizon Showcase", price: "$2400" },
   ];
 
   if (submitted) {
