@@ -23,12 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { type BuildStatus } from "@/lib/build-tracker";
-import {
-  getTrackForServices,
-  STEP_ICONS,
-  SERVICE_TO_TRACK_MAP,
-  TRACKS,
-} from "@/lib/service-tracks";
+import { getTrackForServices } from "@/lib/service-tracks";
 import { trackerUrl } from "@/lib/tracker-api";
 import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";
 
@@ -41,7 +36,7 @@ type BuildSummary = {
   customerName: string;
   services: string[];
   status: BuildStatus;
-  timeline: { status: string; timestamp: string }[];
+  timeline?: { status: string; timestamp: string }[];
   createdAt: string;
 };
 
@@ -397,7 +392,7 @@ function AdminPage() {
               {builds.map((build0) => {
                 const build = build0 as BuildSummaryWithEstimates;
                 const track = getTrackForServices(build.services);
-                const currentStepIndex = build.timeline.length - 1;
+                const currentStepIndex = (build.timeline || []).length - 1;
                 const nextStep = track[currentStepIndex + 1];
 
                 return (
