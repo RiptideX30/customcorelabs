@@ -15,6 +15,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { z } from "zod";
 import {
   ServiceId,
   NEW_BUILDS,
@@ -338,7 +339,7 @@ function LiveEstimator({
             Select services to see your live quote.
           </div>
         ) : (
-          lineItems.map((it, i) => (
+          lineItems.map((it: { label: string; amount: number }, i) => (
             <div
               key={i}
               className="flex items-center justify-between border-b hairline py-2 text-[13px]"
@@ -352,11 +353,11 @@ function LiveEstimator({
       <div className="mt-3 border-t hairline pt-3 text-[13px]">
         <div className="flex items-center justify-between">
           <span className="text-slate-ink">Estimated tax (NY 8%)</span>
-          <span className="mono tabular-nums text-foreground">${taxAmount.toFixed(2)}</span>
+          <span className="mono tabular-nums text-foreground">`${taxAmount.toFixed(2)}</span>
         </div>
         <div className="mt-2 flex items-baseline justify-between">
           <span className="text-[13px] font-semibold">Estimated total</span>
-          <span className="text-[20px] font-semibold tabular-nums">${total.toFixed(2)}</span>
+          <span className="text-[20px] font-semibold tabular-nums">`${total.toFixed(2)}</span>
         </div>
       </div>
     </div>
@@ -543,7 +544,17 @@ function BuildLookFields({
   setLookDescription: (v: string) => void;
 }) {
   // Reusable Premium Custom Dropdown Component
-  function PremiumSelect({ label, value, onChange, options }) {
+  function PremiumSelect({
+    label,
+    value,
+    onChange,
+    options,
+  }: {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    options: { value: string; label: string }[];
+  }) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -893,7 +904,7 @@ export default function IntakeForm() {
     const generatedCode = isBuildOrderPath ? generateTrackingCode() : "";
 
     // Build payload based on path
-    let payload: Record<string, string> = {
+    let payload: Record<string, any> = {
       "customer-name": name,
       "customer-phone": phone,
       "customer-email": email,
@@ -1012,7 +1023,7 @@ export default function IntakeForm() {
         const data = await response.json();
         alert("Submission error: " + (data.error || "Please try again."));
       }
-    } catch {
+    } catch (error) {
       alert("Error sending details. Please check your internet connection.");
     }
   };
