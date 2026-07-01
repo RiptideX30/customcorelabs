@@ -282,10 +282,8 @@ function AdminPage() {
           },
         });
         const data = await res.json();
-        if (data.ok && data.data) {
-          setBuilds((prev) =>
-            prev.map((b) => (b.trackingCode === code ? { ...b, ...data.data } : b)),
-          );
+        if (data.ok) {
+          fetchBuilds();
         }
       } catch {
         // silent
@@ -293,7 +291,7 @@ function AdminPage() {
         setUpdatingCode(null);
       }
     },
-    [adminKey],
+    [adminKey, fetchBuilds],
   );
 
   if (!authenticated) {
