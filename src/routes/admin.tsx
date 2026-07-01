@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { type BuildStatus, BUILD_STATUSES, STATUS_LABELS } from "@/lib/build-tracker";
 import { trackerUrl } from "@/lib/tracker-api";
+import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -46,6 +47,8 @@ type BuildSummaryWithEstimates = BuildSummary & {
 
 const ADMIN_KEY_STORAGE = "ccl_admin_key";
 
+const allServices = [...NEW_BUILDS, ...SERVICE_REPAIR, ...PERFORMANCE_TUNING];
+
 function CreateBuildDialog({
   adminKey,
   onBuildCreated,
@@ -56,7 +59,7 @@ function CreateBuildDialog({
   const [isOpen, setIsOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [services, setServices] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
   const [newBuild, setNewBuild] = useState<{ trackingCode: string; emailSent: boolean } | null>(
@@ -66,7 +69,7 @@ function CreateBuildDialog({
   const reset = () => {
     setCustomerName("");
     setCustomerEmail("");
-    setServices("");
+    setSelectedServices([]);
     setIsCreating(false);
     setError("");
     setNewBuild(null);
@@ -86,7 +89,7 @@ function CreateBuildDialog({
         body: JSON.stringify({
           customerName,
           customerEmail,
-          services: services.split(",").map((s) => s.trim()),
+          services: selectedServices,
         }),
       });
       const data = await res.json();
@@ -167,17 +170,31 @@ function CreateBuildDialog({
                 className="col-span-3 w-full rounded-lg border hairline-strong px-3 py-2 text-[14px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="services" className="text-right text-sm">
-                Services
-              </label>
-              <input
-                id="services"
-                value={services}
-                onChange={(e) => setServices(e.target.value)}
-                placeholder="e.g., PC Build, OS Install"
-                className="col-span-3 w-full rounded-lg border hairline-strong px-3 py-2 text-[14px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
+            <div className="col-span-4">
+              <label className="text-sm font-medium">Services</label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {allServices.map((service) => (
+                  <div key={service.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={service.id}
+                      checked={selectedServices.includes(service.title)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedServices((prev) => [...prev, service.title]);
+                        } else {
+                          setSelectedServices((prev) =>
+                            prev.filter((s) => s !== service.title),
+                          );
+                        }
+                      }}
+                    />
+                    <label htmlFor={service.id} className="text-sm">
+                      {service.title}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
             {error && <p className="col-span-4 text-center text-sm text-red-600">{error}</p>}
           </div>
@@ -373,7 +390,7 @@ function AdminPage() {
               <div className="flex items-center justify-between">
                 <h1 className="text-[24px] font-semibold tracking-tight">Active Builds</h1>
                 <span className="mono text-[11px] uppercase tracking-[0.12em] text-slate-mute">
-                  {builds.length} build{builds.length !== 1 ? "s" : ""}\
+                  {builds.length} build{builds.length !== 1 ? "s" : ""}
                 </span>
               </div>
 
@@ -453,7 +470,7 @@ function AdminPage() {
                             )}
                           </button>
                         )}
-                        {build.status === "picked-up" && (
+                        {build.status === "completed" && (
                           <span className="text-[12px] text-slate-mute italic">Complete</span>
                         )}
                         <Link

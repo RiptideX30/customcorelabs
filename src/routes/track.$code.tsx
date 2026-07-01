@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Calendar, Clock, DollarSign } from "lucide-react";
-import BuildTimeline from "@/components/BuildTimeline";
+import { ArrowLeft, Calendar, Clock, DollarSign, CheckCircle, Circle } from "lucide-react";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
 import { type BuildRecord, type ApiResponse, STATUS_LABELS } from "@/lib/build-tracker";
 import { trackerUrl } from "@/lib/tracker-api";
@@ -12,6 +11,36 @@ export const Route = createFileRoute("/track/$code")({
     return { code: params.code };
   },
 });
+
+const DynamicTimeline = ({ timeline }: { timeline: BuildRecord['timeline'] }) => {
+  if (!timeline) return null;
+
+  return (
+    <div className="space-y-4">
+      {timeline.map((item, index) => {
+        const isCompleted = item.status === 'completed';
+        const isActive = item.status === 'active';
+
+        return (
+          <div key={item.service} className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isCompleted ? 'bg-primary text-primary-foreground' : 'bg-slate-200 text-slate-500'}`}>
+                    {isCompleted ? <CheckCircle className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
+                </div>
+                {index < timeline.length - 1 && (
+                    <div className={`w-0.5 h-12 mt-2 ${isCompleted ? 'bg-primary' : 'bg-slate-200'}`} />
+                )}
+            </div>
+            <div>
+              <p className={`font-semibold ${isActive ? 'text-primary' : ''}`}>{item.service}</p>
+              <p className="text-sm text-slate-500">{STATUS_LABELS[item.status] || item.status}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 function TrackBuildPage() {
   const { code } = Route.useLoaderData();
@@ -181,7 +210,7 @@ function TrackBuildPage() {
                 <div className="mono text-[10px] uppercase tracking-[0.18em] text-primary mb-6">
                   Progress Timeline
                 </div>
-                {build.status && <BuildTimeline currentStatus={build.status} />}
+                {build.timeline && <DynamicTimeline timeline={build.timeline} />}
               </div>
             </div>
 
@@ -207,43 +236,6 @@ function TrackBuildPage() {
                   </ul>
                 ) : (
                   <p className="text-[13px] text-slate-mute">No services listed.</p>
-                )}
-
-                {/* Timeline Summary */}
-                {build.timeline && build.timeline.length > 0 && (
-                  <div className="mt-6 border-t hairline pt-6">
-                    <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute mb-3">
-                      Recent Updates
-                    </div>
-                    <div className="space-y-2">
-                      {[...build.timeline]
-                        .reverse()
-                        .slice(0, 4)
-                        .map((entry, i) => (
-                          <div
-                            key={i}
-                            className="flex items-start gap-2 text-[12.5px] leading-relaxed"
-                          >
-                            <span className="text-primary shrink-0 mt-0.5">↳</span>
-                            <div>
-                              <span className="font-medium text-foreground">
-                                {STATUS_LABELS[entry.status]}
-                              </span>
-                              <span className="text-slate-mute">
-                                {" — "}
-                                {new Date(entry.timestamp).toLocaleString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "numeric",
-                                  minute: "2-digit",
-                                })}
-                              </span>
-                              {entry.note && <p className="text-slate-mute mt-0.5">{entry.note}</p>}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
                 )}
               </div>
 

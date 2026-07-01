@@ -99,7 +99,7 @@ export const PERFORMANCE_TUNING = [
   },
 ] as const;
 
-export type PathId = "selector" | "repair" | "build-known" | "build-help";
+export type PathId = "selector" | "repair" | "build-known" | "build-help" | "signature";
 
 export function formatPhone(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -138,7 +138,7 @@ export function computeEstimator(
     items.push({ label: "Pro Cable Management", amount: 18, taxable: true });
   if (services.has("wipe"))
     items.push({
-      label: `Secure Drive Wipe × ${"wipeQuantity"}`,
+      label: `Secure Drive Wipe × ${wipeQuantity}`,
       amount: 15 * wipeQuantity,
       taxable: true,
     });
@@ -166,6 +166,38 @@ export function computeEstimator(
   const total = +(subtotal + taxAmount).toFixed(2);
   return { items, subtotal, taxAmount, total };
 }
+
+export function computeSignatureEstimator(
+  tier: 'esports' | 'apex' | 'horizon',
+  isPriority: boolean,
+) {
+  const items: { label: string; amount: number }[] = [];
+  let dueToday = 0;
+
+  if (tier === 'esports') {
+    items.push({ label: "Parts Cost", amount: 1021.00 });
+    items.push({ label: "Ultimate Labor", amount: 179.00 });
+    dueToday = 1021.00;
+  } else if (tier === 'apex') {
+    items.push({ label: "Parts Cost", amount: 1586.00 });
+    items.push({ label: "Ultimate Labor + Tuning", amount: 214.00 });
+    dueToday = 1586.00;
+  } else if (tier === 'horizon') {
+    items.push({ label: "Parts Cost", amount: 2077.00 });
+    items.push({ label: "Ultimate Labor + Full Validation Suite", amount: 323.00 });
+    dueToday = 2077.00;
+  }
+
+  if (isPriority) {
+    dueToday += 150.00;
+  }
+
+  items.push({ label: "Due Today", amount: dueToday });
+
+  const total = items.reduce((sum, item) => sum + item.amount, 0);
+  return { items, total };
+}
+
 
 export async function submitForm(payload: Record<string, string>) {
   const response = await fetch("https://submit-form.cdwojick.workers.dev", {

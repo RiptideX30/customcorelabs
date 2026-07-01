@@ -5,48 +5,37 @@
 
 /** Possible build statuses in order of progression */
 export const BUILD_STATUSES = [
-  "received",
-  "assembling",
-  "cabling",
-  "testing",
-  "ready",
-  "picked-up",
+  "pending",
+  "active",
+  "completed",
 ] as const;
 
 export type BuildStatus = (typeof BUILD_STATUSES)[number];
 
 /** Human-readable labels for each status */
 export const STATUS_LABELS: Record<BuildStatus, string> = {
-  received: "Parts Received",
-  assembling: "Assembling",
-  cabling: "Cable Routing",
-  testing: "Stress Test",
-  ready: "Ready for Pickup",
-  "picked-up": "Picked Up",
+  pending: "Pending",
+  active: "Active",
+  completed: "Completed",
 };
 
 /** Emoji/icon indicators per status */
 export const STATUS_ICONS: Record<BuildStatus, string> = {
-  received: "📦",
-  assembling: "🔧",
-  cabling: "🔌",
-  testing: "⚡",
-  ready: "✅",
-  "picked-up": "🏁",
+  pending: "📦",
+  active: "⚡",
+  completed: "✅",
 };
 
 /** Color classes for status badges */
 export const STATUS_COLORS: Record<BuildStatus, string> = {
-  received: "bg-blue-100 text-blue-800 border-blue-200",
-  assembling: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  cabling: "bg-violet-100 text-violet-800 border-violet-200",
-  testing: "bg-amber-100 text-amber-800 border-amber-200",
-  ready: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  "picked-up": "bg-zinc-100 text-zinc-500 border-zinc-200",
+  pending: "bg-zinc-100 text-zinc-500 border-zinc-200",
+  active: "bg-blue-100 text-blue-800 border-blue-200",
+  completed: "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
 /** A single timeline entry recording a status change */
 export interface TimelineEntry {
+  service: string;
   status: BuildStatus;
   timestamp: string; // ISO 8601
   note?: string;
