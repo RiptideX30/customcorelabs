@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type BuildStatus } from "@/lib/build-tracker";
+import { type Build, type BuildStatus } from "@/lib/build-tracker";
 import { getTrackForServices } from "@/lib/service-tracks";
 import { trackerUrl } from "@/lib/tracker-api";
 import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";
@@ -35,7 +35,7 @@ type BuildSummary = {
   customerName: string;
   services: string[];
   status: BuildStatus;
-  timeline?: { status: string; timestamp: string }[];
+  timeline: { status: string; timestamp: string }[];
   createdAt: string;
 };
 
@@ -232,16 +232,24 @@ function AdminPage() {
       });
       const data = await res.json();
       if (data.ok && Array.isArray(data.data)) {
-        const validBuilds = data.data.filter(
-          (b): b is BuildSummary =>
-            b &&
+        const validBuilds = data.data.filter((b: unknown): b is Build => {
+          return (
+            !!b &&
             typeof b === "object" &&
+            "trackingCode" in b &&
             typeof b.trackingCode === "string" &&
+            "customerName" in b &&
             typeof b.customerName === "string" &&
+            "createdAt" in b &&
             typeof b.createdAt === "string" &&
+            "status" in b &&
             typeof b.status === "string" &&
-            Array.isArray(b.services),
-        );
+            "services" in b &&
+            Array.isArray(b.services) &&
+            "timeline" in b &&
+            Array.isArray(b.timeline)
+          );
+        });
         setBuilds(validBuilds.map(getCorrectedStatus));
         setAuthenticated(true);
       } else {
