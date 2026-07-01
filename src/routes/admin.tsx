@@ -9,7 +9,6 @@ import {
   Loader2,
   Send,
   CheckCircle,
-  XCircle,
 } from "lucide-react";
 import cclLogo from "@/assets/ccl-logo.jpg";
 import BuildStatusBadge from "@/components/BuildStatusBadge";
@@ -49,7 +48,11 @@ type BuildSummaryWithEstimates = BuildSummary & {
 
 const ADMIN_KEY_STORAGE = "ccl_admin_key";
 
-const allServices = [...NEW_BUILDS, ...SERVICE_REPAIR, ...PERFORMANCE_TUNING];
+const allServices = [
+  ...(Array.isArray(NEW_BUILDS) ? NEW_BUILDS : []),
+  ...(Array.isArray(SERVICE_REPAIR) ? SERVICE_REPAIR : []),
+  ...(Array.isArray(PERFORMANCE_TUNING) ? PERFORMANCE_TUNING : []),
+];
 
 function CreateBuildDialog({
   adminKey,
@@ -60,17 +63,13 @@ function CreateBuildDialog({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
-  const [newBuild, setNewBuild] = useState<{ trackingCode: string; emailSent: boolean } | null>(
-    null,
-  );
+  const [newBuild, setNewBuild] = useState<{ trackingCode: string } | null>(null);
 
   const reset = () => {
     setCustomerName("");
-    setCustomerEmail("");
     setSelectedServices([]);
     setIsCreating(false);
     setError("");
@@ -90,13 +89,12 @@ function CreateBuildDialog({
         },
         body: JSON.stringify({
           customerName,
-          customerEmail,
           services: selectedServices,
         }),
       });
       const data = await res.json();
       if (data.ok) {
-        setNewBuild({ trackingCode: data.data.trackingCode, emailSent: false });
+        setNewBuild({ trackingCode: data.data.trackingCode });
         onBuildCreated(data.data);
       } else {
         setError(data.error || "Failed to create build.");
@@ -132,20 +130,10 @@ function CreateBuildDialog({
 
         {newBuild ? (
           <div className="py-8 text-center">
+            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <h3 className="font-semibold text-lg">Build Created!</h3>
-            <p className="mono text-primary text-2xl my-4">{newBuild.trackingCode}</p>
-            <div className="flex items-center justify-center gap-2">
-              {newBuild.emailSent ? (
-                <CheckCircle className="h-4 w-4 text-green-500" />
-              ) : (
-                <XCircle className="h-4 w-4 text-red-500" />
-              )}
-              <span className="text-sm text-slate-mute">
-                {newBuild.emailSent
-                  ? "Tracking code sent to customer."
-                  : "Failed to send tracking code email."}
-              </span>
-            </div>
+            <p className="mono text-primary text-2xl my-2">{newBuild.trackingCode}</p>
+            <p className="text-sm text-slate-mute">A new tracking code has been generated.</p>
           </div>
         ) : (
           <div className="grid gap-4 py-4">
@@ -160,26 +148,14 @@ function CreateBuildDialog({
                 className="col-span-3 w-full rounded-lg border hairline-strong px-3 py-2 text-[14px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="email" className="text-right text-sm">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                className="col-span-3 w-full rounded-lg border hairline-strong px-3 py-2 text-[14px] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
             <div className="col-span-4">
               <label className="text-sm font-medium">Services</label>
-              <div className="mt-2 grid grid-cols-2 gap-2">
+              <div className="mt-2 grid grid-cols-2 gap-2 h-48 overflow-y-auto">
                 {allServices.map((service) => (
                   <div key={service.id} className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      id={service.id}
+                      id={`create-${service.id}`}
                       checked={selectedServices.includes(service.title)}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -191,7 +167,7 @@ function CreateBuildDialog({
                         }
                       }}
                     />
-                    <label htmlFor={service.id} className="text-sm">
+                    <label htmlFor={`create-${service.id}`} className="text-sm">
                       {service.title}
                     </label>
                   </div>
@@ -213,7 +189,7 @@ function CreateBuildDialog({
           ) : (
             <button
               onClick={handleCreateBuild}
-              disabled={isCreating || !customerName || !customerEmail}
+              disabled={isCreating || !customerName}
               className="w-full rounded-md bg-primary px-4 py-2.5 text-[14px] font-medium text-primary-foreground hover:opacity-90 disabled:opacity-50"
             >
               {isCreating ? (
@@ -221,7 +197,7 @@ function CreateBuildDialog({
               ) : (
                 <span className="flex items-center justify-center gap-2">
                   <Send className="h-4 w-4" />
-                  Create & Email Code
+                  Create Build
                 </span>
               )}
             </button>
@@ -282,16 +258,20 @@ function AdminPage() {
           },
         });
         const data = await res.json();
-        if (data.ok) {
-          fetchBuilds();
+        if (data.ok && data.data) {
+          setBuilds((prevBuilds) =>
+            prevBuilds.map((build) =>
+              build.trackingCode === code ? { ...build, ...data.data } : build,
+            ),
+          );
         }
-      } catch {
-        // silent
+      } catch (error) {
+        console.error("Failed to advance build:", error);
       } finally {
         setUpdatingCode(null);
       }
     },
-    [adminKey, fetchBuilds],
+    [adminKey],
   );
 
   if (!authenticated) {
@@ -350,7 +330,7 @@ function AdminPage() {
               <CreateBuildDialog
                 adminKey={adminKey}
                 onBuildCreated={(newBuild) => {
-                  setBuilds((prev) => [newBuild, ...prev]);
+                  setBuilds((prev) => [newBuild, ...prev].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
                 }}
               />
               <button
@@ -376,7 +356,7 @@ function AdminPage() {
             <div className="text-center py-20">
               <PackageSearch className="h-12 w-12 text-slate-mute mx-auto mb-4" />
               <h2 className="text-[20px] font-semibold">No active builds</h2>
-              <p className_="text-[14px] text-slate-mute mt-1">
+              <p className="text-[14px] text-slate-mute mt-1">
                 Use the "Create New Build" button to manually create a build.
               </p>
             </div>
