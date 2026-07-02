@@ -12,9 +12,26 @@ export async function onRequest(context) {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  // Extract the admin key from the request headers
-  const adminKey = context.request.headers.get("x-admin-key");
-  console.log(`[onRequest] Admin key: ${adminKey ? "present" : "missing"}`);
+  // Authenticate the request.
+  const providedKey = context.request.headers.get('x-admin-key');
+  const secretAdminKey = context.env.ADMIN_KEY;
+
+  if (!secretAdminKey) {
+    return new Response(
+      JSON.stringify({ ok: false, error: 'Server configuration error: ADMIN_KEY not set.' }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    );
+  }
+
+  if (providedKey !== secretAdminKey) {
+    return new Response(JSON.stringify({ ok: false, error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
   // Create the tracking code and prepare build data
   const trackingCode = `CCL-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
@@ -25,11 +42,17 @@ export async function onRequest(context) {
     console.log(`[onRequest] Request body:`, body);
 
     const buildData = {
+      trackingCode: trackingCode,
       customerName: body.customerName,
-      customerEmail: body.customerEmail,
       services: body.services,
       status: "pending",
       createdAt: new Date().toISOString(),
+      timeline: [
+        {
+          status: "Build Created",
+          timestamp: new Date().toISOString(),
+        },
+      ],
     };
     console.log(`[onRequest] Build data to be saved:`, buildData);
 
@@ -37,16 +60,11 @@ export async function onRequest(context) {
     await context.env.BUILD_TRACKER.put(trackingCode, JSON.stringify(buildData));
     console.log(`[onRequest] Successfully saved build data to KV with key: ${trackingCode}`);
 
-    const emailResponse = await sendTrackingCodeEmail(buildData.customerEmail, trackingCode);
-    console.log(`[onRequest] Email send response:`, emailResponse);
 
     return new Response(
       JSON.stringify({
         ok: true,
-        data: {
-          trackingCode,
-          emailSent: emailResponse.success,
-        },
+        data: buildData,
       }),
       { headers: { "Content-Type": "application/json" } },
     );
@@ -60,16 +78,4 @@ export async function onRequest(context) {
       },
     );
   }
-}
-
-// Placeholder for a function to send the tracking code to the customer
-async function sendTrackingCodeEmail(customerEmail, trackingCode) {
-  console.log(
-    `[sendTrackingCodeEmail] Attempting to send email to: ${customerEmail} with code: ${trackingCode}`,
-  );
-  // In a real application, you would use an email service like SendGrid, Mailgun, etc.
-  // For this example, we'll just log the action.
-  console.log(`Email sent to ${customerEmail} with tracking code ${trackingCode}`);
-  // Simulate a successful email dispatch
-  return Promise.resolve({ success: true });
 }
