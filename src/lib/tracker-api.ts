@@ -1,6 +1,5 @@
-// The API is served from the same domain as the frontend via Cloudflare Functions.
-// We use a relative path by setting the base to an empty string.
-export const TRACKER_API_BASE = "";
+// The API is served from a separate Cloudflare Worker.
+export const TRACKER_API_BASE = "https://build-tracker.cdwojick.workers.dev";
 
 export function trackerUrl(path: string) {
   // If the path is already a full URL, return it as is.
