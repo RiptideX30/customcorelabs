@@ -48,18 +48,6 @@ const allServices = [
 ];
 
 const getCorrectedStatus = (build: BuildSummary): BuildSummary => {
-  const track = getTrackForServices(build.services || []);
-  if (!track || track.length === 0) {
-    return build;
-  }
-  const isCompleted = (build.timeline || []).length >= track.length;
-
-  if (!isCompleted && build.status === "completed") {
-    return { ...build, status: "in-progress" };
-  }
-  if (isCompleted && build.status !== "completed") {
-    return { ...build, status: "completed" };
-  }
   return build;
 };
 
