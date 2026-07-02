@@ -472,5 +472,5 @@ function AdminPage() {
         </div>
       </section>
     </main>
- );
+  );
 }

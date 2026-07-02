@@ -126,7 +126,7 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
       {
         status: "received",
         timestamp: now,
-        note: "Parts received at Bushnell\'s Basin bench",
+        note: "Parts received at Bushnell's Basin bench",
       },
     ],
     dropoffDate: now.split("T")[0],

@@ -1,12 +1,7 @@
 import type { ReactNode } from "react";
 import { CheckCircle, XCircle, Loader2, FileText, Ban } from "lucide-react";
 
-export type BuildStatus =
-  | "pending"
-  | "in-progress"
-  | "completed"
-  | "failed"
-  | "cancelled";
+export type BuildStatus = "pending" | "in-progress" | "completed" | "failed" | "cancelled";
 
 export type BuildTimelineEvent = {
   status: string;

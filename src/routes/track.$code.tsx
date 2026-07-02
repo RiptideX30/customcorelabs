@@ -29,7 +29,7 @@ export const Route = createFileRoute("/track/$code")({
         return { build: null, error: data.error || "Build not found." };
       }
       return { build: data.data as Build, error: null };
-    } catch (e: any) {
+    } catch (e: unknown) {
       return { build: null, error: "Could not connect to the build tracker." };
     }
   },
@@ -102,7 +102,9 @@ function TrackHeader({ build }: { build: Build }) {
               <img src={cclLogo} alt="CCL Logo" className="h-9 w-9 rounded-md" />
               <div>
                 <h1 className="text-xl font-bold text-slate-900">Your Custom Core Labs Build</h1>
-                <p className="text-sm text-slate-500">Tracking your build for {build.customerName}</p>
+                <p className="text-sm text-slate-500">
+                  Tracking your build for {build.customerName}
+                </p>
               </div>
             </div>
           </div>

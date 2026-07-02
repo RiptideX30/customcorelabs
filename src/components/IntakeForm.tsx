@@ -988,7 +988,7 @@ export default function IntakeForm() {
       currentPath === "build-known" || currentPath === "build-help" || currentPath === "signature";
     const generatedCode = isBuildOrderPath ? generateTrackingCode() : "";
 
-    let payload: Record<string, any> = {
+    let payload: Record<string, string | null> = {
       "customer-name": name,
       "customer-phone": phone,
       "customer-email": email,
@@ -1011,7 +1011,8 @@ export default function IntakeForm() {
         "logistics-timeline": signatureLogistics,
         "additional-notes": signatureNotes,
         "estimate-details": JSON.stringify(estimate.items),
-        "due-today": estimate.items.find((item) => item.label === "Due Today")?.amount.toFixed(2),
+        "due-today":
+          estimate.items.find((item) => item.label === "Due Today")?.amount.toFixed(2) || null,
       };
     } else if (currentPath === "repair") {
       // ... (rest of the logic for other paths)
@@ -1034,9 +1035,9 @@ export default function IntakeForm() {
   };
 
   const signaturePackages = [
-    { id: "nebula-core", name: "Nebula Core", price: "$1200" },
-    { id: "zenith-performance", name: "Zenith Performance", price: "$1800" },
-    { id: "horizon-showcase", name: "Horizon Showcase", price: "$2400" },
+    { id: "esports", name: "Nebula Core", price: "$1200" },
+    { id: "apex", name: "Zenith Performance", price: "$1800" },
+    { id: "horizon", name: "Horizon Showcase", price: "$2400" },
   ];
 
   if (submitted) {
@@ -1135,7 +1136,7 @@ export default function IntakeForm() {
                             {signaturePackages.map((pkg) => (
                               <div
                                 key={pkg.id}
-                                onClick={() => setSignaturePackage(pkg.id as any)}
+                                onClick={() => setSignaturePackage(pkg.id)}
                                 className={`cursor-pointer rounded-xl border p-5 transition-all ${signaturePackage === pkg.id ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}
                               >
                                 <div className="flex items-center justify-between">

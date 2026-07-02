@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   type LucideIcon,
   ClipboardPlus,
@@ -17,11 +17,11 @@ export const STEP_ICONS: Record<string, LucideIcon> = {
   "Build Created": ClipboardPlus,
   "Build Complete": CheckCircle,
   "Received for Service": Truck,
-  "Diagnostics": Search,
-  "Repair": Wrench,
+  Diagnostics: Search,
+  Repair: Wrench,
   "Ready for Pickup": PackageCheck,
   "Parts Ordered": ShoppingCart,
   "Parts Received": Archive,
-  "Assembly": Component,
-  "Validation": ClipboardCheck,
+  Assembly: Component,
+  Validation: ClipboardCheck,
 };
