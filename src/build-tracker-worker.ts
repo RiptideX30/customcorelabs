@@ -42,6 +42,9 @@ export async function handleTrackerRequest(
   const pathParts = path.split("/").filter(Boolean);
 
   try {
+    const adminKey = request.headers.get("x-admin-key");
+    const isAuthed = adminKey && adminKey === env.ADMIN_KEY;
+
     // POST /api/track — create a new build record
     if (
       request.method === "POST" &&
@@ -49,6 +52,7 @@ export async function handleTrackerRequest(
       pathParts[1] === "track" &&
       pathParts.length === 2
     ) {
+      if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       return handleCreate(request, env);
     }
 
@@ -57,25 +61,24 @@ export async function handleTrackerRequest(
       request.method === "GET" &&
       pathParts[0] === "api" &&
       pathParts[1] === "track" &&
-      pathParts[2]
+      pathParts[2] &&
+      pathParts.length === 3
     ) {
       const code = pathParts[2].toUpperCase();
       return handleLookup(code, env);
     }
 
-    // PATCH /api/track/:code — update build status
+    // POST /api/track/:code/advance — advance build to next status
     if (
-      request.method === "PATCH" &&
+      request.method === "POST" &&
       pathParts[0] === "api" &&
       pathParts[1] === "track" &&
-      pathParts[2]
+      pathParts[2] &&
+      pathParts[3] === "advance"
     ) {
-      const adminKey = request.headers.get("x-admin-key");
-      if (!adminKey || adminKey !== env.ADMIN_KEY) {
-        return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
-      }
+      if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       const code = pathParts[2].toUpperCase();
-      return handleUpdate(request, code, env);
+      return handleAdvance(code, env);
     }
 
     // GET /api/admin/builds — list all builds
@@ -85,10 +88,7 @@ export async function handleTrackerRequest(
       pathParts[1] === "admin" &&
       pathParts[2] === "builds"
     ) {
-      const adminKey = request.headers.get("x-admin-key");
-      if (!adminKey || adminKey !== env.ADMIN_KEY) {
-        return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
-      }
+      if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       return handleListBuilds(env);
     }
 
@@ -106,11 +106,7 @@ export default {
 };
 
 async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Response> {
-  const data = (await request.json()) as Partial<BuildRecord> & {
-    estimateSubtotal?: string;
-    taxAmount?: string;
-    totalWithTax?: string;
-  };
+  const data = (await request.json()) as Partial<BuildRecord>;
 
   const trackingCode = generateTrackingCode();
   const now = new Date().toISOString();
@@ -118,37 +114,23 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
   const record: BuildRecord = {
     trackingCode,
     customerName: data.customerName || "Unknown",
-    customerEmail: data.customerEmail || "",
-    customerPhone: data.customerPhone || "",
     services: data.services || [],
     status: "received",
     timeline: [
       {
         status: "received",
         timestamp: now,
-        note: "Parts received at Bushnell's Basin bench",
+        note: "Build initiated in admin dashboard",
       },
     ],
-    dropoffDate: now.split("T")[0],
-    partsValue: data.partsValue || "",
-    estimateSubtotal: data.estimateSubtotal || "",
-    taxAmount: data.taxAmount || "",
-    totalWithTax: data.totalWithTax || "",
-    notes: data.notes || "",
     createdAt: now,
   };
 
   await env.BUILD_TRACKER.put(kvKey(trackingCode), JSON.stringify(record), {
-    metadata: { createdAt: now, customerName: record.customerName },
+    metadata: { createdAt: now, customerName: record.customerName, status: "received" },
   });
 
-  return jsonResponse(
-    {
-      ok: true,
-      data: record,
-    },
-    201,
-  );
+  return jsonResponse({ ok: true, data: record }, 201);
 }
 
 async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Response> {
@@ -156,94 +138,46 @@ async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Respons
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
-
   const record: BuildRecord = JSON.parse(raw);
-
-  // Return public-facing data only (no admin fields)
-  return jsonResponse({
-    ok: true,
-    data: {
-      trackingCode: record.trackingCode,
-      customerName: record.customerName,
-      services: record.services,
-      status: record.status,
-      timeline: record.timeline,
-      partsValue: record.partsValue,
-      estimateSubtotal: record.estimateSubtotal,
-      taxAmount: record.taxAmount,
-      totalWithTax: record.totalWithTax,
-      createdAt: record.createdAt,
-    },
-  });
+  return jsonResponse({ ok: true, data: record });
 }
 
-async function handleUpdate(
-  request: Request,
-  code: string,
-  env: BuildTrackerEnv,
-): Promise<Response> {
+async function handleAdvance(code: string, env: BuildTrackerEnv): Promise<Response> {
   const raw = await env.BUILD_TRACKER.get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
 
   const record: BuildRecord = JSON.parse(raw);
-  const data = (await request.json()) as { status?: string; note?: string };
+  const currentStatusIndex = BUILD_STATUSES.indexOf(record.status);
 
-  if (!data.status || !isValidStatus(data.status)) {
-    return jsonResponse(
-      { ok: false, error: `Invalid status. Must be one of: ${BUILD_STATUSES.join(", ")}` },
-      400,
-    );
+  if (currentStatusIndex < BUILD_STATUSES.length - 1) {
+    const newStatus = BUILD_STATUSES[currentStatusIndex + 1];
+    record.status = newStatus;
+    record.timeline.push({
+      status: newStatus,
+      timestamp: new Date().toISOString(),
+      note: `Status changed to ${STATUS_LABELS[newStatus]}`.trim(),
+    });
+
+    await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record), {
+      metadata: { ...record, status: newStatus },
+    });
   }
 
-  const newStatus = data.status as BuildStatus;
-
-  record.status = newStatus;
-  record.timeline.push({
-    status: newStatus,
-    timestamp: new Date().toISOString(),
-    note: data.note || `Status changed to ${STATUS_LABELS[newStatus]}`,
-  });
-
-  await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record));
-
-  return jsonResponse({
-    ok: true,
-    data: {
-      trackingCode: record.trackingCode,
-      status: record.status,
-      timeline: record.timeline,
-    },
-  });
+  return jsonResponse({ ok: true, data: record });
 }
 
 async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
-  const list = await env.BUILD_TRACKER.list({ prefix: KV_KEY_PREFIX });
-  const builds: Partial<BuildRecord>[] = [];
-
+  const list = await env.BUILD_TRACKT.list({ prefix: KV_KEY_PREFIX });
+  const builds: BuildRecord[] = [];
   for (const key of list.keys) {
     const raw = await env.BUILD_TRACKER.get(key.name);
     if (raw) {
-      const record: BuildRecord = JSON.parse(raw);
-      builds.push({
-        trackingCode: record.trackingCode,
-        customerName: record.customerName,
-        services: record.services,
-        status: record.status,
-        createdAt: record.createdAt,
-        timeline: record.timeline,
-        partsValue: record.partsValue,
-        estimateSubtotal: record.estimateSubtotal,
-        taxAmount: record.taxAmount,
-        totalWithTax: record.totalWithTax,
-      });
+      builds.push(JSON.parse(raw));
     }
   }
-
-  // Sort by most recent first
   builds.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
-
   return jsonResponse({ ok: true, data: builds });
 }
 
