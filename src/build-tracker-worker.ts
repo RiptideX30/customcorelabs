@@ -232,6 +232,7 @@ async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
         services: record.services,
         status: record.status,
         createdAt: record.createdAt,
+        timeline: record.timeline, // <-- Added this line
         partsValue: record.partsValue,
         estimateSubtotal: record.estimateSubtotal,
         taxAmount: record.taxAmount,
