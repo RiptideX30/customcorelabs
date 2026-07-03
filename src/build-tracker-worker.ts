@@ -1,8 +1,6 @@
 import {
   type BuildRecord,
-  type BuildStatus,
   type ApiResponse,
-  isValidStatus,
   generateTrackingCode,
   kvKey,
   KV_KEY_PREFIX,
@@ -74,7 +72,8 @@ export async function handleTrackerRequest(
       pathParts[0] === "api" &&
       pathParts[1] === "track" &&
       pathParts[2] &&
-      pathParts[3] === "advance"
+      pathParts[3] === "advance" &&
+      pathParts.length === 4
     ) {
       if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       const code = pathParts[2].toUpperCase();
@@ -86,7 +85,8 @@ export async function handleTrackerRequest(
       request.method === "GET" &&
       pathParts[0] === "api" &&
       pathParts[1] === "admin" &&
-      pathParts[2] === "builds"
+      pathParts[2] === "builds" &&
+      pathParts.length === 3
     ) {
       if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       return handleListBuilds(env);
@@ -127,7 +127,11 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
   };
 
   await env.BUILD_TRACKER.put(kvKey(trackingCode), JSON.stringify(record), {
-    metadata: { createdAt: now, customerName: record.customerName, status: "received" },
+    metadata: { 
+      createdAt: now, 
+      customerName: record.customerName, 
+      status: "received" 
+    },
   });
 
   return jsonResponse({ ok: true, data: record }, 201);
@@ -161,7 +165,11 @@ async function handleAdvance(code: string, env: BuildTrackerEnv): Promise<Respon
     });
 
     await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record), {
-      metadata: { ...record, status: newStatus },
+      metadata: {
+        createdAt: record.createdAt,
+        customerName: record.customerName,
+        status: newStatus,
+      },
     });
   }
 
@@ -173,7 +181,6 @@ async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
 
   const loadPromises = listResult.keys.map(async (key) => {
     const rawData = await env.BUILD_TRACKER.get(key.name);
-    // Handle cases where the record might be empty or malformed
     if (!rawData) return null;
     try {
       return JSON.parse(rawData) as BuildRecord;
@@ -185,12 +192,10 @@ async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
   const results = await Promise.all(loadPromises);
   const builds = results.filter((record): record is BuildRecord => record !== null);
 
-  // Sort by creation date in descending order
   builds.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return jsonResponse({ ok: true, data: builds });
 }
-
 
 function jsonResponse(data: ApiResponse, status = 200): Response {
   return new Response(JSON.stringify(data), {

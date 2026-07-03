@@ -24,7 +24,7 @@ import {
 import { type Build, type BuildStatus } from "@/lib/build-tracker.tsx";
 import { getTrackForServices } from "@/lib/service-tracks";
 import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";
-import { trackerUrl } from "@/lib/tracker-api";
+import { trackerFetch, trackerUrl } from "@/lib/tracker-api";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -78,7 +78,7 @@ function CreateBuildDialog({
     setError("");
     setNewBuild(null);
     try {
-      const res = await fetch(trackerUrl("/api/track"), {
+      const res = await trackerFetch("/api/track", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -212,40 +212,31 @@ function AdminPage() {
   const [updatingCode, setUpdatingCode] = useState<string | null>(null);
 
   const fetchBuilds = useCallback(async () => {
+    if (!adminKey) {
+      setError("Admin key is not set.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(trackerUrl("/api/admin/builds"), {
-        headers: { "x-admin-key": adminKey },
+      const res = await trackerFetch("/api/admin/builds", {
+        headers: { 
+          "x-admin-key": adminKey 
+        },
       });
+      
       const data = await res.json();
+
       if (data.ok && Array.isArray(data.data)) {
-        const validBuilds = data.data.filter((b: unknown): b is Build => {
-          return (
-            !!b &&
-            typeof b === "object" &&
-            "trackingCode" in b &&
-            typeof b.trackingCode === "string" &&
-            "customerName" in b &&
-            typeof b.customerName === "string" &&
-            "createdAt" in b &&
-            typeof b.createdAt === "string" &&
-            "status" in b &&
-            typeof b.status === "string" &&
-            "services" in b &&
-            Array.isArray(b.services) &&
-            "timeline" in b &&
-            Array.isArray(b.timeline)
-          );
-        });
-        setBuilds(validBuilds.map(getCorrectedStatus));
+        setBuilds(data.data.map(getCorrectedStatus));
         setAuthenticated(true);
       } else {
         setError(data.error || "Unauthorized");
         setAuthenticated(false);
         sessionStorage.removeItem(ADMIN_KEY_STORAGE);
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to fetch builds:", err);
       setError("Unable to connect to build tracker.");
     } finally {
       setLoading(false);
@@ -263,19 +254,25 @@ function AdminPage() {
     async (code: string) => {
       setUpdatingCode(code);
       try {
-        const res = await fetch(trackerUrl(`/api/track/${code}/advance`), {
+        const res = await trackerFetch(`/api/track/${code}/advance`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-admin-key": adminKey,
           },
         });
+        
         const data = await res.json();
+
         if (data.ok && data.data) {
           const correctedBuild = getCorrectedStatus(data.data);
           setBuilds((prevBuilds) =>
-            prevBuilds.map((build) => (build.trackingCode === code ? correctedBuild : build)),
+            prevBuilds.map((build) =>
+              build.trackingCode === code ? correctedBuild : build
+            )
           );
+        } else {
+          console.error("Failed to advance build:", data.error);
         }
       } catch (error) {
         console.error("Failed to advance build:", error);
