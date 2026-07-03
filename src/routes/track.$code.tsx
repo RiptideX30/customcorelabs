@@ -107,7 +107,7 @@ function TrackPage() {
             {build.trackingCode}
           </h1>
           <p className="mt-3 text-lg text-foreground">
-            Hi {build.customerName}, here\'s the status of your build.
+            Hi {build.customerName}, here's the status of your build.
           </p>
           <div className="mt-2 inline-block">
             <BuildStatusBadge status={build.status} large />

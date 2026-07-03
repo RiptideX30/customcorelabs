@@ -393,14 +393,19 @@ function AdminPage() {
                   return null;
                 }
 
-                const currentStepIndex = (build.timeline || []).length - 1;
-                const nextStep = track[currentStepIndex + 1];
+                const currentStepIndex = track.indexOf(build.status);
+                const nextStep =
+                  currentStepIndex !== -1 && currentStepIndex < track.length - 1
+                    ? track[currentStepIndex + 1]
+                    : null;
 
                 return (
                   <div
                     key={build.trackingCode}
-                    className="rounded-xl border hairline-strong bg-background p-5 shadow-[var(--shadow-elegant)] hover:border-primary/30 transition-all"
-                  >
+                    className={`rounded-xl border hairline-strong bg-background p-5 shadow-[var(--shadow-elegant)] transition-all ${build.status === "completed"
+                        ? "opacity-40 grayscale pointer-events-none"
+                        : "hover:border-primary/30"
+                      }`}>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -442,15 +447,18 @@ function AdminPage() {
                             )}
                           </button>
                         )}
-                        {build.status === "completed" && (
-                          <span className="text-[12px] text-slate-mute italic">Complete</span>
+                        {build.status === "completed" ? (
+                          <span className="text-[12px] font-semibold tracking-wide text-green-600 uppercase">
+                            Picked Up / Completed
+                          </span>
+                        ) : (
+                          <Link
+                            to={`/track/${build.trackingCode}`}
+                            className="text-[12px] text-primary hover:underline shrink-nowrap"
+                          >
+                            View
+                          </Link>
                         )}
-                        <Link
-                          to={`/track/${build.trackingCode}`}
-                          className="text-[12px] text-primary hover:underline shrink-nowrap"
-                        >
-                          View
-                        </Link>
                       </div>
                     </div>
                   </div>

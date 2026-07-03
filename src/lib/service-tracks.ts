@@ -1,25 +1,49 @@
-const DEFAULT_TRACK = ["Build Created", "Build Complete"];
-const REPAIR_TRACK = ["Received for Service", "Diagnostics", "Repair", "Ready for Pickup"];
-const ULTIMATE_TRACK = [
-  "Parts Ordered",
-  "Parts Received",
-  "Assembly",
-  "Validation",
-  "Ready for Pickup",
+const SYSTEM_BUILD_TRACK = [
+  "received",
+  "parts_ordered",
+  "parts_received",
+  "assembly",
+  "validation",
+  "ready_for_pickup",
+  "completed",
 ];
 
+const SERVICE_REPAIR_TRACK = [
+  "received",
+  "diagnosis",
+  "parts_ordered",
+  "repairing",
+  "validation",
+  "ready_for_pickup",
+  "completed",
+];
+
+const PERFORMANCE_TUNING_TRACK = [
+  "received",
+  "profiling",
+  "modification",
+  "benchmarking",
+  "thermal_testing",
+  "ready_for_pickup",
+  "completed",
+];
+
+const DEFAULT_TRACK = ["received", "completed"];
+
 const SERVICE_TO_TRACK: Record<string, string[]> = {
-  "Ultimate Build": ULTIMATE_TRACK,
-  "Desktop Refresh Bundle": REPAIR_TRACK,
-  "Full System Diagnostic": REPAIR_TRACK,
-  "Hardware Upgrade": REPAIR_TRACK,
+  // System Build Services
+  "Ultimate Build": SYSTEM_BUILD_TRACK,
+
+  // Service & Repair Services
+  "Desktop Refresh Bundle": SERVICE_REPAIR_TRACK,
+  "Full System Diagnostic": SERVICE_REPAIR_TRACK,
+  "Hardware Upgrade": SERVICE_REPAIR_TRACK,
+  "Secure Drive Wipe": SERVICE_REPAIR_TRACK,
+
+  // Performance Tuning Services
+  "Performance Tuning": PERFORMANCE_TUNING_TRACK,
 };
 
-/**
- * Determines the appropriate tracking timeline for a given set of services.
- * @param services An array of service titles.
- * @returns The corresponding array of timeline statuses.
- */
 export function getTrackForServices(services: string[]): string[] {
   if (!Array.isArray(services)) {
     return DEFAULT_TRACK;
