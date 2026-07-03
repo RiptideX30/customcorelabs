@@ -120,30 +120,38 @@ export function computeEstimator(
 
   if (services.has("basic")) {
     const basicAmount = partsValue < 1000 ? 99 : partsValue < 2000 ? 119 : 159;
-    items.push({ label: `Basic Build · $${"basicAmount"}`, amount: basicAmount, taxable: true });
+    items.push({ label: `Basic Build · $${basicAmount}`, amount: basicAmount, taxable: true });
   }
   if (services.has("ultimate")) {
     const ultimateAmount = partsValue < 1000 ? 149 : partsValue < 2000 ? 179 : 229;
     items.push({
-      label: `Ultimate Build · $${"ultimateAmount"}`,
+      label: `Ultimate Build · $${ultimateAmount}`,
       amount: ultimateAmount,
       taxable: true,
     });
   }
-  if (services.has("refresh"))
+  if (services.has("refresh")) {
     items.push({ label: "Desktop Refresh Bundle", amount: 49, taxable: true });
-  if (services.has("diagnostic")) items.push({ label: "Full System Diagnostic", amount: 25 });
-  if (services.has("software")) items.push({ label: "Software Install", amount: 39 });
-  if (services.has("cables"))
+  }
+  if (services.has("diagnostic")) {
+    items.push({ label: "Full System Diagnostic", amount: 25 });
+  }
+  if (services.has("software")) {
+    items.push({ label: "Software Install", amount: 39 });
+  }
+  if (services.has("cables")) {
     items.push({ label: "Pro Cable Management", amount: 18, taxable: true });
-  if (services.has("wipe"))
+  }
+  if (services.has("wipe")) {
     items.push({
       label: `Secure Drive Wipe × ${wipeQuantity}`,
       amount: 15 * wipeQuantity,
       taxable: true,
     });
-  if (services.has("upgrade"))
+  }
+  if (services.has("upgrade")) {
     items.push({ label: "Hardware Upgrade · TBD", amount: 0, taxable: true });
+  }
   if (services.has("thermal")) {
     const isComplimentary = services.has("basic") || services.has("ultimate");
     items.push({
@@ -152,13 +160,22 @@ export function computeEstimator(
       taxable: !isComplimentary,
     });
   }
-  if (services.has("bios")) items.push({ label: "BIOS / Firmware Tuning", amount: 35 });
-  if (services.has("validation")) items.push({ label: "24-Hour Bench Validation", amount: 59 });
-  if (services.has("overclock"))
+  if (services.has("bios")) {
+    items.push({ label: "BIOS / Firmware Tuning", amount: 35 });
+  }
+  if (services.has("validation")) {
+    items.push({ label: "24-Hour Bench Validation", amount: 59 });
+  }
+  if (services.has("overclock")) {
     items.push({ label: "Memory + CPU Overclock Profile", amount: 49 });
+  }
 
-  if (isITX) items.push({ label: "ITX / SFF Case Surcharge", amount: 30, taxable: true });
-  if (nonModularPSU) items.push({ label: "Non-Modular PSU Surcharge", amount: 15, taxable: true });
+  if (isITX) {
+    items.push({ label: "ITX / SFF Case Surcharge", amount: 30, taxable: true });
+  }
+  if (nonModularPSU) {
+    items.push({ label: "Non-Modular PSU Surcharge", amount: 15, taxable: true });
+  }
 
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const taxableSubtotal = items.reduce((sum, item) => (item.taxable ? sum + item.amount : sum), 0);
