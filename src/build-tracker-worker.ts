@@ -54,22 +54,25 @@ export async function handleTrackerRequest(
       return handleListBuilds(env);
     }
 
-    // 3. Dynamic Tracking Path Processing
-    if (pathname.startsWith("/api/track/")) {
-      const remainingPath = pathname.substring("/api/track/".length);
-      const parts = remainingPath.split("/").filter(Boolean);
+    // Dynamic Tracking Path Processing
+if (pathname.startsWith("/api/track/")) {
+  const remainingPath = pathname.substring("/api/track/".length);
+  const parts = remainingPath.split("/").filter(Boolean);
 
-      // Handle Lookup: GET /api/track/:code
-      if (parts.length === 1 && method === "GET") {
-        return handleLookup(parts[0].toUpperCase(), env);
-      }
+  // Handle Lookup: GET /api/track/:code
+  if (parts.length === 1 && method === "GET") {
+    const trackingCode = parts[0].toUpperCase(); // 👈 Use index 0 explicitly
+    return handleLookup(trackingCode, env);
+  }
 
-      // Handle Advance: POST /api/track/:code/advance
-      if (parts.length === 2 && parts[1].toLowerCase() === "advance" && method === "POST") {
-        if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
-        return handleAdvance(parts[0].toUpperCase(), env);
-      }
-    }
+  // Handle Advance: POST /api/track/:code/advance
+  if (parts.length === 2 && parts[1].toLowerCase() === "advance" && method === "POST") { // 👈 Read index 1
+    if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
+    
+    const trackingCode = parts[0].toUpperCase(); // 👈 Extract index 0 ("CCL-WHKV")
+    return handleAdvance(trackingCode, env);
+  }
+}
 
     // Explicit router error that outputs exactly what path was received
     return jsonResponse({ ok: false, error: `Route not found: ${method} ${pathname}` }, 404);
