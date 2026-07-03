@@ -249,13 +249,14 @@ function AdminPage() {
 
   useEffect(() => {
     if (adminKey) {
-      sessionStorage.setItem(ADMIN_KEY_STORAGE, adminKey);
+      localStorage.setItem(ADMIN_KEY_STORAGE, adminKey);
       fetchBuilds();
     }
   }, [adminKey, fetchBuilds]);
 
   const advanceBuild = useCallback(
-    async (code: string, nextStatus: string) => {
+    async (code: string, nextStatus: string | null) => {
+      if (!nextStatus) return; // Safeguard if there is no next step
       setUpdatingCode(code);
       try {
         const res = await trackerFetch(`/api/track/${code}/advance`, {
@@ -264,20 +265,17 @@ function AdminPage() {
             "Content-Type": "application/json",
             "x-admin-key": adminKey,
           },
-          body: JSON.stringify({ nextStatus }),
+          body: JSON.stringify({ nextStatus }), // Sends the step string to the worker
         });
-
+        
         const data = await res.json();
-
         if (data.ok && data.data) {
-          const correctedBuild = getCorrectedStatus(data.data);
+          const updatedBuildRecord = getCorrectedStatus(data.data);
           setBuilds((prevBuilds) =>
             prevBuilds.map((build) =>
-              build.trackingCode === code ? correctedBuild : build
+              build.trackingCode === code ? updatedBuildRecord : build
             )
           );
-        } else {
-          console.error("Failed to advance build:", data.error);
         }
       } catch (error) {
         console.error("Failed to advance build:", error);
@@ -285,8 +283,8 @@ function AdminPage() {
         setUpdatingCode(null);
       }
     },
-    [adminKey],
-  );
+    [adminKey]
+  );  
 
   if (!authenticated) {
     return (
