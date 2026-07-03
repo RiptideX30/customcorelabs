@@ -1,10 +1,10 @@
-import {
-  type BuildRecord,
-  type ApiResponse,
-  generateTrackingCode,
-  kvKey,
-  KV_KEY_PREFIX,
-  STATUS_LABELS,
+import { 
+  type BuildRecord, 
+  type ApiResponse, 
+  generateTrackingCode, 
+  kvKey, 
+  KV_KEY_PREFIX, 
+  STATUS_LABELS, 
 } from "./lib/build-tracker";
 
 const CORS_HEADERS = {
@@ -30,6 +30,7 @@ export async function handleTrackerRequest(
   request: Request,
   env: BuildTrackerEnv,
 ): Promise<Response> {
+  // Handle Browser Preflight Requests
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
@@ -42,7 +43,7 @@ export async function handleTrackerRequest(
     const adminKey = request.headers.get("x-admin-key");
     const isAuthed = adminKey && adminKey === env.ADMIN_KEY;
 
-    // POST /api/track — create a new build record
+    // 1. POST /api/track — Create a new build record
     if (
       request.method === "POST" &&
       pathParts[0] === "api" &&
@@ -53,7 +54,7 @@ export async function handleTrackerRequest(
       return handleCreate(request, env);
     }
 
-    // GET /api/track/:code — lookup a build
+    // 2. GET /api/track/:code — Lookup a single build (Public View)
     if (
       request.method === "GET" &&
       pathParts[0] === "api" &&
@@ -65,7 +66,7 @@ export async function handleTrackerRequest(
       return handleLookup(code, env);
     }
 
-    // POST /api/track/:code/advance — advance build to next status
+    // 3. POST /api/track/:code/advance — Advance a build status (Admin Action)
     if (
       request.method === "POST" &&
       pathParts[0] === "api" &&
@@ -76,10 +77,10 @@ export async function handleTrackerRequest(
     ) {
       if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       const code = pathParts[2].toUpperCase();
-      return handleAdvance(request, code, env);
+      return handleAdvance(code, env);
     }
 
-    // GET /api/admin/builds — list all builds
+    // 4. GET /api/admin/builds — List all builds (Admin Dashboard)
     if (
       request.method === "GET" &&
       pathParts[0] === "api" &&
@@ -91,6 +92,7 @@ export async function handleTrackerRequest(
       return handleListBuilds(env);
     }
 
+    // Fallback if no matching URL patterns match the array check strings
     return jsonResponse({ ok: false, error: "Not found" }, 404);
   } catch (error) {
     console.error("Tracker worker error:", error);
@@ -106,7 +108,6 @@ export default {
 
 async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Response> {
   const data = (await request.json()) as Partial<BuildRecord>;
-
   const trackingCode = generateTrackingCode();
   const now = new Date().toISOString();
 
@@ -145,24 +146,47 @@ async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Respons
   return jsonResponse({ ok: true, data: record });
 }
 
-async function handleAdvance(
-  request: Request,
-  code: string,
-  env: BuildTrackerEnv,
-): Promise<Response> {
+async function handleAdvance(code: string, env: BuildTrackerEnv): Promise<Response> {
   const raw = await env.BUILD_TRACKER.get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
 
-  const body = (await request.json()) as { nextStatus?: string };
-  const newStatus = body.nextStatus;
+  const record: BuildRecord = JSON.parse(raw);
 
-  if (!newStatus) {
-    return jsonResponse({ ok: false, error: "Missing nextStatus in request body" }, 400);
+  // Define our 3 distinct tracking workflows
+  const SYSTEM_BUILD_TRACK = ["received", "parts_ordered", "parts_received", "assembly", "validation", "ready_for_pickup", "completed"];
+  const REPAIR_TRACK = ["received", "diagnosis", "parts_ordered", "repairing", "validation", "ready_for_pickup", "completed"];
+  const TUNING_TRACK = ["received", "profiling", "modification", "benchmarking", "thermal_testing", "ready_for_pickup", "completed"];
+
+  // Inspect the record's services array to calculate the correct track
+  let track = SYSTEM_BUILD_TRACK; // Default fallback
+  const servicesJoined = (record.services || []).join(", ").toLowerCase();
+
+  if (
+    servicesJoined.includes("diagnostic") || 
+    servicesJoined.includes("repair") || 
+    servicesJoined.includes("refresh") || 
+    servicesJoined.includes("wipe")
+  ) {
+    track = REPAIR_TRACK;
+  } else if (
+    servicesJoined.includes("software") || 
+    servicesJoined.includes("thermal") || 
+    servicesJoined.includes("bench") || 
+    servicesJoined.includes("overclock") ||
+    servicesJoined.includes("tuning")
+  ) {
+    track = TUNING_TRACK;
   }
 
-  const record: BuildRecord = JSON.parse(raw);
+  // Find where we are and step forward cleanly
+  const currentIndex = track.indexOf(record.status);
+  if (currentIndex === -1 || currentIndex >= track.length - 1) {
+    return jsonResponse({ ok: false, error: "Build is already completed or has an invalid status" }, 400);
+  }
+
+  const newStatus = track[currentIndex + 1];
 
   record.status = newStatus as BuildRecord["status"];
   record.timeline.push({
@@ -171,6 +195,7 @@ async function handleAdvance(
     note: `Status changed to ${STATUS_LABELS[newStatus] || newStatus}`.trim(),
   });
 
+  // Save back to KV using a minimized shallow metadata block to avoid the 1024-byte limit
   await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record), {
     metadata: {
       createdAt: record.createdAt,
@@ -184,7 +209,6 @@ async function handleAdvance(
 
 async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
   const listResult = await env.BUILD_TRACKER.list({ prefix: KV_KEY_PREFIX });
-
   const loadPromises = listResult.keys.map(async (key) => {
     const rawData = await env.BUILD_TRACKER.get(key.name);
     if (!rawData) return null;
@@ -197,9 +221,9 @@ async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
 
   const results = await Promise.all(loadPromises);
   const builds = results.filter((record): record is BuildRecord => record !== null);
-
+  
   builds.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
+  
   return jsonResponse({ ok: true, data: builds });
 }
 
