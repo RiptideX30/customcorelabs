@@ -48,7 +48,11 @@ const allServices = [
 ];
 
 const getCorrectedStatus = (build: BuildSummary): BuildSummary => {
-  return build;
+  return {
+    ...build,
+    timeline: build.timeline || [],
+    services: build.services || [],
+  };
 };
 
 function CreateBuildDialog({
