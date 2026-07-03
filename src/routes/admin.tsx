@@ -249,7 +249,7 @@ function AdminPage() {
 
   useEffect(() => {
     if (adminKey) {
-      localStorage.setItem(ADMIN_KEY_STORAGE, adminKey);
+      sessionStorage.setItem(ADMIN_KEY_STORAGE, adminKey);
       fetchBuilds();
     }
   }, [adminKey, fetchBuilds]);
