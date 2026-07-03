@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { type Build, type BuildStatus } from "@/lib/build-tracker.tsx";
+import { type Build, type BuildStatus, STATUS_LABELS } from "@/lib/build-tracker.tsx";
 import { getTrackForServices } from "@/lib/service-tracks";
 import { NEW_BUILDS, SERVICE_REPAIR, PERFORMANCE_TUNING } from "@/lib/form-utils";
 import { trackerFetch, trackerUrl } from "@/lib/tracker-api";
@@ -442,7 +442,7 @@ function AdminPage() {
                               <span className="inline-block h-3 w-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                             ) : (
                               <>
-                                Advance to "{nextStep}"
+                                Advance to "{STATUS_LABELS[nextStep] || nextStep}"
                                 <ArrowUpRight className="h-3 w-3" />
                               </>
                             )}
