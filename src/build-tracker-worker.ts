@@ -30,81 +30,54 @@ export async function handleTrackerRequest(
   request: Request,
   env: BuildTrackerEnv,
 ): Promise<Response> {
-  // Handle Browser Preflight Requests
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
   const url = new URL(request.url);
-  const path = url.pathname;
-  const pathParts = path.split("/").filter(Boolean);
+  const pathname = url.pathname;
+  const method = request.method;
 
   try {
     const adminKey = request.headers.get("x-admin-key");
     const isAuthed = adminKey && adminKey === env.ADMIN_KEY;
 
-    // 1. POST /api/track — Create a new build record
-    if (
-      request.method === "POST" &&
-      pathParts[0] === "api" &&
-      pathParts[1] === "track" &&
-      pathParts.length === 2
-    ) {
+    // 1. POST /api/track
+    if (method === "POST" && pathname === "/api/track") {
       if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       return handleCreate(request, env);
     }
 
-    // 2. GET /api/track/:code — Lookup a single build (Public View)
-    if (
-      request.method === "GET" &&
-      pathParts[0] === "api" &&
-      pathParts[1] === "track" &&
-      pathParts[2] &&
-      pathParts.length === 3
-    ) {
-      const code = pathParts[2].toUpperCase();
-      return handleLookup(code, env);
-    }
-
-    // 3. POST /api/track/:code/advance — Advance a build status (Admin Action)
-    if (
-      request.method === "POST" &&
-      pathParts[0] === "api" &&
-      pathParts[1] === "track" &&
-      pathParts[2] &&
-      pathParts[3] === "advance" &&
-      pathParts.length === 4
-    ) {
-      if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
-      const code = pathParts[2].toUpperCase();
-      return handleAdvance(code, env);
-    }
-
-    // 4. GET /api/admin/builds — List all builds (Admin Dashboard)
-    if (
-      request.method === "GET" &&
-      pathParts[0] === "api" &&
-      pathParts[1] === "admin" &&
-      pathParts[2] === "builds" &&
-      pathParts.length === 3
-    ) {
+    // 2. GET /api/admin/builds
+    if (method === "GET" && pathname === "/api/admin/builds") {
       if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       return handleListBuilds(env);
     }
 
-    // Fallback if no matching URL patterns match the array check strings
-    return jsonResponse({ ok: false, error: "Not found" }, 404);
+    // 3. Dynamic Tracking Path Processing
+    if (pathname.startsWith("/api/track/")) {
+      const remainingPath = pathname.substring("/api/track/".length);
+      const parts = remainingPath.split("/").filter(Boolean);
+
+      // Handle Lookup: GET /api/track/:code
+      if (parts.length === 1 && method === "GET") {
+        return handleLookup(parts[0].toUpperCase(), env);
+      }
+
+      // Handle Advance: POST /api/track/:code/advance
+      if (parts.length === 2 && parts[1].toLowerCase() === "advance" && method === "POST") {
+        if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
+        return handleAdvance(parts[0].toUpperCase(), env);
+      }
+    }
+
+    // Explicit router error that outputs exactly what path was received
+    return jsonResponse({ ok: false, error: `Route not found: ${method} ${pathname}` }, 404);
   } catch (error) {
     console.error("Tracker worker error:", error);
     return jsonResponse({ ok: false, error: "Internal error" }, 500);
   }
 }
-
-export default {
-  async fetch(request: Request, env: BuildTrackerEnv): Promise<Response> {
-    return handleTrackerRequest(request, env);
-  },
-};
 
 async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Response> {
   const data = (await request.json()) as Partial<BuildRecord>;
