@@ -203,8 +203,8 @@ function TrackPage() {
         <div className="md:col-span-3 mt-6 border-t border-slate-200/80 pt-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 font-mono text-[11px] uppercase tracking-wider">
             {track.map((step, index) => {
-              const isStepActive = activeStepIndex === index;
-              const isStepCompleted = activeStepIndex > index;
+              const isStepActive = !isCompleted && activeStepIndex === index;
+              const isStepCompleted = isCompleted || activeStepIndex > index;
               const timelineEvent = build.timeline.find(
                 (e) => e.status.toLowerCase() === step.toLowerCase()
               );
