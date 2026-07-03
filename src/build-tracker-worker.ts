@@ -4,7 +4,6 @@ import {
   generateTrackingCode,
   kvKey,
   KV_KEY_PREFIX,
-  BUILD_STATUSES,
   STATUS_LABELS,
 } from "./lib/build-tracker";
 
@@ -77,7 +76,7 @@ export async function handleTrackerRequest(
     ) {
       if (!isAuthed) return jsonResponse({ ok: false, error: "Unauthorized" }, 403);
       const code = pathParts[2].toUpperCase();
-      return handleAdvance(code, env);
+      return handleAdvance(request, code, env);
     }
 
     // GET /api/admin/builds — list all builds
@@ -146,32 +145,39 @@ async function handleLookup(code: string, env: BuildTrackerEnv): Promise<Respons
   return jsonResponse({ ok: true, data: record });
 }
 
-async function handleAdvance(code: string, env: BuildTrackerEnv): Promise<Response> {
+async function handleAdvance(
+  request: Request,
+  code: string,
+  env: BuildTrackerEnv,
+): Promise<Response> {
   const raw = await env.BUILD_TRACKER.get(kvKey(code));
   if (!raw) {
     return jsonResponse({ ok: false, error: "Build not found" }, 404);
   }
 
-  const record: BuildRecord = JSON.parse(raw);
-  const currentStatusIndex = BUILD_STATUSES.indexOf(record.status);
+  const body = (await request.json()) as { nextStatus?: string };
+  const newStatus = body.nextStatus;
 
-  if (currentStatusIndex < BUILD_STATUSES.length - 1) {
-    const newStatus = BUILD_STATUSES[currentStatusIndex + 1];
-    record.status = newStatus;
-    record.timeline.push({
-      status: newStatus,
-      timestamp: new Date().toISOString(),
-      note: `Status changed to ${STATUS_LABELS[newStatus]}`.trim(),
-    });
-
-    await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record), {
-      metadata: {
-        createdAt: record.createdAt,
-        customerName: record.customerName,
-        status: newStatus,
-      },
-    });
+  if (!newStatus) {
+    return jsonResponse({ ok: false, error: "Missing nextStatus in request body" }, 400);
   }
+
+  const record: BuildRecord = JSON.parse(raw);
+
+  record.status = newStatus;
+  record.timeline.push({
+    status: newStatus,
+    timestamp: new Date().toISOString(),
+    note: `Status changed to ${STATUS_LABELS[newStatus] || newStatus}`.trim(),
+  });
+
+  await env.BUILD_TRACKER.put(kvKey(code), JSON.stringify(record), {
+    metadata: {
+      createdAt: record.createdAt,
+      customerName: record.customerName,
+      status: newStatus,
+    },
+  });
 
   return jsonResponse({ ok: true, data: record });
 }

@@ -255,7 +255,7 @@ function AdminPage() {
   }, [adminKey, fetchBuilds]);
 
   const advanceBuild = useCallback(
-    async (code: string) => {
+    async (code: string, nextStatus: string) => {
       setUpdatingCode(code);
       try {
         const res = await trackerFetch(`/api/track/${code}/advance`, {
@@ -264,8 +264,9 @@ function AdminPage() {
             "Content-Type": "application/json",
             "x-admin-key": adminKey,
           },
+          body: JSON.stringify({ nextStatus }),
         });
-        
+
         const data = await res.json();
 
         if (data.ok && data.data) {
@@ -433,7 +434,7 @@ function AdminPage() {
                       <div className="flex items-center gap-2 shrink-0">
                         {nextStep && build.status !== "completed" && (
                           <button
-                            onClick={() => advanceBuild(build.trackingCode)}
+                            onClick={() => advanceBuild(build.trackingCode, nextStep)}
                             disabled={updatingCode === build.trackingCode}
                             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[12px] font-medium text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
                           >

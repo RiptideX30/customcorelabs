@@ -1,31 +1,31 @@
 const SYSTEM_BUILD_TRACK = [
-  "received",
-  "parts_ordered",
-  "parts_received",
-  "assembly",
-  "validation",
-  "ready_for_pickup",
-  "completed",
+  "Order Received",
+  "Parts Ordered",
+  "Parts Received",
+  "Assembly",
+  "Validation",
+  "Ready for Pickup",
+  "Completed",
 ];
 
 const SERVICE_REPAIR_TRACK = [
-  "received",
-  "diagnosis",
-  "parts_ordered",
-  "repairing",
-  "validation",
-  "ready_for_pickup",
-  "completed",
+  "Order Received",
+  "Diagnosis",
+  "Parts Ordered",
+  "Repairing",
+  "Validation",
+  "Ready for Pickup",
+  "Completed",
 ];
 
 const PERFORMANCE_TUNING_TRACK = [
-  "received",
-  "profiling",
-  "modification",
-  "benchmarking",
-  "thermal_testing",
-  "ready_for_pickup",
-  "completed",
+  "Order Recieved",
+  "Profiling",
+  "Modification",
+  "Benchmarking",
+  "Thermal Testing",
+  "Ready for Pickup",
+  "Completed",
 ];
 
 const DEFAULT_TRACK = ["received", "completed"];
