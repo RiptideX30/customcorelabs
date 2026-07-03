@@ -126,10 +126,10 @@ async function handleCreate(request: Request, env: BuildTrackerEnv): Promise<Res
   };
 
   await env.BUILD_TRACKER.put(kvKey(trackingCode), JSON.stringify(record), {
-    metadata: { 
-      createdAt: now, 
-      customerName: record.customerName, 
-      status: "received" 
+    metadata: {
+      createdAt: now,
+      customerName: record.customerName,
+      status: "received",
     },
   });
 
@@ -164,7 +164,7 @@ async function handleAdvance(
 
   const record: BuildRecord = JSON.parse(raw);
 
-  record.status = newStatus;
+  record.status = newStatus as BuildRecord["status"];
   record.timeline.push({
     status: newStatus,
     timestamp: new Date().toISOString(),
