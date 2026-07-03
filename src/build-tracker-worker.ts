@@ -97,7 +97,7 @@ export async function handleTrackerRequest(
       return handleListBuilds(env);
     }
 
-    return jsonResponse({ ok: false, error: `Route not found: ${method} ${pathname}` }, 404);
+    return jsonResponse({ ok: false, error: `V2 Route Mismatch: ${method} ${pathname}` }, 404);
   } catch (error) {
     console.error("Tracker worker error:", error);
     return jsonResponse({ ok: false, error: "Internal error" }, 500);

@@ -392,7 +392,7 @@ function AdminPage() {
                   return null;
                 }
 
-                const currentStepIndex = track.indexOf(build.status);
+                const currentStepIndex = track.indexOf(build.status?.toLowerCase());
                 const nextStep =
                   currentStepIndex !== -1 && currentStepIndex < track.length - 1
                     ? track[currentStepIndex + 1]
