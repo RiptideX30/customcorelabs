@@ -1,5 +1,5 @@
 // The API is served from a separate Cloudflare Worker.
-export const TRACKER_API_BASE = "https://build-tracker.cdwojick.workers.dev";
+export const TRACKER_API_BASE = import.meta.env.DEV ? "" : "https://build-tracker.cdwojick.workers.dev";
 
 export function trackerUrl(path: string) {
   // If the path is already a full URL, return it as is.

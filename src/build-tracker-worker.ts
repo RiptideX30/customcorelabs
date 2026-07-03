@@ -169,17 +169,28 @@ async function handleAdvance(code: string, env: BuildTrackerEnv): Promise<Respon
 }
 
 async function handleListBuilds(env: BuildTrackerEnv): Promise<Response> {
-  const list = await env.BUILD_TRACKT.list({ prefix: KV_KEY_PREFIX });
-  const builds: BuildRecord[] = [];
-  for (const key of list.keys) {
-    const raw = await env.BUILD_TRACKER.get(key.name);
-    if (raw) {
-      builds.push(JSON.parse(raw));
+  const listResult = await env.BUILD_TRACKER.list({ prefix: KV_KEY_PREFIX });
+
+  const loadPromises = listResult.keys.map(async (key) => {
+    const rawData = await env.BUILD_TRACKER.get(key.name);
+    // Handle cases where the record might be empty or malformed
+    if (!rawData) return null;
+    try {
+      return JSON.parse(rawData) as BuildRecord;
+    } catch {
+      return null;
     }
-  }
-  builds.sort((a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""));
+  });
+
+  const results = await Promise.all(loadPromises);
+  const builds = results.filter((record): record is BuildRecord => record !== null);
+
+  // Sort by creation date in descending order
+  builds.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   return jsonResponse({ ok: true, data: builds });
 }
+
 
 function jsonResponse(data: ApiResponse, status = 200): Response {
   return new Response(JSON.stringify(data), {
