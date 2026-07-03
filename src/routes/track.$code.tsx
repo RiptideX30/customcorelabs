@@ -110,7 +110,7 @@ function TrackPage() {
             Hi {build.customerName}, here's the status of your build.
           </p>
           <div className="mt-2 inline-block">
-            <BuildStatusBadge status={build.status} large />
+          <BuildStatusBadge status={build.status} />
           </div>
         </div>
 
