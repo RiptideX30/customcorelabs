@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { type Build } from "@/lib/build-tracker";
 import { trackerFetch } from "@/lib/tracker-api";
-import { CheckCircle, Circle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 // Loader function to fetch build data before rendering the component
 export const Route = createFileRoute("/track/$code")({
@@ -199,44 +199,69 @@ function TrackPage() {
           </div>
         </div>
 
-        {/* Bottom Section: Horizontal Timeline Tracker */}
-        <div className="md:col-span-3 mt-4 border-t border-slate-200/80 pt-6">
-          <div className="flex w-full flex-row items-start justify-between gap-2 font-mono text-[11px] uppercase">
+        {/* Bottom Section: Data Grid Matrix */}
+        <div className="md:col-span-3 mt-6 border-t border-slate-200/80 pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-3 font-mono text-[11px] uppercase tracking-wider">
             {track.map((step, index) => {
-              const isStepCompleted = activeStepIndex >= index;
+              const isStepActive = activeStepIndex === index;
+              const isStepCompleted = activeStepIndex > index;
               const timelineEvent = build.timeline.find(
-                (e) => e.status.toLowerCase() === step.toLowerCase(),
+                (e) => e.status.toLowerCase() === step.toLowerCase()
               );
+
+              let boxClass = "border-slate-200 bg-slate-50/40";
+              if (isStepActive) {
+                boxClass = "bg-blue-50/50 border-blue-200";
+              } else if (isStepCompleted) {
+                boxClass = "border-slate-200 bg-white";
+              }
 
               return (
                 <div
                   key={step}
-                  className={`flex-1 text-center ${
-                    !isStepCompleted ? "opacity-35" : ""
+                  className={`rounded-xl p-3 flex flex-col justify-between min-h-[68px] border transition-all ${boxClass} ${
+                    !isStepCompleted && !isStepActive
+                      ? "opacity-40 grayscale"
+                      : ""
                   }`}
                 >
-                  <p className="font-bold text-slate-700">
+                  <p className="font-bold text-slate-800 text-[12px] leading-tight">
                     {TRACKING_LABELS[step] || step.toUpperCase()}
                   </p>
-                  {isStepCompleted ? (
-                    <div className="mt-1">
-                      <div className="mx-auto h-0.5 w-full rounded-full bg-blue-600" />
-                      <p className="mt-1 text-[10px] font-semibold text-blue-600">
-                        {timelineEvent
-                          ? new Date(
-                              timelineEvent.timestamp,
-                            ).toLocaleDateString()
-                          : "COMPLETED"}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mt-1">
-                      <div className="mx-auto h-0.5 w-full rounded-full bg-slate-300" />
-                      <p className="mt-1 text-[10px] font-semibold text-slate-400">
-                        [ STANDBY ]
-                      </p>
-                    </div>
-                  )}
+                  <div className="mt-2">
+                    {isStepCompleted ? (
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-green-600 flex items-center gap-1.5">
+                          <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
+                          STATUS: SECURED
+                        </span>
+                        <span className="text-slate-400 font-semibold">
+                          {timelineEvent
+                            ? new Date(
+                                timelineEvent.timestamp
+                              ).toLocaleTimeString([], {
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })
+                            : ""}
+                        </span>
+                      </div>
+                    ) : isStepActive ? (
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex h-2 w-2">
+                          <div className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></div>
+                          <div className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></div>
+                        </div>
+                        <span className="font-bold text-blue-600">
+                          STATUS: ACTIVE WORKFLOW
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-semibold text-slate-400">
+                        STATUS: LINE STANDBY
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
