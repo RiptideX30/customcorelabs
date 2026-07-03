@@ -1,192 +1,222 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
-  ArrowLeft,
-  CheckCircle2,
-  Circle,
-  CircleEllipsis,
-  Loader2,
-  PackageSearch,
-} from "lucide-react";
-import cclLogo from "@/assets/ccl-logo.jpg";
-import BuildStatusBadge from "@/components/BuildStatusBadge";
+  type Build,
+  type BuildStatus,
+} from "@/lib/build-tracker";
 import { trackerFetch } from "@/lib/tracker-api";
-import { type Build } from "@/lib/build-tracker.tsx";
 import { getTrackForServices } from "@/lib/service-tracks";
-import { cn } from "@/lib/utils";
+import {
+  CheckCircle,
+  Circle,
+  Clock,
+  HardDrive,
+  User,
+  Wrench,
+  ShieldCheck,
+} from "lucide-react";
 
+// Loader function to fetch build data before rendering the component
 export const Route = createFileRoute("/track/$code")({
+  loader: async ({ params }) => {
+    try {
+      const res = await trackerFetch(`/api/track/${params.code}`);
+      if (!res.ok) {
+        throw notFound();
+      }
+      const data = await res.json();
+      if (!data.ok) {
+        throw notFound();
+      }
+      return data.data as Build;
+    } catch {
+      throw notFound();
+    }
+  },
   component: TrackPage,
+  notFoundComponent: () => (
+    <div className="flex h-[calc(100vh-10rem)] items-center justify-center text-center">
+      <div>
+        <p className="mono text-5xl font-extrabold tracking-tight text-primary">
+          404
+        </p>
+        <h1 className="mt-2 text-xl font-bold tracking-tight sm:text-2xl">
+          Tracking Code Not Found
+        </h1>
+        <p className="mt-2 text-sm text-slate-mute">
+          The code you entered is invalid or has expired.
+        </p>
+        <div className="mt-6">
+          <Link
+            to="/"
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-90"
+          >
+            Go back home
+          </Link>
+        </div>
+      </div>
+    </div>
+  ),
 });
 
+const STEP_DETAILS: Record<string, { title: string; subtitle: string }> = {
+    received: { title: "ORDER RECEIVED", subtitle: "BUILD PROFILE INITIALIZED IN SYSTEM" },
+    diagnosis: { title: "SYSTEM DIAGNOSIS", subtitle: "RUNNING HARDWARE DIAGNOSTIC SEQUENCES" },
+    parts_ordered: { title: "PARTS ORDERED", subtitle: "SOURCING HARDWARE COMPONENTS FROM LAB" },
+    parts_received: { title: "PARTS RECEIVED", subtitle: "HARDWARE ARRIVED & VERIFIED AT LAB" },
+    repairing: { title: "HARDWARE REPAIR", subtitle: "PERFORMING COMPONENT LEVEL REPAIRS" },
+    profiling: { title: "BASELINE PROFILING", subtitle: "TESTING STOCK SYSTEM VOLTAGE CURVES" },
+    assembly: { title: "SYSTEM ASSEMBLY", subtitle: "BUILD ASSEMBLED WITH PREMIUM CABLING" },
+    modification: { title: "HARDWARE MODIFICATION", subtitle: "APPLYING CUSTOM LOOPS & HARDWARE TUNING" },
+    benchmarking: { title: "STRESS BENCHMARKING", subtitle: "VERIFYING PULL RATES & SYSTEM SCORE CARDS" },
+    thermal_testing: { title: "THERMAL INTEGRITY TEST", subtitle: "RUNNING 24HR TEMPERATURE HEAT CYCLING" },
+    validation: { title: "QUALITY VALIDATION", subtitle: "RUNNING FINAL 50-POINT SAFETY CHECKLIST" },
+    ready_for_pickup: { title: "READY FOR PICKUP!", subtitle: "BUILD PACKAGED & CLEANED FOR COLLECTION" },
+    completed: { title: "ORDER FINALIZED", subtitle: "MACHINE HANDED OFF TO CUSTOMER PROFILE" }
+};
+
 function TrackPage() {
-  const { code } = Route.useParams();
-  const [build, setBuild] = useState<Build | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const build = Route.useLoaderData();
+  const track = getTrackForServices(build.services);
 
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    trackerFetch(`/api/track/${code}`)
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.ok) {
-          setBuild(res.data);
-        } else {
-          setError(res.error || "Could not find build.");
-        }
-      })
-      .catch(() => setError("Unable to connect to build tracker."))
-      .finally(() => setLoading(false));
-  }, [code]);
-
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-slate-50/50">
-        <div className="text-center">
-          <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
-          <p className="mt-4 text-[15px] text-slate-mute">Loading build status...</p>
-        </div>
-      </div>
-    );
+  if (!track) {
+    return <div>Error: Build track could not be determined.</div>;
   }
 
-  if (error || !build) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-slate-50/50 px-5">
-        <div className="max-w-md rounded-xl border hairline-strong bg-background p-8 text-center shadow-[var(--shadow-elegant)]">
-          <PackageSearch className="mx-auto h-16 w-16 text-slate-400" />
-          <h1 className="mt-6 text-[22px] font-semibold tracking-tight">
-            Build Not Found
-          </h1>
-          <p className="mt-1.5 text-slate-mute">
-            The tracking code <span className="mono font-semibold text-primary">{code}</span> could
-            not be found. Please check the code and try again.
-          </p>
-          <Link
-            to="/"
-            className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Homepage
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const track = getTrackForServices(build.services) || [];
-  const activeStepIndex = (build.timeline || []).length - 1;
-  const isComplete = build.status === "completed";
+  const activeStepIndex = track.indexOf(build.status);
+  const progressPercentage = (activeStepIndex / (track.length - 1)) * 100;
+  const isCompleted = build.status.toLowerCase() === 'completed';
 
   return (
-    <main className="min-h-screen bg-slate-50/50 antialiased">
-      <header className="border-b hairline bg-background/80 backdrop-blur-sm sticky top-0">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-5">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={cclLogo} alt="CCL" className="h-7 w-7 rounded-md" />
-            <span className="text-[13px] font-semibold">Build Tracker</span>
-          </Link>
-          <Link
-            to="/"
-            className="text-[12px] font-medium text-primary hover:underline"
-          >
-            Check another build
-          </Link>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-2xl px-5 py-12">
-        {/* --- Top Summary --- */}
-        <div className="text-center">
-          <p className="text-sm uppercase tracking-widest text-slate-mute">
-            Tracking Code
-          </p>
-          <h1 className="mono mt-1 text-4xl font-bold text-primary">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto px-4 py-4">
+      {/* Left Column: System Data Node */}
+      <div className="md:col-span-1 space-y-4">
+        <div className="p-4 rounded-xl border hairline-strong bg-background shadow-lg">
+          <p className="mono text-3xl font-extrabold tracking-tight text-primary uppercase">
             {build.trackingCode}
-          </h1>
-          <p className="mt-3 text-lg text-foreground">
-            Hi {build.customerName}, here's the status of your build.
           </p>
-          <div className="mt-2 inline-block">
-          <BuildStatusBadge status={build.status} />
-          </div>
-        </div>
+          <p className="mt-1 text-sm font-medium text-slate-mute uppercase">
+            {build.customerName}
+          </p>
 
-        {/* --- Visual Timeline --- */}
-        <div className="mt-12">
-          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
-            {track.map((step, index) => {
-              const isCompleted = isComplete || index < activeStepIndex;
-              const isActive = !isComplete && index === activeStepIndex;
-              const isUpcoming = !isComplete && index > activeStepIndex;
-              
-              const timelineEvent = build.timeline?.find(e => e.status === step);
-
-              return (
-                <div key={step} className="contents">
-                  <div className="flex flex-col items-center">
-                    {isCompleted ? (
-                      <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-                    ) : isActive ? (
-                      <CircleEllipsis className="h-6 w-6 text-blue-500 animate-pulse" />
-                    ) : (
-                      <Circle className="h-6 w-6 text-slate-300" />
-                    )}
-                    {index < track.length - 1 && (
-                       <div className={cn("w-px h-full my-1",
-                         isCompleted ? "bg-emerald-500" : "bg-slate-300"
-                       )}></div>
-                    )}
-                  </div>
-                  <div className={cn("pb-10", isUpcoming && "text-slate-400")}>
-                    <p className={cn("font-semibold", isActive && "text-blue-600")}>{step}</p>
-                    {isActive && (
-                      <p className="text-sm text-blue-500">In progress...</p>
-                    )}
-                    {timelineEvent && (
-                      <p className="text-xs text-slate-mute mt-0.5">
-                        {new Date(timelineEvent.timestamp).toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* --- Services Selected --- */}
-        {build.services && build.services.length > 0 && (
-          <div className="mt-4 rounded-xl border hairline-strong bg-background p-5 shadow-[var(--shadow-subtle)]">
-            <h3 className="font-semibold">Services Selected</h3>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-4 space-y-2">
+            <h3 className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+              Selected Services
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
               {build.services.map((service) => (
                 <span
                   key={service}
-                  className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+                  className="inline-block bg-slate-800 text-slate-300 rounded-full px-2.5 py-0.5 text-xs font-mono uppercase"
                 >
                   {service}
                 </span>
               ))}
             </div>
           </div>
-        )}
-
-        {/* --- Footer --- */}
-        <footer className="mt-12 border-t hairline-strong pt-6 text-center">
-          <p className="text-sm text-slate-mute">
-            Questions about your build? Contact us at{" "}
-            <a
-              href="mailto:technician@cclbuilds.com"
-              className="font-medium text-primary hover:underline"
-            >
-              technician@cclbuilds.com
-            </a>
-          </p>
-        </footer>
+          
+          <div className="mt-4">
+            <h3 className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+              Overall Progress
+            </h3>
+            <div className="mt-2 w-full bg-slate-700/50 rounded-full h-2.5">
+                <div
+                    className="bg-primary h-2.5 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                ></div>
+            </div>
+             <p className="mono text-primary text-xs font-bold mt-1">{Math.round(progressPercentage)}% COMPLETE</p>
+          </div>
+        </div>
       </div>
-    </main>
+
+      {/* Right Column: High-Tech Timeline Core */}
+      <div className="md:col-span-2">
+        {isCompleted ? (
+            <div className="h-full flex flex-col items-center justify-center rounded-xl border hairline-strong bg-background p-8 shadow-lg text-center">
+                <div className="relative">
+                    <CheckCircle className="h-20 w-20 text-green-500" />
+                    <div className="absolute inset-0 rounded-full bg-green-500/10 animate-ping -z-1" />
+                </div>
+                <h2 className="text-2xl font-bold tracking-tight uppercase mt-4">
+                    Build Mission Completed
+                </h2>
+                <p className="text-slate-mute text-sm mt-1">THIS ORDER HAS BEEN FINALIZED AND CLOSED.</p>
+                <div className="mt-6 border-t hairline-strong w-full max-w-sm pt-4 space-y-2 text-left text-sm">
+                    <div className="flex justify-between"><span className="font-mono uppercase text-slate-mute">Tracking ID:</span> <span className="font-mono text-foreground font-semibold">{build.trackingCode}</span></div>
+                    <div className="flex justify-between"><span className="font-mono uppercase text-slate-mute">Final Status:</span> <span className="font-mono text-green-400 font-semibold">COMPLETED</span></div>
+                    <div className="flex justify-between"><span className="font-mono uppercase text-slate-mute">Completed On:</span> <span className="font-mono text-foreground font-semibold">{new Date(build.timeline[build.timeline.length-1].timestamp).toLocaleDateString()}</span></div>
+                </div>
+            </div>
+        ) : (
+        <div className="p-4 rounded-xl border hairline-strong bg-background shadow-lg relative">
+          <div className="relative space-y-3">
+            {track.map((step, index) => {
+              const timelineEvent = build.timeline.find(
+                (t) => t.status === step,
+              );
+              const isStepActive = index === activeStepIndex;
+              const isStepCompleted = index < activeStepIndex;
+
+              const stepDetails = STEP_DETAILS[step] || { title: step.toUpperCase(), subtitle: "STATUS UPDATE" };
+
+              return (
+                <div key={step} className="relative flex items-start gap-4">
+                  {/* Vertical Connector Line */}
+                  {index < track.length - 1 && (
+                    <div
+                      className={`absolute left-[9px] top-5 h-full w-0.5 ${
+                        isStepCompleted ? "bg-green-500" : "bg-slate-700"
+                      }`}
+                    />
+                  )}
+
+                  {/* Icon */}
+                  <div className="relative z-10 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full">
+                    {isStepCompleted ? (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    ) : isStepActive ? (
+                      <div className="relative h-4 w-4">
+                        <div className="absolute inset-0 rounded-full bg-cyan-400 animate-ping" />
+                        <div className="relative h-4 w-4 rounded-full bg-cyan-400" />
+                      </div>
+                    ) : (
+                      <Circle className="h-3.5 w-3.5 text-slate-500" />
+                    )}
+                  </div>
+
+                  {/* Text Content */}
+                  <div className={`flex-grow pb-3 transition-opacity ${!isStepCompleted && !isStepActive ? 'opacity-40 grayscale' : ''}`}>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className={`font-bold uppercase text-sm ${isStepActive ? 'text-primary' : 'text-foreground'}`}>
+                                {stepDetails.title}
+                            </p>
+                            <p className="text-[11px] font-mono uppercase text-slate-mute">{stepDetails.subtitle}</p>
+                        </div>
+                        <div className="text-right">
+                        {isStepCompleted && timelineEvent && (
+                            <p className="font-mono text-xs text-green-400">
+                                {new Date(timelineEvent.timestamp).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit', second:'2-digit' })}
+                            </p>
+                        )}
+                        {isStepActive && (
+                            <span className="inline-block rounded-md bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary animate-pulse mono">
+                                [ LIVE ]
+                            </span>
+                        )}
+                        {!isStepCompleted && !isStepActive && (
+                            <p className="font-mono text-xs text-slate-500">[ STANDBY... ]</p>
+                        )}
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        )}
+      </div>
+    </div>
   );
 }
