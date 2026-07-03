@@ -65,50 +65,24 @@ const TRACKING_LABELS: Record<string, string> = {
 function TrackPage() {
   const build = Route.useLoaderData();
 
-  // Determine the active track based on build services
-  let track = [
-    "received",
-    "parts_ordered",
-    "parts_received",
-    "assembly",
-    "validation",
-    "ready_for_pickup",
-    "completed",
-  ]; // Default to System Build Track
+  const SYSTEM_BUILD_TRACK = [
+    "received", "parts_ordered", "parts_received", "assembly", "validation", "ready_for_pickup", "completed"
+  ];
+  const SERVICE_REPAIR_TRACK = [
+    "received", "diagnosis", "parts_ordered", "repairing", "validation", "ready_for_pickup", "completed"
+  ];
+  const PERFORMANCE_TUNING_TRACK = [
+    "received", "profiling", "modification", "benchmarking", "thermal_testing", "ready_for_pickup", "completed"
+  ];
+
+  let track = SYSTEM_BUILD_TRACK; // Default
   const servicesJoined = (build.services || []).join(", ").toLowerCase();
 
-  if (
-    servicesJoined.includes("diagnostic") ||
-    servicesJoined.includes("repair") ||
-    servicesJoined.includes("refresh") ||
-    servicesJoined.includes("wipe")
-  ) {
-    track = [
-      "received",
-      "diagnosis",
-      "parts_ordered",
-      "repairing",
-      "validation",
-      "ready_for_pickup",
-      "completed",
-    ];
-  } else if (
-    servicesJoined.includes("software") ||
-    servicesJoined.includes("thermal") ||
-    servicesJoined.includes("bench") ||
-    servicesJoined.includes("overclock") ||
-    servicesJoined.includes("tuning")
-  ) {
-    track = [
-      "received",
-      "profiling",
-      "modification",
-      "benchmarking",
-      "thermal_testing",
-      "ready_for_pickup",
-      "completed",
-    ];
-  }
+   if (servicesJoined.includes("diagnostic") || servicesJoined.includes("repair") || servicesJoined.includes("refresh") || servicesJoined.includes("wipe")) {
+     track = SERVICE_REPAIR_TRACK;
+   } else if (servicesJoined.includes("software") || servicesJoined.includes("thermal") || servicesJoined.includes("bench") || servicesJoined.includes("overclock") || servicesJoined.includes("tuning")) {
+     track = PERFORMANCE_TUNING_TRACK;
+   }
 
   const activeStepIndex = track.indexOf(build.status?.toLowerCase());
   const progressPercentage =
