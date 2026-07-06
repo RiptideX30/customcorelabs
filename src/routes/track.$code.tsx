@@ -82,7 +82,7 @@ function TrackPage() {
     "validation",
     "ready_for_pickup",
     "completed",
-  ]:
+  ];
   const SERVICE_REPAIR_TRACK = [
     "received",
     "parts_ordered",
