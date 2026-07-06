@@ -47,18 +47,18 @@ export const Route = createFileRoute("/track/$code")({
 });
 
 const TRACKING_LABELS: Record<string, string> = {
-  received: "BUILD INITIATED / DATA PROFILE MATCHED",
+  received: "PROJECT INITIATED",
   diagnosis: "HARDWARE MULTI-POINT DIAGNOSTIC SCAN",
-  parts_ordered: "COMPONENTS SOURCED FROM DISPATCH",
-  parts_received: "HARDWARE RECEIVED & VOLTAGE CHECKED",
-  repairing: "MICRO-SOLDERING & COMPONENT REPAIR",
+  parts_ordered: "COMPONENT SOURCING & ORDERING",
+  parts_received: "HARDWARE RECEIVED",
+  repairing: "COMPONENT REPAIR",
   profiling: "BASELINE COMPONENT BENCHMARK PROFILING",
   assembly: "CABLING INTEGRATION & CHASSIS ASSEMBLY",
   modification: "THERMAL MODIFICATIONS & BIOS TUNING",
   benchmarking: "HARDWARE SCORING & CLOCK AGITATION",
-  thermal_testing: "24-HOUR INTEGRITY HEAT CYCLING",
-  validation: "FINAL 50-POINT SENIOR LAB INSPECTION",
-  ready_for_pickup: "READY FOR PICKUP IN LAB ENCLOSURE",
+  thermal_testing: "THERMAL INTEGRITY TEST",
+  validation: "FINAL BENCH VALIDATION & SYSTEM VERIFICATION",
+  ready_for_pickup: "READY FOR PICKUP",
   completed: "ORDER PICKED UP & ARCHIVED",
 };
 
@@ -66,23 +66,61 @@ function TrackPage() {
   const build = Route.useLoaderData();
 
   const SYSTEM_BUILD_TRACK = [
-    "received", "parts_ordered", "parts_received", "assembly", "validation", "ready_for_pickup", "completed"
+    "received",
+    "parts_ordered",
+    "parts_received",
+    "assembly",
+    "validation",
+    "ready_for_pickup",
+    "completed",
   ];
+  const DIAGNOSTIC_TRACK = [
+    "received",
+    "diagnosis",
+    "parts_ordered",
+    "repair",
+    "validation",
+    "ready_for_pickup",
+    "completed",
+  ]:
   const SERVICE_REPAIR_TRACK = [
-    "received", "diagnosis", "parts_ordered", "repairing", "validation", "ready_for_pickup", "completed"
+    "received",
+    "parts_ordered",
+    "repairing",
+    "validation",
+    "ready_for_pickup",
+    "completed",
   ];
   const PERFORMANCE_TUNING_TRACK = [
-    "received", "profiling", "modification", "benchmarking", "thermal_testing", "ready_for_pickup", "completed"
+    "received",
+    "profiling",
+    "modification",
+    "benchmarking",
+    "thermal_testing",
+    "ready_for_pickup",
+    "completed",
   ];
 
   let track = SYSTEM_BUILD_TRACK; // Default
   const servicesJoined = (build.services || []).join(", ").toLowerCase();
 
-   if (servicesJoined.includes("diagnostic") || servicesJoined.includes("repair") || servicesJoined.includes("refresh") || servicesJoined.includes("wipe")) {
-     track = SERVICE_REPAIR_TRACK;
-   } else if (servicesJoined.includes("software") || servicesJoined.includes("thermal") || servicesJoined.includes("bench") || servicesJoined.includes("overclock") || servicesJoined.includes("tuning")) {
-     track = PERFORMANCE_TUNING_TRACK;
-   }
+  if (servicesJoined.includes("diagnostic")) {
+    track = DIAGNOSTIC_TRACK;
+  } else if (
+    servicesJoined.includes("repair") ||
+    servicesJoined.includes("refresh") ||
+    servicesJoined.includes("wipe")
+  ) {
+    track = SERVICE_REPAIR_TRACK;
+  } else if (
+    servicesJoined.includes("software") ||
+    servicesJoined.includes("thermal") ||
+    servicesJoined.includes("bench") ||
+    servicesJoined.includes("overclock") ||
+    servicesJoined.includes("tuning")
+  ) {
+    track = PERFORMANCE_TUNING_TRACK;
+  }
 
   const activeStepIndex = track.indexOf(build.status?.toLowerCase());
   const progressPercentage =

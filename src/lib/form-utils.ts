@@ -29,18 +29,21 @@ export const NEW_BUILDS = [
   },
 ] as const;
 
+export const DIAGNOSTIC = [
+  {
+    id: "diagnostic" as ServiceId,
+    title: "Full System Diagnostic",
+    price: 25,
+    desc: "12-point check. 100% credited toward repairs.",
+  },
+] as const;
+
 export const SERVICE_REPAIR = [
   {
     id: "refresh" as ServiceId,
     title: "Desktop Refresh Bundle",
     price: 49,
     desc: "Deep clean, airflow re-route, thermal remediation.",
-  },
-  {
-    id: "diagnostic" as ServiceId,
-    title: "Full System Diagnostic",
-    price: 25,
-    desc: "12-point check. 100% credited toward repairs.",
   },
   {
     id: "software" as ServiceId,
