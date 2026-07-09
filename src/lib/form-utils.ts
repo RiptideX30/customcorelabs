@@ -18,7 +18,7 @@ export const NEW_BUILDS = [
   {
     id: "basic" as ServiceId,
     title: "Basic Build",
-    priceLabel: "$109",
+    priceLabel: "Starting at $109",
     desc: "Pure hardware assembly. No OS or drivers.",
   },
   {
@@ -128,7 +128,7 @@ export function computeEstimator(
 
   // --- Build Services ---
   if (services.has("basic")) {
-    const basicAmount = partsValue < 1000 ? 99 : partsValue < 2000 ? 119 : 159;
+    const basicAmount = partsValue < 1000 ? 109 : partsValue < 2000 ? 129 : 159;
     items.push({ label: `Basic Build · $${basicAmount}`, amount: basicAmount, taxable: true });
   }
   if (services.has("ultimate")) {
