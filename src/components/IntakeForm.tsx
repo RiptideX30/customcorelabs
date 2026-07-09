@@ -20,7 +20,6 @@ import {
   ServiceId,
   NEW_BUILDS,
   SERVICE_REPAIR,
-  PERFORMANCE_TUNING,
   PathId,
   formatPhone,
   computeEstimator,
@@ -865,6 +864,26 @@ function PathSelector({ onSelect }: { onSelect: (path: PathId) => void }) {
 /* ============================================================
    MAIN INTAKE FORM COMPONENT
    ============================================================ */
+// NOTE: These constants should be sourced from form-utils, but are temporarily hardcoded here
+// to ensure the component renders correctly.
+const TEMP_SERVICE_REPAIR: ServiceCardData[] = [
+  { id: "refresh", title: "Desktop Refresh Bundle", price: 49, desc: "Deep clean, airflow re-route, thermal remediation." },
+  { id: "diagnostic", title: "Full System Diagnostic", price: 25, desc: "12-point check. 100% credited toward repairs." },
+  { id: "software", title: "Software Install", price: 39, desc: "Clean OS install + driver configuration." },
+  { id: "cables", title: "Pro Cable Management", price: 18, desc: "Combs, velcro, precision routing." },
+  { id: "wipe", title: "Secure Drive Wipe", price: 15, desc: "Multi-pass military-grade erasure.", hasQuantity: true },
+  { id: "upgrade", title: "Hardware Upgrade", priceLabel: "Quoted", desc: "Component swap-in (GPU, RAM, storage)." },
+  { id: "bios", title: "BIOS / Firmware Tuning", price: 35, desc: "Flash optimization, custom fan curves, voltage tuning." },
+  { id: "validation", title: "24-Hour Bench Validation", price: 59, desc: "Extended stress testing and stability verification." },
+  { id: "overclock", title: "Memory + CPU Overclock Profile", price: 49, desc: "Custom performance tuning for maximum throughput." },
+  { id: "thermal", title: "Fresh Thermal Paste", price: 10, desc: "Add-on. Removal, cleanup, fresh application." },
+];
+
+const TEMP_NEW_BUILDS: ServiceCardData[] = [
+    { id: "basic", title: "Basic Build", priceLabel: "$109+", desc: "Pure hardware assembly. No OS or drivers." },
+    { id: "ultimate", title: "Ultimate Build", priceLabel: "$149+", desc: "Full assembly, OS, stress testing, and more." },
+];
+
 
 export default function IntakeForm() {
   const search = useSearch({ from: "/" });
@@ -1136,7 +1155,7 @@ export default function IntakeForm() {
                             {signaturePackages.map((pkg) => (
                               <div
                                 key={pkg.id}
-                                onClick={() => setSignaturePackage(pkg.id)}
+                                onClick={() => setSignaturePackage(pkg.id as any)}
                                 className={`cursor-pointer rounded-xl border p-5 transition-all ${signaturePackage === pkg.id ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}
                               >
                                 <div className="flex items-center justify-between">
@@ -1190,7 +1209,7 @@ export default function IntakeForm() {
                                 )}
                               </div>
                               <p className="mt-2 text-sm text-slate-mute">
-                                Air-freight component routing. Ready in 3-4 business days.
+                                Ready for pickup in 3-4 business days.
                               </p>
                             </div>
                           </div>
@@ -1241,8 +1260,246 @@ export default function IntakeForm() {
                         </div>
                       </div>
                     )}
+                    {currentPath === "repair" && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <Wrench className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-[20px] font-semibold">Service & Repair</h3>
+                            <p className="text-[13px] text-slate-mute">
+                              Diagnostics, cleaning, upgrades, and more.
+                            </p>
+                          </div>
+                        </div>
 
-                    {/* ... (rest of the paths) */}
+                        <StepHeader index="01" title="Client Metrics" />
+                        <CustomerInfoFields
+                          name={name}
+                          setName={setName}
+                          phone={phone}
+                          setPhone={setPhone}
+                          email={email}
+                          setEmail={setEmail}
+                          errors={errors}
+                        />
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <StepHeader index="02" title="Select Services" />
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {TEMP_SERVICE_REPAIR.map((service) => (
+                              <ServiceCard
+                                key={service.id}
+                                service={service}
+                                selected={repairServices.has(service.id)}
+                                onSelect={() =>
+                                  setRepairServices((prev) => {
+                                    const next = new Set(prev);
+                                    if (next.has(service.id)) {
+                                      next.delete(service.id);
+                                    } else {
+                                      next.add(service.id);
+                                    }
+                                    return next;
+                                  })
+                                }
+                                quantity={service.id === "wipe" ? repairWipeQty : undefined}
+                                onQuantityChange={(delta) =>
+                                  setRepairWipeQty((q) => Math.max(1, q + delta))
+                                }
+                                disabled={service.id === "thermal" && !thermalEligibleForRepair}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <StepHeader index="03" title="Describe Symptoms" />
+                          <FormTextarea
+                            value={repairSymptoms}
+                            onChange={setRepairSymptoms}
+                            placeholder="Describe the issues you are experiencing in detail. For example: 'My computer is running very slow and I hear a clicking noise.'"
+                            rows={4}
+                          />
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <div className="rounded-xl border hairline-strong bg-gradient-to-br from-primary/5 via-background to-background p-6 shadow-[var(--shadow-elegant)]">
+                            <div className="mono text-[10px] uppercase tracking-[0.18em] text-slate-mute">
+                              Final Step
+                            </div>
+                            <div className="space-y-4 mt-4">
+                              <CheckboxField
+                                checked={agreedToTerms}
+                                onChange={setAgreedToTerms}
+                                label={
+                                  <>
+                                    I agree to the{" "}
+                                    <a
+                                      href="/terms.html"
+                                      target="_blank"
+                                      className="text-primary underline"
+                                    >
+                                      Terms and Conditions
+                                    </a>
+                                  </>
+                                }
+                                error={errors.terms}
+                              />
+                            </div>
+                            <button
+                              type="submit"
+                              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-[15px] font-semibold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:opacity-90"
+                            >
+                              <Check className="h-5 w-5" />
+                              Submit Repair Request
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {currentPath === "build-known" && (
+                       <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Package className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-[20px] font-semibold">Build — I Know My Parts</h3>
+                                <p className="text-[13px] text-slate-mute">
+                                You have a PCPartPicker list ready.
+                                </p>
+                            </div>
+                        </div>
+
+                        <StepHeader index="01" title="Client Metrics" />
+                        <CustomerInfoFields name={name} setName={setName} phone={phone} setPhone={setPhone} email={email} setEmail={setEmail} errors={errors} />
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <StepHeader index="02" title="Build Configuration" />
+                            <div className="space-y-4">
+                                <div>
+                                    <FieldLabel icon={Link2}>PCPartPicker Link</FieldLabel>
+                                    <FormInput value={knownPCPP} onChange={setKnownPCPP} placeholder="https://pcpartpicker.com/list/..." error={errors.pcpp} disabled={knownNoPCPP} />
+                                    <button type="button" onClick={() => setShowPCPP(true)} className="text-xs text-primary mt-1 underline">How to get this link?</button>
+                                </div>
+                                <CheckboxField checked={knownNoPCPP} onChange={setKnownNoPCPP} label="I don't have a PCPartPicker list and will provide parts." />
+                                {knownNoPCPP && (
+                                <div>
+                                    <FieldLabel icon={Cpu}>Approximate Value of Your Parts ($)</FieldLabel>
+                                    <FormInput value={knownPartsValue} onChange={setKnownPartsValue} placeholder="1500" type="number" />
+                                </div>
+                                )}
+                            </div>
+                             <BuildSurchargeFields isITX={knownITX} setIsITX={setKnownITX} nonModularPSU={knownNonModular} setNonModularPSU={setKnownNonModular} />
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <BuildLookFields rgbPref={knownRgb} setRgbPref={setKnownRgb} colorPref={knownColor} setColorPref={setKnownColor} extraFans={knownFans} setExtraFans={setKnownFans} lookDescription={knownLook} setLookDescription={setKnownLook} />
+                        </div>
+                        
+                        <div className="mt-8 border-t hairline pt-8">
+                          <StepHeader index="04" title="Turnaround Time" />
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div onClick={() => setKnownTurnaround("standard")} className={`cursor-pointer rounded-xl border p-5 transition-all ${knownTurnaround === "standard" ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}>
+                                  <div className="flex items-center justify-between">
+                                      <h4 className="text-md font-semibold">Standard</h4>
+                                      {knownTurnaround === "standard" ? <Check className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border hairline-strong" />}
+                                  </div>
+                                  <p className="mt-2 text-sm text-slate-mute">5-7 business days</p>
+                              </div>
+                              <div onClick={() => setKnownTurnaround("priority")} className={`cursor-pointer rounded-xl border p-5 transition-all ${knownTurnaround === "priority" ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}>
+                                  <div className="flex items-center justify-between">
+                                      <h4 className="text-md font-semibold">Priority (+$150)</h4>
+                                      {knownTurnaround === "priority" ? <Check className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border hairline-strong" />}
+                                  </div>
+                                  <p className="mt-2 text-sm text-slate-mute">3-4 business days</p>
+                              </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <StepHeader index="05" title="Additional Notes" />
+                            <FormTextarea value={knownNotes} onChange={setKnownNotes} placeholder="Any other details about your build..." />
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <CheckboxField checked={agreedToTerms} onChange={setAgreedToTerms} label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>} error={errors.terms} />
+                            <button type="submit" className="mt-4 w-full bg-primary text-white py-3 rounded-md">Submit Build Request</button>
+                        </div>
+                      </div>
+                    )}
+                    {currentPath === "build-help" && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Lightbulb className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-[20px] font-semibold">Build — Help Me Decide</h3>
+                                <p className="text-[13px] text-slate-mute">
+                                Tell us your budget and needs, and we'll spec and build it for you.
+                                </p>
+                            </div>
+                        </div>
+
+                        <StepHeader index="01" title="Client Metrics" />
+                        <CustomerInfoFields name={name} setName={setName} phone={phone} setPhone={setPhone} email={email} setEmail={setEmail} errors={errors} />
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <StepHeader index="02" title="Performance & Budget" />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <FieldLabel icon={Cpu}>Target Budget ($)</FieldLabel>
+                                    <FormInput value={helpBudget} onChange={setHelpBudget} placeholder="2000" type="number" />
+                                </div>
+                                <div>
+                                    <FieldLabel icon={FileText}>Primary Use-Case</FieldLabel>
+                                    <FormInput value={helpPurpose} onChange={setHelpPurpose} placeholder="e.g., Gaming, Streaming, Video Editing" />
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <FormTextarea value={helpPurpose} onChange={setHelpPurpose} placeholder="Describe what you'll use this PC for. The more detail, the better we can tailor the parts. (e.g., Playing Call of Duty at 1440p high settings, streaming to Twitch, editing 4K videos)" rows={4}/>
+                            </div>
+                             <BuildSurchargeFields isITX={helpITX} setIsITX={setHelpITX} nonModularPSU={helpNonModular} setNonModularPSU={setHelpNonModular} />
+                        </div>
+                        
+                        <div className="mt-8 border-t hairline pt-8">
+                           <BuildLookFields rgbPref={helpRgb} setRgbPref={setHelpRgb} colorPref={helpColor} setColorPref={setHelpColor} extraFans={helpFans} setExtraFans={setHelpFans} lookDescription={helpLook} setLookDescription={setHelpLook} />
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                          <StepHeader index="04" title="Turnaround Time" />
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div onClick={() => setHelpTurnaround("standard")} className={`cursor-pointer rounded-xl border p-5 transition-all ${helpTurnaround === "standard" ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}>
+                                  <div className="flex items-center justify-between">
+                                      <h4 className="text-md font-semibold">Standard</h4>
+                                      {helpTurnaround === "standard" ? <Check className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border hairline-strong" />}
+                                  </div>
+                                  <p className="mt-2 text-sm text-slate-mute">5-7 business days</p>
+                              </div>
+                              <div onClick={() => setHelpTurnaround("priority")} className={`cursor-pointer rounded-xl border p-5 transition-all ${helpTurnaround === "priority" ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}>
+                                  <div className="flex items-center justify-between">
+                                      <h4 className="text-md font-semibold">Priority (+$150)</h4>
+                                      {helpTurnaround === "priority" ? <Check className="h-4 w-4 text-primary" /> : <div className="h-4 w-4 rounded-full border hairline-strong" />}
+                                  </div>
+                                  <p className="mt-2 text-sm text-slate-mute">3-4 business days</p>
+                              </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <StepHeader index="05" title="Additional Notes" />
+                            <FormTextarea value={helpNotes} onChange={setHelpNotes} placeholder="Any other preferences or questions..." />
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <CheckboxField checked={agreedToTerms} onChange={setAgreedToTerms} label={<>I agree to the <a href="/terms.html" target="_blank" className="text-primary underline">Terms and Conditions</a></>} error={errors.terms} />
+                            <button type="submit" className="mt-4 w-full bg-primary text-white py-3 rounded-md">Submit Build Request</button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1256,7 +1513,18 @@ export default function IntakeForm() {
                     />
                   </div>
                 )}
-                {/* ... (rest of the estimators) */}
+                 {(currentPath === "repair" || currentPath === "build-known" || currentPath === "build-help") && (
+                  <div className="sticky top-24">
+                    <LiveEstimator
+                      services={currentPath === "repair" ? repairServices : knownPerformance}
+                      partsValue={Number(knownPartsValue) || 0}
+                      wipeQuantity={repairWipeQty}
+                      isITX={currentPath === "build-known" ? knownITX : helpITX}
+                      nonModularPSU={currentPath === "build-known" ? knownNonModular : helpNonModular}
+                      isPriority={currentPath === "build-known" ? knownTurnaround === "priority" : helpTurnaround === "priority"}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </form>

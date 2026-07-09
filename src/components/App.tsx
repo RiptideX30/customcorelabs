@@ -81,16 +81,16 @@ const SERVICES: Service[] = [
   {
     id: "diagnostic",
     title: "Full System Diagnostic",
-    priceLabel: "$25",
-    short: "12-point check. 100% credited toward repairs.",
+    priceLabel: "$45",
+    short: "Bench time, stress-testing, and expert labor to isolate system issues. Settled at pickup.",
     category: "service",
     details:
-      "12-point component stability check, power supply unit (PSU) voltage verification, RAM error scan, and operating system conflict analysis. 100% of this fee is credited back to your repair labor if you fix it with us.",
+      "The diagnostic service covers the bench time, specialized stress-testing, and expert labor required to accurately isolate a system issue. All payments are settled at pickup once the work is complete. Integrated Solution Pricing: If a standard repair service is selected to fix the system, the diagnostic fee is completely absorbed into a single, combined solution price at checkout. The customer is never obligated to proceed with a repair and can choose to take the system back after receiving the diagnostic report. Instant Resolutions: If the issue is permanently resolved entirely within the initial testing process (such as utilizing a physical BIOS flashback button, clearing CMOS, or resolving a loose cable connection), no additional repair fees are added. The customer is only billed the base $45 diagnostic rate. Specialized Lab Procedures: For unique hardware scenarios that do not fall under standard website services (such as straightening bent motherboard socket pins), a single flat-rate labor quote will be provided for customer approval before any specialized work begins.",
   },
   {
     id: "software",
     title: "Software Install",
-    priceLabel: "$39",
+    priceLabel: "$69",
     short: "Clean OS install + driver configuration.",
     category: "service",
     details:
@@ -121,7 +121,7 @@ const SERVICES: Service[] = [
     short: "Component swap-in (GPU, RAM, storage).",
     category: "service",
     details:
-      "Targeted component installation on an existing system. Pricing varies by part category. Basic upgrades (fans, RAM, NVMe SSDs): $8-25. Mid-level upgrades (CPU cooler, CPU, PSU, GPU, hard drives): $30-50. High maintenance (case, motherboard): $90-120+. If the part requires CPU or CPU cooler removal, add $10 thermal paste service. Pricing is per part in the highest category—if upgrading parts from multiple categories, you're only charged for the highest tier part.",
+      "Basic Upgrades (Fans, RAM, NVMe SSDs): $29 flat rate per part category. Mid-Level Upgrades (CPU cooler, CPU, PSU, GPU, hard drives): $59 flat rate per part category. High Maintenance (Full Case Migrations, Motherboard swaps): $129 flat rate. Thermal Rule: If the upgrade requires CPU or CPU cooler removal, a $10 fresh thermal paste service is automatically bundled. Multi-Part Projects: When upgrading multiple interdependent parts at once (e.g., a CPU + Motherboard combo, or a full Case Migration with new components), we group the labor and provide a single, discounted custom quote upfront so you never pay for overlapping steps.",
   },
   {
     id: "thermal",
@@ -145,7 +145,7 @@ const SERVICES: Service[] = [
   {
     id: "validation",
     title: "24-Hour Bench Validation",
-    priceLabel: "$59",
+    priceLabel: "$69",
     short: "Extended stress testing and stability verification.",
     category: "service",
     details:
@@ -189,8 +189,8 @@ function computeLineItems(active: Set<ServiceId>, partsValue: number) {
   if (active.has("refresh"))
     items.push({ id: "refresh", label: "Desktop Refresh Bundle", amount: 49 });
   if (active.has("diagnostic"))
-    items.push({ id: "diagnostic", label: "Full System Diagnostic", amount: 25 });
-  if (active.has("software")) items.push({ id: "software", label: "Software Install", amount: 39 });
+    items.push({ id: "diagnostic", label: "Full System Diagnostic", amount: 45 });
+  if (active.has("software")) items.push({ id: "software", label: "Software Install", amount: 69 });
   if (active.has("cables")) items.push({ id: "cables", label: "Pro Cable Management", amount: 18 });
   if (active.has("wipe")) items.push({ id: "wipe", label: "Secure Drive Wipe", amount: 15 });
   if (active.has("upgrade"))
@@ -199,7 +199,7 @@ function computeLineItems(active: Set<ServiceId>, partsValue: number) {
     items.push({ id: "thermal", label: "Fresh Thermal Paste (add-on)", amount: 10 });
   if (active.has("bios")) items.push({ id: "bios", label: "BIOS / Firmware Tuning", amount: 35 });
   if (active.has("validation"))
-    items.push({ id: "validation", label: "24-Hour Bench Validation", amount: 59 });
+    items.push({ id: "validation", label: "24-Hour Bench Validation", amount: 69 });
   if (active.has("overclock"))
     items.push({ id: "overclock", label: "Memory + CPU Overclock Profile", amount: 49 });
 
@@ -1095,7 +1095,7 @@ function ServiceCard({
       )}
       {service.id === "diagnostic" && (
         <p className="mono mt-4 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
-          <span className="text-primary">↳</span> 100% credited to repair labor if hired.
+          <span className="text-primary">↳</span> Fee is absorbed if you proceed with a repair.
         </p>
       )}
       {service.id === "thermal" && disabled && (
@@ -1141,7 +1141,7 @@ function DetailsModal({ service, onClose }: { service: Service; onClose: () => v
   }, [onClose]);
 
   const bullets = service.details
-    .split(/(?<=[.!?])\s+(?=[A-Z])/)
+    .split(/(?<=[.!?])\s+(?=[A-Z])|(?<=:)\s+(?=[A-Z])/)
     .map((s) => s.trim())
     .filter(Boolean);
 
@@ -1218,8 +1218,8 @@ function DetailsModal({ service, onClose }: { service: Service; onClose: () => v
         <ul className="mt-6 space-y-3">
           {bullets.map((b, i) => (
             <li key={i} className="flex gap-3 text-[14px] leading-relaxed text-slate-ink">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-              <span>{b}</span>
+               <span className="font-semibold text-primary mt-1">•</span>
+              <span className={b.includes(":") ? 'font-semibold text-foreground' : ''}>{b}</span>
             </li>
           ))}
         </ul>

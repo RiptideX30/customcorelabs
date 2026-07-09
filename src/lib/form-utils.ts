@@ -33,8 +33,8 @@ export const DIAGNOSTIC = [
   {
     id: "diagnostic" as ServiceId,
     title: "Full System Diagnostic",
-    price: 25,
-    desc: "12-point check. 100% credited toward repairs.",
+    price: 45,
+    desc: "Bench time, stress-testing, and expert labor to isolate system issues. Settled at pickup.",
   },
 ] as const;
 
@@ -48,7 +48,7 @@ export const SERVICE_REPAIR = [
   {
     id: "software" as ServiceId,
     title: "Software Install",
-    price: 39,
+    price: 69,
     desc: "Clean OS install + driver configuration.",
   },
   {
@@ -91,7 +91,7 @@ export const PERFORMANCE_TUNING = [
   {
     id: "validation" as ServiceId,
     title: "24-Hour Bench Validation",
-    price: 59,
+    price: 69,
     desc: "Extended stress testing and stability verification.",
   },
   {
@@ -121,6 +121,12 @@ export function computeEstimator(
 ) {
   const items: { label: string; amount: number; taxable?: boolean }[] = [];
 
+  // --- Core Services ---
+  if (services.has("diagnostic")) {
+    items.push({ label: "Full System Diagnostic", amount: 45, taxable: true });
+  }
+
+  // --- Build Services ---
   if (services.has("basic")) {
     const basicAmount = partsValue < 1000 ? 99 : partsValue < 2000 ? 119 : 159;
     items.push({ label: `Basic Build · $${basicAmount}`, amount: basicAmount, taxable: true });
@@ -133,14 +139,17 @@ export function computeEstimator(
       taxable: true,
     });
   }
+
+  // --- Repair & Maintenance ---
   if (services.has("refresh")) {
     items.push({ label: "Desktop Refresh Bundle", amount: 49, taxable: true });
   }
-  if (services.has("diagnostic")) {
-    items.push({ label: "Full System Diagnostic", amount: 25 });
-  }
   if (services.has("software")) {
-    items.push({ label: "Software Install", amount: 39 });
+    // If a diagnostic is also selected, the software install fee is absorbed.
+    const hasDiagnostic = services.has("diagnostic");
+    if (!hasDiagnostic) {
+        items.push({ label: "Software Install", amount: 69, taxable: true });
+    }
   }
   if (services.has("cables")) {
     items.push({ label: "Pro Cable Management", amount: 18, taxable: true });
@@ -153,7 +162,8 @@ export function computeEstimator(
     });
   }
   if (services.has("upgrade")) {
-    items.push({ label: "Hardware Upgrade · TBD", amount: 0, taxable: true });
+    // The modal will handle displaying the flat-rates. This is a placeholder for the estimator.
+    items.push({ label: "Hardware Upgrade · See Quote", amount: 0, taxable: true });
   }
   if (services.has("thermal")) {
     const isComplimentary = services.has("basic") || services.has("ultimate");
@@ -163,16 +173,19 @@ export function computeEstimator(
       taxable: !isComplimentary,
     });
   }
+
+  // --- Performance Tuning ---
   if (services.has("bios")) {
-    items.push({ label: "BIOS / Firmware Tuning", amount: 35 });
+    items.push({ label: "BIOS / Firmware Tuning", amount: 35, taxable: true });
   }
   if (services.has("validation")) {
-    items.push({ label: "24-Hour Bench Validation", amount: 59 });
+    items.push({ label: "24-Hour Bench Validation", amount: 69, taxable: true });
   }
   if (services.has("overclock")) {
-    items.push({ label: "Memory + CPU Overclock Profile", amount: 49 });
+    items.push({ label: "Memory + CPU Overclock Profile", amount: 49, taxable: true });
   }
 
+  // --- Surcharges ---
   if (isITX) {
     items.push({ label: "ITX / SFF Case Surcharge", amount: 30, taxable: true });
   }
