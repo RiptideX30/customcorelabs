@@ -54,7 +54,7 @@ const SERVICES: Service[] = [
   {
     id: "basic",
     title: "Basic Build",
-    priceLabel: "$109",
+    priceLabel: "Starting at $109",
     short: "Pure hardware assembly. No OS or drivers.",
     category: "build",
     details: "Pure hardware assembly and standard cable routing. No OS or driver installation.",
@@ -175,7 +175,7 @@ function computeLineItems(active: Set<ServiceId>, partsValue: number) {
   const items: { id: ServiceId; label: string; amount: number }[] = [];
 
   if (active.has("basic")) {
-    const basicAmount = partsValue < 1000 ? 99 : partsValue < 2000 ? 119 : 159;
+    const basicAmount = partsValue < 1000 ? 109 : partsValue < 2000 ? 129 : 159;
     items.push({ id: "basic", label: `Basic Build · $${basicAmount}`, amount: basicAmount });
   }
   if (active.has("ultimate")) {
@@ -790,12 +790,12 @@ function PricingTable() {
             <tbody>
               <tr>
                 <td className="font-semibold">Under $1,000</td>
-                <td>$99</td>
+                <td>$109</td>
                 <td>$149</td>
               </tr>
               <tr>
                 <td className="font-semibold">$1,000-$1,999</td>
-                <td>$119</td>
+                <td>$129</td>
                 <td>$179</td>
               </tr>
               <tr>
@@ -1067,7 +1067,7 @@ function ServiceCard({
       </div>
       <h4 className="mt-5 text-[18px] font-semibold tracking-tight">{service.title}</h4>
       <p className="mt-1.5 text-[13.5px] leading-relaxed text-slate-mute">{service.short}</p>
-      <div className="mt-6 inline-flex items-end gap-2">
+      <div className="mt-6 flex items-baseline justify-between">
         <span className="text-[28px] font-semibold tracking-[-0.04em] text-slate-950">
           {service.priceLabel}
         </span>
@@ -1091,6 +1091,12 @@ function ServiceCard({
         <p className="mono mt-4 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
           <span className="text-primary">↳</span> Under $1,000 → $149, $1,000–$1,999 → $179, $2,000+
           → $229.
+        </p>
+      )}
+       {service.id === "basic" && (
+        <p className="mono mt-4 text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-slate-mute">
+          <span className="text-primary">↳</span> Under $1,000 → $109, $1,000–$1,999 → $129, $2,000+
+          → $159.
         </p>
       )}
       {service.id === "diagnostic" && (
@@ -1184,11 +1190,11 @@ function DetailsModal({ service, onClose }: { service: Service; onClose: () => v
                   <>
                     <tr>
                       <td className="text-slate-mute">Under $1,000</td>
-                      <td className="text-right font-semibold">$99</td>
+                      <td className="text-right font-semibold">$109</td>
                     </tr>
                     <tr>
                       <td className="text-slate-mute">$1,000–$1,999</td>
-                      <td className="text-right font-semibold">$119</td>
+                      <td className="text-right font-semibold">$129</td>
                     </tr>
                     <tr>
                       <td className="text-slate-mute">$2,000+</td>
