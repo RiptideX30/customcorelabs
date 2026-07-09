@@ -691,7 +691,6 @@ function BuildLookFields({
   // Your Main Section Return Code
   return (
     <div id="intake-form">
-      <StepHeader index="03" title="Build Aesthetics & Configuration" />
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <PremiumSelect
           label="RGB Preference"
@@ -867,11 +866,11 @@ function PathSelector({ onSelect }: { onSelect: (path: PathId) => void }) {
 // NOTE: These constants should be sourced from form-utils, but are temporarily hardcoded here
 // to ensure the component renders correctly.
 const TEMP_SERVICE_REPAIR: ServiceCardData[] = [
-  { id: "refresh", title: "Desktop Refresh Bundle", price: 49, desc: "Deep clean, airflow re-route, thermal remediation." },
+  { id: "refresh", title: "Desktop Refresh Bundle", price: 59, desc: "Deep clean, airflow re-route, thermal remediation." },
   { id: "diagnostic", title: "Full System Diagnostic", price: 25, desc: "12-point check. 100% credited toward repairs." },
   { id: "software", title: "Software Install", price: 39, desc: "Clean OS install + driver configuration." },
   { id: "cables", title: "Pro Cable Management", price: 18, desc: "Combs, velcro, precision routing." },
-  { id: "wipe", title: "Secure Drive Wipe", price: 15, desc: "Multi-pass military-grade erasure.", hasQuantity: true },
+  { id: "wipe", title: "Secure Drive Wipe", price: 10, desc: "Multi-pass military-grade erasure.", hasQuantity: true },
   { id: "upgrade", title: "Hardware Upgrade", priceLabel: "Quoted", desc: "Component swap-in (GPU, RAM, storage)." },
   { id: "bios", title: "BIOS / Firmware Tuning", price: 35, desc: "Flash optimization, custom fan curves, voltage tuning." },
   { id: "validation", title: "24-Hour Bench Validation", price: 59, desc: "Extended stress testing and stability verification." },
@@ -881,7 +880,7 @@ const TEMP_SERVICE_REPAIR: ServiceCardData[] = [
 
 const TEMP_NEW_BUILDS: ServiceCardData[] = [
     { id: "basic", title: "Basic Build", priceLabel: "$109+", desc: "Pure hardware assembly. No OS or drivers." },
-    { id: "ultimate", title: "Ultimate Build", priceLabel: "$149+", desc: "Full assembly, OS, stress testing, and more." },
+    { id: "ultimate", title: "Ultimate Build", priceLabel: "$139+", desc: "Full assembly, OS, stress testing, and more." },
 ];
 
 
@@ -1033,7 +1032,13 @@ export default function IntakeForm() {
         "due-today":
           estimate.items.find((item) => item.label === "Due Today")?.amount.toFixed(2) || null,
       };
-    } else if (currentPath === "repair") {
+    } else if (currentPath === "build-known") {
+        if (!knownBuild) {
+            setErrors({ buildType: "Please select a build type." });
+            return;
+        }
+    }
+    else if (currentPath === "repair") {
       // ... (rest of the logic for other paths)
     }
 
@@ -1293,22 +1298,29 @@ export default function IntakeForm() {
                                 key={service.id}
                                 service={service}
                                 selected={repairServices.has(service.id)}
-                                onSelect={() =>
-                                  setRepairServices((prev) => {
-                                    const next = new Set(prev);
-                                    if (next.has(service.id)) {
-                                      next.delete(service.id);
-                                    } else {
-                                      next.add(service.id);
-                                    }
-                                    return next;
-                                  })
-                                }
+                                onSelect={() => {
+                                    setRepairServices(prev => {
+                                        const next = new Set(prev);
+                                        if (next.has(service.id)) {
+                                            next.delete(service.id);
+                                            return next;
+                                        }
+                                
+                                        next.add(service.id);
+                                        if (service.id === 'diagnostic' && prev.has('software')) {
+                                            next.delete('software');
+                                        }
+                                        if (service.id === 'software' && prev.has('diagnostic')) {
+                                            next.delete('diagnostic');
+                                        }
+                                        return next;
+                                    })
+                                }}
                                 quantity={service.id === "wipe" ? repairWipeQty : undefined}
                                 onQuantityChange={(delta) =>
                                   setRepairWipeQty((q) => Math.max(1, q + delta))
                                 }
-                                disabled={service.id === "thermal" && !thermalEligibleForRepair}
+                                disabled={(service.id === "software" && repairServices.has("diagnostic")) || (service.id === "diagnostic" && repairServices.has("software")) || (service.id === "thermal" && !thermalEligibleForRepair)}
                               />
                             ))}
                           </div>
@@ -1377,7 +1389,22 @@ export default function IntakeForm() {
                         <CustomerInfoFields name={name} setName={setName} phone={phone} setPhone={setPhone} email={email} setEmail={setEmail} errors={errors} />
 
                         <div className="mt-8 border-t hairline pt-8">
-                            <StepHeader index="02" title="Build Configuration" />
+                            <StepHeader index="02" title="Select Build Type" />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {TEMP_NEW_BUILDS.map((service) => (
+                                    <ServiceCard
+                                        key={service.id}
+                                        service={service}
+                                        selected={knownBuild === service.id}
+                                        onSelect={() => setKnownBuild(service.id)}
+                                    />
+                                ))}
+                            </div>
+                            {errors.buildType && <FieldHint>{errors.buildType}</FieldHint>}
+                        </div>
+
+                        <div className="mt-8 border-t hairline pt-8">
+                            <StepHeader index="03" title="Provide Parts List" />
                             <div className="space-y-4">
                                 <div>
                                     <FieldLabel icon={Link2}>PCPartPicker Link</FieldLabel>
@@ -1396,11 +1423,12 @@ export default function IntakeForm() {
                         </div>
 
                         <div className="mt-8 border-t hairline pt-8">
-                            <BuildLookFields rgbPref={knownRgb} setRgbPref={setKnownRgb} colorPref={knownColor} setColorPref={setKnownColor} extraFans={knownFans} setExtraFans={setKnownFans} lookDescription={knownLook} setLookDescription={setKnownLook} />
+                           <StepHeader index="04" title="Build Aesthetics & Configuration" />
+                           <BuildLookFields rgbPref={knownRgb} setRgbPref={setKnownRgb} colorPref={knownColor} setColorPref={setKnownColor} extraFans={knownFans} setExtraFans={setKnownFans} lookDescription={knownLook} setLookDescription={setKnownLook} />
                         </div>
                         
                         <div className="mt-8 border-t hairline pt-8">
-                          <StepHeader index="04" title="Turnaround Time" />
+                          <StepHeader index="05" title="Turnaround Time" />
                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div onClick={() => setKnownTurnaround("standard")} className={`cursor-pointer rounded-xl border p-5 transition-all ${knownTurnaround === "standard" ? "border-primary shadow-[var(--shadow-glow)]" : "hairline-strong hover:border-primary/60"}`}>
                                   <div className="flex items-center justify-between">
@@ -1420,7 +1448,7 @@ export default function IntakeForm() {
                         </div>
 
                         <div className="mt-8 border-t hairline pt-8">
-                            <StepHeader index="05" title="Additional Notes" />
+                            <StepHeader index="06" title="Additional Notes" />
                             <FormTextarea value={knownNotes} onChange={setKnownNotes} placeholder="Any other details about your build..." />
                         </div>
 
@@ -1466,6 +1494,7 @@ export default function IntakeForm() {
                         </div>
                         
                         <div className="mt-8 border-t hairline pt-8">
+                           <StepHeader index="03" title="Build Aesthetics & Configuration" />
                            <BuildLookFields rgbPref={helpRgb} setRgbPref={setHelpRgb} colorPref={helpColor} setColorPref={setHelpColor} extraFans={helpFans} setExtraFans={setHelpFans} lookDescription={helpLook} setLookDescription={setHelpLook} />
                         </div>
 
